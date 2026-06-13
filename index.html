@@ -89,7 +89,7 @@ textarea { resize: vertical; min-height: 70px; }
     <div style="font-size:44px;margin-bottom:8px;">🎾</div>
     <h1>Schläger-Besaitung</h1>
     <p>Myron Henschen · Eggenstein</p>
-    <span class="price-pill">ab 12,50 € pro Schläger</span>
+    <span class="price-pill">ab 10,00 € pro Schläger</span>
   </div>
 
   <div class="tabs">
@@ -118,7 +118,18 @@ textarea { resize: vertical; min-height: 70px; }
         <option value="4">4 Schläger</option>
       </select>
       <label>Saite</label>
-      <div class="abgabe-info">🎒 Bitte Saite selbst mitbringen</div>
+      <div class="opts-grid">
+        <div class="opt selected" id="saite-mitbringen" onclick="selectSaite('mitbringen')">
+          <div class="o-label">🎒 Ich bringe Saite mit</div>
+          <div class="o-sub">Eigene Saite</div>
+          <div class="o-price">10,00 €</div>
+        </div>
+        <div class="opt" id="saite-von-myron" onclick="selectSaite('von-myron')">
+          <div class="o-label">🛒 Saite von Myron</div>
+          <div class="o-sub">Saite inklusive</div>
+          <div class="o-price">12,50 €</div>
+        </div>
+      </div>
       <label>Extras (optional)</label>
       <div class="extras-grid">
         <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
@@ -240,7 +251,7 @@ let extras={logo:false,overgrip:false,basisgriff:false};
 let weekOffset=0, aiHistory=[];
 const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const today=new Date();
-const PRICES={besaitung:12.5,logo:1,overgrip:3.5,basisgriff:10};
+const PRICES={besaitung_eigen:10,besaitung_myron:12.5,logo:1,overgrip:3.5,basisgriff:10};
 const ADMIN_PIN='1234';
 let isAdmin=false;
 function adminLogin(el){
@@ -265,11 +276,11 @@ function switchTab(name,el){
   if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings();
 }
 function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
-function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));document.getElementById('saite-typ-field').style.display=s==='von-myron'?'block':'none';}
+function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
 function toggleExtra(k){extras[k]=!extras[k];document.getElementById('ex-'+k).classList.toggle('selected',extras[k]);document.getElementById('chk-'+k).textContent=extras[k]?'✓':'';document.getElementById('pr-'+k+'-row').style.display=extras[k]?'flex':'none';calcPrice();}
 function calcPrice(){
   const c=parseInt(document.getElementById('b-count').value);
-  const base=c*PRICES.besaitung;
+  const base=c*(selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen);
   const total=base+(extras.logo?PRICES.logo:0)+(extras.overgrip?PRICES.overgrip:0)+(extras.basisgriff?PRICES.basisgriff:0);
   document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
   document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
@@ -283,7 +294,7 @@ function submitBooking(){
   if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
   const count=parseInt(document.getElementById('b-count').value);
   const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
-  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?document.getElementById('b-saite-typ').value:'Eigene Saite',extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
+  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
