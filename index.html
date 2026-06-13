@@ -58,6 +58,8 @@ textarea { resize: vertical; min-height: 70px; }
 .booking-actions { display: flex; gap: 8px; margin-top: 10px; }
 .btn-small { font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; border: 1.5px solid #e5e5e5; background: white; color: #1a1a1a; font-weight: 500; font-family: inherit; }
 .btn-danger { border-color: #ffcdd2; color: #c62828; }
+.btn-accept { border-color: #a5d6a7; color: #2e7d32; }
+.badge-red { background: #ffebee; color: #c62828; }
 .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
 .stat-card { background: white; border-radius: 14px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .stat-value { font-size: 26px; font-weight: 700; }
@@ -92,9 +94,13 @@ textarea { resize: vertical; min-height: 70px; }
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('buchen',this)">Buchen</button>
-    <button class="tab" onclick="switchTab('kalender',this)">Kalender</button>
-    <button class="tab" onclick="switchTab('auftraege',this)">Aufträge</button>
     <button class="tab" onclick="switchTab('ki',this)">KI-Chat</button>
+    <button class="tab" onclick="adminLogin(this)">🔒</button>
+  </div>
+  <div class="tabs" id="admin-tabs" style="display:none;">
+    <button class="tab" onclick="switchTab('kalender',this)">📅 Kalender</button>
+    <button class="tab" onclick="switchTab('auftraege',this)">📋 Aufträge</button>
+    <button class="tab" onclick="adminLogout()">🔓 Logout</button>
   </div>
 
   <!-- BUCHEN -->
@@ -255,6 +261,21 @@ let weekOffset=0, aiHistory=[];
 const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const today=new Date();
 const PRICES={besaitung:12.5,logo:1,overgrip:3.5,basisgriff:10};
+const ADMIN_PIN='1234';
+let isAdmin=false;
+function adminLogin(el){
+  const pin=prompt('Admin-PIN eingeben:');
+  if(pin===ADMIN_PIN){isAdmin=true;document.getElementById('admin-tabs').style.display='flex';el.textContent='✅';}
+  else if(pin!==null){alert('Falscher PIN!');}
+}
+function adminLogout(){
+  isAdmin=false;document.getElementById('admin-tabs').style.display='none';
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-buchen').classList.add('active');
+  document.querySelector('.tabs .tab').classList.add('active');
+}
+
 document.getElementById('b-date').value=today.toISOString().slice(0,10);
 function save(){localStorage.setItem('besaitung_bookings',JSON.stringify(bookings));}
 function switchTab(name,el){
@@ -295,9 +316,28 @@ function renderBookings(){
   document.getElementById('stat-revenue').textContent=bookings.filter(b=>b.status==='fertig').reduce((s,b)=>s+b.revenue,0).toFixed(0)+' €';
   const list=document.getElementById('bookings-list');
   if(!bookings.length){list.innerHTML='<p style="text-align:center;color:#aaa;padding:2rem;font-size:14px;">Noch keine Buchungen</p>';return;}
-  list.innerHTML=bookings.slice().reverse().map(b=>`<div class="booking-card"><div class="booking-name">${b.name} <span class="badge badge-${b.status==='fertig'?'green':'amber'}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span></div><div class="booking-detail">📅 ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div><div class="booking-actions"><button class="btn-small" onclick="toggleStatus(${b.id})">${b.status==='offen'?'✓ Fertig':'↩ Rückgängig'}</button><button class="btn-small btn-danger" onclick="deleteBooking(${b.id})">🗑 Löschen</button></div></div>`).join('');
+  list.innerHTML=bookings.slice().reverse().map(b=>{
+    const statusColor = b.status==='angenommen'?'green':b.status==='abgelehnt'?'red':'amber';
+    const tel = b.tel ? b.tel.replace(/\s/g,'') : '';
+    const waNum = tel.startsWith('+') ? tel.slice(1) : tel.startsWith('0') ? '49'+tel.slice(1) : tel;
+    const acceptMsg = encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung am ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''} wurde bestätigt. Bitte bringe deinen Schläger vorbei. Bei Fragen meld dich! – Myron`);
+    const rejectMsg = encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);
+    return `<div class="booking-card">
+      <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span></div>
+      <div class="booking-detail">📅 ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
+      <div class="booking-actions">
+        ${b.status==='offen'?`
+          <button class="btn-small btn-accept" onclick="acceptBooking(${b.id})">✅ Annehmen</button>
+          <button class="btn-small btn-danger" onclick="rejectBooking(${b.id})">❌ Ablehnen</button>
+        `:`<button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>`}
+        <button class="btn-small btn-danger" onclick="deleteBooking(${b.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
-function toggleStatus(id){const b=bookings.find(x=>x.id===id);if(b){b.status=b.status==='offen'?'fertig':'offen';save();renderBookings();}}
+function acceptBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='angenommen';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung am ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''} wurde bestätigt. Bitte bringe deinen Schläger vorbei! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
+function rejectBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='abgelehnt';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
+function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';save();renderBookings();}}
 function deleteBooking(id){if(confirm('Buchung löschen?')){bookings=bookings.filter(x=>x.id!==id);save();renderBookings();}}
 function renderCalendar(){
   const base=new Date(today);base.setDate(today.getDate()-today.getDay()+1+weekOffset*7);
