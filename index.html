@@ -118,27 +118,7 @@ textarea { resize: vertical; min-height: 70px; }
         <option value="4">4 Schläger</option>
       </select>
       <label>Saite</label>
-      <div class="opts-grid">
-        <div class="opt selected" id="saite-mitbringen" onclick="selectSaite('mitbringen')">
-          <div class="o-label">🎒 Ich bringe mit</div>
-          <div class="o-sub">Eigene Saite</div>
-          <div class="o-price">+0,00 €</div>
-        </div>
-        <div class="opt" id="saite-von-myron" onclick="selectSaite('von-myron')">
-          <div class="o-label">🛒 Saite von Myron</div>
-          <div class="o-sub">Poly / Multi / Natur</div>
-          <div class="o-price">nach Absprache</div>
-        </div>
-      </div>
-      <div id="saite-typ-field" style="display:none;">
-        <label>Saitentyp</label>
-        <select id="b-saite-typ">
-          <option>Polyester (Kontrolle + Spin)</option>
-          <option>Multifilament (Komfort)</option>
-          <option>Naturdarm (Premium)</option>
-          <option>Hybrid (Poly + Multi)</option>
-        </select>
-      </div>
+      <div class="abgabe-info">🎒 Bitte Saite selbst mitbringen</div>
       <label>Extras (optional)</label>
       <div class="extras-grid">
         <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
@@ -166,10 +146,10 @@ textarea { resize: vertical; min-height: 70px; }
       <label>Abgabe</label>
       <div class="abgabe-info">🚶 Schläger bitte persönlich vorbeibringen · Adresse per WhatsApp nach Buchung</div>
       <div class="form-row" style="margin-top:14px;">
-        <div><label>Wunschdatum</label><input type="date" id="b-date" /></div>
-        <div><label>Wunschuhrzeit</label>
+        <div><label>Fertig bis (Datum)</label><input type="date" id="b-date" /></div>
+        <div><label>Uhrzeit (optional)</label>
           <select id="b-time">
-            <option>Nach Absprache</option>
+            <option>Egal</option>
             <option>09:00</option><option>10:00</option><option>11:00</option>
             <option>14:00</option><option>15:00</option><option>16:00</option>
             <option>17:00</option><option>18:00</option><option>19:00</option>
