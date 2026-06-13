@@ -308,6 +308,9 @@ function submitBooking(){
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
   ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
+  const lb=bookings[bookings.length-1];
+  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nDatum: ${formatDate(lb.date)} ${lb.time}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
+  setTimeout(()=>window.open(`https://wa.me/4917676864244?text=${myronMsg}`,'_blank'),800);
 }
 function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function renderBookings(){
