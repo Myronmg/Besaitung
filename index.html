@@ -108,7 +108,7 @@ textarea { resize: vertical; min-height: 70px; }
     <div class="card">
       <div class="form-row">
         <div><label>Name</label><input type="text" id="b-name" placeholder="Max Mustermann" /></div>
-        <div><label>WhatsApp / Tel.</label><input type="tel" id="b-tel" placeholder="+49 ..." /></div>
+        <div><label>WhatsApp / Tel. *</label><input type="tel" id="b-tel" placeholder="+49 ..." required /></div>
       </div>
       <label>Anzahl Schläger</label>
       <select id="b-count" onchange="calcPrice()">
@@ -298,7 +298,9 @@ function calcPrice(){
 function openPayPal(){window.open('https://www.paypal.com/paypalme/myronhenschen/'+calcPrice().toFixed(2)+'EUR','_blank');}
 function submitBooking(){
   const name=document.getElementById('b-name').value.trim();
+  const tel=document.getElementById('b-tel').value.trim();
   if(!name){alert('Bitte Name eingeben.');return;}
+  if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
   const count=parseInt(document.getElementById('b-count').value);
   const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
   bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?document.getElementById('b-saite-typ').value:'Eigene Saite',extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
