@@ -95,7 +95,6 @@ textarea { resize: vertical; min-height: 70px; }
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('buchen',this)">Buchen</button>
-    <button class="tab" onclick="switchTab('ki',this)">KI-Chat</button>
     <button class="tab" onclick="adminLogin(this)">🔒</button>
   </div>
   <div class="tabs" id="admin-tabs" style="display:none;">
@@ -224,31 +223,6 @@ textarea { resize: vertical; min-height: 70px; }
       <div class="stat-card"><div class="stat-value" id="stat-revenue">0 €</div><div class="stat-label">Einnahmen</div></div>
     </div>
     <div id="bookings-list"></div>
-  </div>
-
-  <!-- KI CHAT -->
-  <div id="tab-ki" class="section">
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;">
-        <div style="font-size:15px;font-weight:700;">🤖 KI-Buchungsassistent</div>
-        <div style="font-size:12px;color:#888;margin-top:2px;">Saitenberatung · Preise · Buchung</div>
-      </div>
-      <div style="padding:14px 18px;">
-        <div class="ai-chat" id="ai-chat">
-          <div class="ai-msg">👋 Hey! Ich bin Myrons Buchungsassistent. Ich helfe dir bei Saitenfragen, erkläre die Extras und buche deinen Termin. Was kann ich für dich tun?</div>
-        </div>
-        <div class="quick-btns">
-          <button class="quick-btn" onclick="quickAI('Was kostet alles zusammen?')">💰 Preise</button>
-          <button class="quick-btn" onclick="quickAI('Welche Saite empfiehlst du?')">🎾 Saitenberatung</button>
-          <button class="quick-btn" onclick="quickAI('Ich möchte einen Termin buchen')">📅 Termin</button>
-          <button class="quick-btn" onclick="quickAI('Was ist ein Logo-Design?')">🎨 Logo-Design?</button>
-        </div>
-        <div class="chat-row">
-          <input type="text" id="ai-input" placeholder="Frage stellen..." onkeydown="if(event.key==='Enter')sendAI()" />
-          <button class="chat-send" onclick="sendAI()">Senden</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div class="footer">Myron Henschen · Eggenstein · myron.henschen@gmail.com</div>
