@@ -166,22 +166,22 @@ textarea { resize: vertical; min-height: 70px; }
       </div>
       <label>Abgabe</label>
       <div class="abgabe-info">🚶 Schläger bitte persönlich vorbeibringen · Adresse per WhatsApp nach Buchung</div>
-      <div class="form-row" style="margin-top:14px;">
-        <div><label>Fertig bis (Datum)</label><input type="date" id="b-date" /></div>
-        <div><label>Uhrzeit (optional)</label>
-          <select id="b-time">
-            <option>Egal</option>
-            <option>09:00</option><option>10:00</option><option>11:00</option>
-            <option>14:00</option><option>15:00</option><option>16:00</option>
-            <option>17:00</option><option>18:00</option><option>19:00</option>
-          </select>
-        </div>
+      <div style="margin-top:14px;">
+        <label>Fertig bis (Datum)</label>
+        <input type="date" id="b-date" style="margin-bottom:12px;" />
+        <label>Uhrzeit (optional)</label>
+        <select id="b-time">
+          <option>Egal</option>
+          <option>09:00</option><option>10:00</option><option>11:00</option>
+          <option>14:00</option><option>15:00</option><option>16:00</option>
+          <option>17:00</option><option>18:00</option><option>19:00</option>
+        </select>
       </div>
       <label>Notizen (optional)</label>
       <textarea id="b-notes" placeholder="z.B. Kreuzbesaitung, Besonderheiten..."></textarea>
-      <label>Bezahlung</label>
+      <label>Bezahlung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
       <div class="opts-grid">
-        <div class="opt selected" id="pay-paypal" onclick="selectPay('paypal')">
+        <div class="opt" id="pay-paypal" onclick="selectPay('paypal')">
           <div class="o-label">🅿️ PayPal</div>
           <div class="o-sub">myron.henschen@gmail.com</div>
         </div>
@@ -256,6 +256,7 @@ textarea { resize: vertical; min-height: 70px; }
 
 <script>
 let bookings = JSON.parse(localStorage.getItem('besaitung_bookings')||'[]');
+let selectedPay=null, selectedSaite='mitbringen';
 let selectedKg=25;
 function changeKg(d){selectedKg=Math.min(35,Math.max(18,selectedKg+d));document.getElementById('kg-display').textContent=selectedKg;}
 let extras={logo:false,overgrip:false,basisgriff:false};
@@ -304,6 +305,7 @@ function submitBooking(){
   if(!name){alert('Bitte Name eingeben.');return;}
   if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
   if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
+  if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
   const count=parseInt(document.getElementById('b-count').value);
   const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
   bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
