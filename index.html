@@ -131,6 +131,15 @@ textarea { resize: vertical; min-height: 70px; }
           <div class="o-price">12,50 €</div>
         </div>
       </div>
+      <label>Bespannungsspannung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:6px;padding:16px;background:#f5f5f3;border-radius:12px;">
+        <button onclick="changeKg(-1)" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e5e5;background:white;font-size:20px;cursor:pointer;font-family:inherit;">−</button>
+        <div style="text-align:center;">
+          <div id="kg-display" style="font-size:36px;font-weight:700;color:#1a1a1a;line-height:1;">25</div>
+          <div style="font-size:13px;color:#888;margin-top:2px;">kg</div>
+        </div>
+        <button onclick="changeKg(1)" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e5e5;background:white;font-size:20px;cursor:pointer;font-family:inherit;">+</button>
+      </div>
       <label>Extras (optional)</label>
       <div class="extras-grid">
         <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
@@ -168,8 +177,8 @@ textarea { resize: vertical; min-height: 70px; }
           </select>
         </div>
       </div>
-      <label>Spannung & Notizen (optional)</label>
-      <textarea id="b-notes" placeholder="z.B. 25 kg, Kreuzbesaitung, Besonderheiten..."></textarea>
+      <label>Notizen (optional)</label>
+      <textarea id="b-notes" placeholder="z.B. Kreuzbesaitung, Besonderheiten..."></textarea>
       <label>Bezahlung</label>
       <div class="opts-grid">
         <div class="opt selected" id="pay-paypal" onclick="selectPay('paypal')">
@@ -247,13 +256,14 @@ textarea { resize: vertical; min-height: 70px; }
 
 <script>
 let bookings = JSON.parse(localStorage.getItem('besaitung_bookings')||'[]');
-let selectedPay='paypal', selectedSaite='mitbringen';
+let selectedKg=25;
+function changeKg(d){selectedKg=Math.min(35,Math.max(18,selectedKg+d));document.getElementById('kg-display').textContent=selectedKg;}
 let extras={logo:false,overgrip:false,basisgriff:false};
 let weekOffset=0, aiHistory=[];
 const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const today=new Date();
 const PRICES={besaitung_eigen:10,besaitung_myron:12.5,logo:1,overgrip:3.5,basisgriff:10};
-const ADMIN_PIN='H07MGHKH0200';
+const ADMIN_PIN='1234';
 let isAdmin=false;
 function adminLogin(el){
   const pin=prompt('Admin-PIN eingeben:');
@@ -293,15 +303,16 @@ function submitBooking(){
   const tel=document.getElementById('b-tel').value.trim();
   if(!name){alert('Bitte Name eingeben.');return;}
   if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
+  if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
   const count=parseInt(document.getElementById('b-count').value);
   const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
-  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
+  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
   ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
   const lb=bookings[bookings.length-1];
-  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nDatum: ${formatDate(lb.date)} ${lb.time}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
+  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nSpannung: ${lb.kg} kg\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nFertig bis: ${formatDate(lb.date)} ${lb.time!=='Egal'?'um '+lb.time:''}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
   setTimeout(()=>window.open(`https://wa.me/4917676864244?text=${myronMsg}`,'_blank'),800);
 }
 function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
@@ -323,7 +334,7 @@ function renderBookings(){
     const fertigMsg = encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden. – Myron`);
     return `<div class="booking-card">
       <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span></div>
-      <div class="booking-detail">📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
+      <div class="booking-detail">📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · ⚙️ ${b.kg||'25'} kg · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
       <div class="booking-actions">
         ${b.status==='offen'?`
           <button class="btn-small btn-accept" onclick="acceptBooking(${b.id})">✅ Annehmen</button>
