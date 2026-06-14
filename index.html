@@ -327,13 +327,10 @@ function renderBookings(){
   const list=document.getElementById('bookings-list');
   if(!bookings.length){list.innerHTML='<p style="text-align:center;color:#aaa;padding:2rem;font-size:14px;">Noch keine Buchungen</p>';return;}
   list.innerHTML=bookings.slice().reverse().map(b=>{
-    const statusColor = b.status==='angenommen'?'green':b.status==='abgelehnt'?'red':b.status==='bearbeitung'?'blue':b.status==='fertig'?'green':'amber';
+    const statusColor = b.status==='angenommen'?'green':b.status==='abgelehnt'?'red':b.status==='fertig'?'green':'amber';
     const tel = b.tel ? b.tel.replace(/\s/g,'') : '';
     const waNum = tel.startsWith('+') ? tel.slice(1) : tel.startsWith('0') ? '49'+tel.slice(1) : tel;
-    const acceptMsg = encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung am ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''} wurde bestätigt. Bitte bringe deinen Schläger vorbei. Bei Fragen meld dich! – Myron`);
-    const rejectMsg = encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} ${b.time!=='Nach Absprache'?'um '+b.time:''} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);
-    const bearbeitungMsg = encodeURIComponent(`Hey ${b.name}! 🎾 Dein Schläger ist jetzt in Bearbeitung – ich melde mich sobald er fertig ist! – Myron`);
-    const fertigMsg = encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden. – Myron`);
+    const payMsg = b.payment==='paypal' ? `Bitte überweise per PayPal an myron.henschen@gmail.com.` : `Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit.`;
     return `<div class="booking-card">
       <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span></div>
       <div class="booking-detail">📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · ⚙️ ${b.kg||'25'} kg · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
@@ -342,8 +339,6 @@ function renderBookings(){
           <button class="btn-small btn-accept" onclick="acceptBooking(${b.id})">✅ Annehmen</button>
           <button class="btn-small btn-danger" onclick="rejectBooking(${b.id})">❌ Ablehnen</button>
         `:b.status==='angenommen'?`
-          <button class="btn-small btn-blue" onclick="bearbeitungBooking(${b.id})">🔧 In Bearbeitung</button>
-        `:b.status==='bearbeitung'?`
           <button class="btn-small btn-accept" onclick="fertigBooking(${b.id})">✅ Fertig</button>
         `:b.status==='fertig'?`
           <button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>
@@ -355,8 +350,8 @@ function renderBookings(){
 }
 function acceptBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='angenommen';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung am ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''} wurde bestätigt. Bitte bringe deinen Schläger vorbei! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function rejectBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='abgelehnt';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function bearbeitungBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='bearbeitung';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hey ${b.name}! 🎾 Dein Schläger ist jetzt in Bearbeitung – ich melde mich sobald er fertig ist! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden. – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
+function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';save();renderBookings();}}
+function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';save();renderBookings();}}
 function deleteBooking(id){if(confirm('Buchung löschen?')){bookings=bookings.filter(x=>x.id!==id);save();renderBookings();}}
 function renderCalendar(){
