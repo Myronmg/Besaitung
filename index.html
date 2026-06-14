@@ -141,43 +141,48 @@ textarea { resize: vertical; min-height: 70px; }
       </div>
       <label>Extras (optional)</label>
       <div class="extras-grid">
+        <div class="extra-row" id="ex-express" onclick="toggleExtra('express')" style="border-color:#EF9F27;background:#FAEEDA;">
+          <div class="extra-left">
+            <div class="extra-check" id="chk-express" style="border-color:#EF9F27;"></div>
+            <div class="extra-info"><div class="e-label" style="color:#854F0B;">⚡ Express 24h</div><div class="e-sub">Fertig innerhalb von 24 Stunden</div></div>
+          </div>
+          <div class="extra-price" style="color:#854F0B;">+ 15,00 €</div>
+        </div>
         <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
           <div class="extra-left">
             <div class="extra-check" id="chk-logo"></div>
-            <div class="extra-info"><div class="e-label">🎨 Logo-Design</div><div class="e-sub">Individuelles Design für deinen Schläger</div></div>
+            <div class="extra-info"><div class="e-label">🎨 Logo-Design</div><div class="e-sub">Individuelles Design</div></div>
           </div>
           <div class="extra-price">+ 1,00 €</div>
         </div>
         <div class="extra-row" id="ex-overgrip" onclick="toggleExtra('overgrip')">
           <div class="extra-left">
             <div class="extra-check" id="chk-overgrip"></div>
-            <div class="extra-info"><div class="e-label">✋ Overgrip</div><div class="e-sub">Neues Griffband über bestehendem</div></div>
+            <div class="extra-info"><div class="e-label">✋ Overgrip</div><div class="e-sub">Neues Griffband</div></div>
           </div>
           <div class="extra-price">+ 3,50 €</div>
         </div>
         <div class="extra-row" id="ex-basisgriff" onclick="toggleExtra('basisgriff')">
           <div class="extra-left">
             <div class="extra-check" id="chk-basisgriff"></div>
-            <div class="extra-info"><div class="e-label">🔄 Basisgriffband</div><div class="e-sub">Kompletter Ersatz des Originalgriffs</div></div>
+            <div class="extra-info"><div class="e-label">🔄 Basisgriffband</div><div class="e-sub">Kompletter Ersatz</div></div>
           </div>
           <div class="extra-price">+ 10,00 €</div>
         </div>
       </div>
       <label>Abgabe</label>
-      <div class="abgabe-info">🚶 Schläger bitte persönlich vorbeibringen · Adresse per WhatsApp nach Buchung</div>
-      <div style="margin-top:14px;">
-        <label>Fertig bis (Datum)</label>
-        <input type="date" id="b-date" style="margin-bottom:12px;" />
-        <label>Uhrzeit (optional)</label>
-        <select id="b-time">
-          <option>Egal</option>
-          <option>09:00</option><option>10:00</option><option>11:00</option>
-          <option>14:00</option><option>15:00</option><option>16:00</option>
-          <option>17:00</option><option>18:00</option><option>19:00</option>
-        </select>
-      </div>
+      <div class="abgabe-info">🚶 Schläger persönlich vorbeibringen · Adresse kommt per WhatsApp</div>
+      <label>Fertig bis (Datum)</label>
+      <input type="date" id="b-date" />
+      <label>Uhrzeit (optional)</label>
+      <select id="b-time">
+        <option>Egal</option>
+        <option>09:00</option><option>10:00</option><option>11:00</option>
+        <option>14:00</option><option>15:00</option><option>16:00</option>
+        <option>17:00</option><option>18:00</option><option>19:00</option>
+      </select>
       <label>Notizen (optional)</label>
-      <textarea id="b-notes" placeholder="z.B. Kreuzbesaitung, Besonderheiten..."></textarea>
+      <textarea id="b-notes" placeholder="Besonderheiten, Wünsche..."></textarea>
       <label>Bezahlung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
       <div class="opts-grid">
         <div class="opt" id="pay-paypal" onclick="selectPay('paypal')">
@@ -190,11 +195,12 @@ textarea { resize: vertical; min-height: 70px; }
         </div>
       </div>
       <div class="price-box">
-        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">12,50 €</span></div>
+        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">10,00 €</span></div>
+        <div class="price-row" id="pr-express-row" style="display:none;"><span>⚡ Express (24h)</span><span>15,00 €</span></div>
         <div class="price-row" id="pr-logo-row" style="display:none;"><span>Logo-Design</span><span>1,00 €</span></div>
         <div class="price-row" id="pr-overgrip-row" style="display:none;"><span>Overgrip</span><span>3,50 €</span></div>
         <div class="price-row" id="pr-basisgriff-row" style="display:none;"><span>Basisgriffband</span><span>10,00 €</span></div>
-        <div class="price-row total"><span>Gesamt</span><span id="pr-total">12,50 €</span></div>
+        <div class="price-row total"><span>Gesamt</span><span id="pr-total">10,00 €</span></div>
       </div>
       <div id="paypal-section" style="display:none;margin-top:10px;">
         <button class="paypal-btn" onclick="openPayPal()">💳 Jetzt per PayPal bezahlen</button>
@@ -233,11 +239,11 @@ let bookings = JSON.parse(localStorage.getItem('besaitung_bookings')||'[]');
 let selectedPay=null, selectedSaite='mitbringen';
 let selectedKg=25;
 function changeKg(d){selectedKg=Math.min(35,Math.max(18,selectedKg+d));document.getElementById('kg-display').textContent=selectedKg;}
-let extras={logo:false,overgrip:false,basisgriff:false};
+let extras={express:false,logo:false,overgrip:false,basisgriff:false};
 let weekOffset=0, aiHistory=[];
 const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const today=new Date();
-const PRICES={besaitung_eigen:10,besaitung_myron:12.5,logo:1,overgrip:3.5,basisgriff:10};
+const PRICES={besaitung_eigen:10,besaitung_myron:12.5,express:15,logo:1,overgrip:3.5,basisgriff:10};
 const ADMIN_PIN='1234';
 let isAdmin=false;
 function adminLogin(el){
@@ -263,11 +269,28 @@ function switchTab(name,el){
 }
 function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
 function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
-function toggleExtra(k){extras[k]=!extras[k];document.getElementById('ex-'+k).classList.toggle('selected',extras[k]);document.getElementById('chk-'+k).textContent=extras[k]?'✓':'';document.getElementById('pr-'+k+'-row').style.display=extras[k]?'flex':'none';calcPrice();}
+function toggleExtra(k){
+  extras[k]=!extras[k];
+  const el=document.getElementById('ex-'+k);
+  const chk=document.getElementById('chk-'+k);
+  if(k==='express'){
+    el.style.background=extras[k]?'#EF9F27':'#FAEEDA';
+    el.style.borderColor='#EF9F27';
+    chk.style.background=extras[k]?'#EF9F27':'transparent';
+    chk.style.borderColor='#EF9F27';
+    chk.textContent=extras[k]?'✓':'';
+  } else {
+    el.classList.toggle('selected',extras[k]);
+    chk.textContent=extras[k]?'✓':'';
+  }
+  const row=document.getElementById('pr-'+k+'-row');
+  if(row)row.style.display=extras[k]?'flex':'none';
+  calcPrice();
+}
 function calcPrice(){
   const c=parseInt(document.getElementById('b-count').value);
   const base=c*(selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen);
-  const total=base+(extras.logo?PRICES.logo:0)+(extras.overgrip?PRICES.overgrip:0)+(extras.basisgriff?PRICES.basisgriff:0);
+  const total=base+(extras.express?PRICES.express:0)+(extras.logo?PRICES.logo:0)+(extras.overgrip?PRICES.overgrip:0)+(extras.basisgriff?PRICES.basisgriff:0);
   document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
   document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
   return total;
@@ -281,7 +304,7 @@ function submitBooking(){
   if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
   if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
   const count=parseInt(document.getElementById('b-count').value);
-  const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
+  const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='express'?'⚡ Express (24h)':k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
   bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
