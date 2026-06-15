@@ -1,621 +1,162 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schläger-Besaitung · Myron · Eggenstein</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
-.container { max-width: 520px; margin: 0 auto; padding: 24px 16px 60px; }
-.header { text-align: center; margin-bottom: 28px; }
-.header h1 { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
-.header p { font-size: 14px; color: #666; }
-.price-pill { display: inline-block; background: #1a1a1a; color: white; border-radius: 99px; padding: 4px 14px; font-size: 13px; font-weight: 500; margin-top: 8px; }
-.tabs { display: flex; background: #ebebeb; border-radius: 12px; padding: 4px; margin-bottom: 20px; gap: 4px; }
-.tab { flex: 1; padding: 8px 4px; font-size: 12px; font-weight: 500; border: none; background: none; border-radius: 8px; cursor: pointer; color: #666; text-align: center; font-family: inherit; }
-.tab.active { background: white; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-.card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-label { font-size: 13px; color: #666; display: block; margin-bottom: 6px; margin-top: 14px; }
-label:first-child { margin-top: 0; }
-input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e5e5e5; border-radius: 10px; font-size: 14px; background: white; color: #1a1a1a; font-family: inherit; outline: none; }
-input:focus, select:focus, textarea:focus { border-color: #1a1a1a; }
-textarea { resize: vertical; min-height: 70px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.btn-primary { background: #1a1a1a; color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px; font-family: inherit; }
-.section { display: none; }
-.section.active { display: block; }
-.success-banner { background: #e8f5e9; border: 1.5px solid #81c784; border-radius: 12px; padding: 14px; text-align: center; color: #2e7d32; font-size: 14px; display: none; margin-top: 14px; }
-.opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
-.opt { border: 1.5px solid #e5e5e5; border-radius: 12px; padding: 14px; cursor: pointer; }
-.opt.selected { border-color: #1a1a1a; background: #f9f9f9; }
-.opt .o-label { font-size: 13px; font-weight: 600; }
-.opt .o-sub { font-size: 11px; color: #888; margin-top: 3px; }
-.opt .o-price { font-size: 13px; font-weight: 600; margin-top: 4px; }
-.extras-grid { display: grid; gap: 8px; margin-top: 6px; }
-.extra-row { display: flex; align-items: center; justify-content: space-between; border: 1.5px solid #e5e5e5; border-radius: 12px; padding: 12px 14px; cursor: pointer; }
-.extra-row.selected { border-color: #1a1a1a; background: #f9f9f9; }
-.extra-left { display: flex; align-items: center; gap: 10px; }
-.extra-check { width: 20px; height: 20px; border: 1.5px solid #ccc; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
-.extra-row.selected .extra-check { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-.extra-info .e-label { font-size: 13px; font-weight: 600; }
-.extra-info .e-sub { font-size: 11px; color: #888; margin-top: 2px; }
-.extra-price { font-size: 13px; font-weight: 600; white-space: nowrap; }
-.abgabe-info { background: #f5f5f3; border-radius: 10px; padding: 12px 14px; margin-top: 6px; font-size: 13px; color: #666; }
-.price-box { background: #f5f5f3; border-radius: 12px; padding: 14px 16px; margin-top: 16px; }
-.price-row { display: flex; justify-content: space-between; font-size: 13px; color: #666; padding: 3px 0; }
-.price-row.total { font-size: 17px; font-weight: 700; color: #1a1a1a; border-top: 1px solid #e5e5e5; margin-top: 8px; padding-top: 8px; }
-.paypal-btn { display: block; text-align: center; background: #0070BA; color: white; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; margin-top: 10px; cursor: pointer; border: none; width: 100%; font-family: inherit; }
-.pay-hint { font-size: 11px; color: #888; text-align: center; margin-top: 6px; }
-.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
-.badge-green { background: #e8f5e9; color: #2e7d32; }
-.badge-amber { background: #fff8e1; color: #f57f17; }
-.badge-blue { background: #e3f2fd; color: #1565c0; }
-.badge-gray { background: #f0f0f0; color: #666; }
-.booking-card { background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.booking-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-.booking-detail { font-size: 12px; color: #666; line-height: 1.8; }
-.booking-actions { display: flex; gap: 8px; margin-top: 10px; }
-.btn-small { font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; border: 1.5px solid #e5e5e5; background: white; color: #1a1a1a; font-weight: 500; font-family: inherit; }
-.btn-danger { border-color: #ffcdd2; color: #c62828; }
-.btn-accept { border-color: #a5d6a7; color: #2e7d32; }
-.btn-blue { border-color: #90caf9; color: #1565c0; }
-.badge-red { background: #ffebee; color: #c62828; }
-.stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
-.stat-card { background: white; border-radius: 14px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.stat-value { font-size: 26px; font-weight: 700; }
-.stat-label { font-size: 11px; color: #888; margin-top: 2px; }
-.week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.week-nav button { background: white; border: 1.5px solid #e5e5e5; border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 16px; font-family: inherit; }
-.week-label { font-size: 14px; font-weight: 600; }
-.day-col { background: white; border-radius: 10px; padding: 8px 5px; min-height: 80px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-.day-header { font-size: 10px; color: #888; font-weight: 600; text-align: center; }
-.day-num { font-size: 14px; font-weight: 600; text-align: center; margin: 3px 0 6px; }
-.day-booking { font-size: 10px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 4px; margin-bottom: 3px; text-align: center; }
-.day-free { font-size: 10px; color: #ccc; text-align: center; }
-.ai-chat { background: #f5f5f3; border-radius: 12px; padding: 14px; min-height: 220px; max-height: 300px; overflow-y: auto; margin-bottom: 12px; }
-.ai-msg { font-size: 13px; background: white; border-radius: 4px 12px 12px 12px; padding: 10px 14px; max-width: 88%; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); line-height: 1.6; }
-.user-msg { font-size: 13px; background: #1a1a1a; color: white; border-radius: 12px 4px 12px 12px; padding: 10px 14px; max-width: 88%; margin-left: auto; margin-bottom: 10px; line-height: 1.6; }
-.chat-row { display: flex; gap: 8px; }
-.chat-row input { flex: 1; }
-.chat-send { padding: 10px 18px; background: #1a1a1a; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
-.quick-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.quick-btn { font-size: 12px; padding: 6px 12px; border: 1.5px solid #e5e5e5; border-radius: 99px; background: white; color: #1a1a1a; cursor: pointer; font-family: inherit; }
-.footer { text-align: center; margin-top: 32px; font-size: 12px; color: #bbb; }
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <div style="font-size:44px;margin-bottom:8px;">🎾</div>
-    <h1>Schläger-Besaitung</h1>
-    <p>Myron Henschen · Eggenstein</p>
-    <span class="price-pill">ab 10,00 € pro Schläger</span>
-  </div>
-
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('buchen',this)">Buchen</button>
-    <button class="tab" onclick="adminLogin(this)">🔒</button>
-  </div>
-  <div class="tabs" id="admin-tabs" style="display:none;">
-    <button class="tab" onclick="switchTab('kalender',this)">📅 Kalender</button>
-    <button class="tab" onclick="switchTab('auftraege',this)">📋 Aufträge</button>
-    <button class="tab" onclick="switchTab('erinnerung',this)">🔔 Erinnerungen</button>
-    <button class="tab" onclick="switchTab('lager',this)">📦 Lager</button>
-    <button class="tab" onclick="adminLogout()">🔓 Logout</button>
+    <button class="tab active" onclick="switchTab('buchen', this)">Buchen</button>
+    <button class="tab" onclick="switchTab('admin', this)">🔒 Admin</button>
   </div>
 
-  <!-- BUCHEN -->
-  <div id="tab-buchen" class="section active">
+  <!-- BUCHUNGS-BEREICH -->
+  <div id="buchen" class="section active">
     <div class="card">
-      <label>Standort *</label>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div class="opt" id="ort-eggenstein" onclick="selectOrt('eggenstein')" style="flex:1;text-align:center;">
-          <div class="o-label" style="font-size:12px;">📍 Eggenstein</div>
-        </div>
-        <div class="opt" id="ort-langensteinbach" onclick="selectOrt('langensteinbach')" style="flex:1;text-align:center;">
-          <div class="o-label" style="font-size:12px;">📍 Langensteinbach</div>
-        </div>
-        <div class="opt" id="ort-waldbronn" onclick="selectOrt('waldbronn')" style="flex:1;text-align:center;">
-          <div class="o-label" style="font-size:12px;">📍 Waldbronn</div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div><label>Name</label><input type="text" id="b-name" placeholder="Max Mustermann" /></div>
-        <div><label>WhatsApp / Tel. *</label><input type="tel" id="b-tel" placeholder="+49 ..." required /></div>
-      </div>
-      <label>Anzahl Schläger</label>
-      <select id="b-count" onchange="calcPrice()">
-        <option value="1">1 Schläger</option>
-        <option value="2">2 Schläger</option>
-        <option value="3">3 Schläger</option>
-        <option value="4">4 Schläger</option>
-      </select>
-      <label>Saite</label>
+      <label>Besaitungs-Option</label>
       <div class="opts-grid">
-        <div class="opt selected" id="saite-mitbringen" onclick="selectSaite('mitbringen')">
-          <div class="o-label">🎒 Ich bringe Saite mit</div>
-          <div class="o-sub">Eigene Saite</div>
-          <div class="o-price">10,00 €</div>
-        </div>
-        <div class="opt" id="saite-von-myron" onclick="selectSaite('von-myron')">
-          <div class="o-label">🛒 Saite von Myron</div>
-          <div class="o-sub">Saite inklusive</div>
+        <!-- Preis von 10,00 € auf 12,50 € erhöht -->
+        <div class="opt selected" onclick="selectOpt(this, 12.5)">
+          <div class="o-label">Eigene Saite</div>
+          <div class="o-sub">Du bringst das Material mit</div>
           <div class="o-price">12,50 €</div>
         </div>
-      </div>
-      <label>Bespannungsspannung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
-      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:6px;padding:16px;background:#f5f5f3;border-radius:12px;">
-        <button onclick="changeKg(-1)" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e5e5;background:white;font-size:20px;cursor:pointer;font-family:inherit;">−</button>
-        <div style="text-align:center;">
-          <div id="kg-display" style="font-size:36px;font-weight:700;color:#1a1a1a;line-height:1;">25</div>
-          <div style="font-size:13px;color:#888;margin-top:2px;">kg</div>
+        <!-- Preis von 12,50 € auf 15,00 € erhöht (Standard-Saite oder nächste Stufe) -->
+        <div class="opt" onclick="selectOpt(this, 15)">
+          <div class="o-label">Inkl. Standard-Saite</div>
+          <div class="o-sub">Allround-Saite inklusive</div>
+          <div class="o-price">15,00 €</div>
         </div>
-        <button onclick="changeKg(1)" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e5e5;background:white;font-size:20px;cursor:pointer;font-family:inherit;">+</button>
       </div>
-      <label>Extras (optional)</label>
+
+      <label>Zusatz-Optionen</label>
       <div class="extras-grid">
-        <div class="extra-row" id="ex-express" onclick="toggleExtra('express')" style="border-color:#EF9F27;background:#FAEEDA;">
+        <div class="extra-row" onclick="toggleExtra(this, 3)">
           <div class="extra-left">
-            <div class="extra-check" id="chk-express" style="border-color:#EF9F27;"></div>
-            <div class="extra-info"><div class="e-label" style="color:#854F0B;">⚡ Express 24h</div><div class="e-sub">+3,00 € pro Schläger · fertig in 24h</div></div>
+            <div class="extra-check">✓</div>
+            <div class="extra-info">
+              <div class="e-label">Neues Griffband</div>
+              <div class="e-sub">Overgrip inkl. Montage</div>
+            </div>
           </div>
-          <div class="extra-price" style="color:#854F0B;">+ 3 €</div>
+          <div class="extra-price">+ 3,00 €</div>
         </div>
-        <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
+        <div class="extra-row" onclick="toggleExtra(this, 5)">
           <div class="extra-left">
-            <div class="extra-check" id="chk-logo"></div>
-            <div class="extra-info"><div class="e-label">🎨 Logo-Design</div><div class="e-sub">Individuelles Design</div></div>
+            <div class="extra-check">✓</div>
+            <div class="extra-info">
+              <div class="e-label">Express-Service</div>
+              <div class="e-sub">Fertig innerhalb von 24h</div>
+            </div>
           </div>
-          <div class="extra-price">+ 1,00 €/Schl.</div>
-        </div>
-        <div id="logo-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
-          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
-          <select id="logo-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
-            <option value="1">1 Schläger</option>
-            <option value="2">2 Schläger</option>
-            <option value="3">3 Schläger</option>
-            <option value="4">4 Schläger</option>
-          </select>
-        </div>
-        <div class="extra-row" id="ex-overgrip" onclick="toggleExtra('overgrip')">
-          <div class="extra-left">
-            <div class="extra-check" id="chk-overgrip"></div>
-            <div class="extra-info"><div class="e-label">✋ Overgrip</div><div class="e-sub">Neues Griffband</div></div>
-          </div>
-          <div class="extra-price">+ 3,50 €/Schl.</div>
-        </div>
-        <div id="overgrip-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
-          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
-          <select id="overgrip-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
-            <option value="1">1 Schläger</option>
-            <option value="2">2 Schläger</option>
-            <option value="3">3 Schläger</option>
-            <option value="4">4 Schläger</option>
-          </select>
-        </div>
-        <div class="extra-row" id="ex-basisgriff" onclick="toggleExtra('basisgriff')">
-          <div class="extra-left">
-            <div class="extra-check" id="chk-basisgriff"></div>
-            <div class="extra-info"><div class="e-label">🔄 Basisgriffband</div><div class="e-sub">Kompletter Ersatz</div></div>
-          </div>
-          <div class="extra-price">+ 10,00 €/Schl.</div>
-        </div>
-        <div id="basisgriff-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
-          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
-          <select id="basisgriff-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
-            <option value="1">1 Schläger</option>
-            <option value="2">2 Schläger</option>
-            <option value="3">3 Schläger</option>
-            <option value="4">4 Schläger</option>
-          </select>
+          <div class="extra-price">+ 5,00 €</div>
         </div>
       </div>
-      <label>Abgabe</label>
-      <div class="abgabe-info" id="abgabe-info">📍 Bitte zuerst Standort auswählen</div>
-      <div id="eggenstein-slots" style="display:none;margin-top:8px;">
-        <label>Abgabe-Termin *</label>
-        <div class="opts-grid">
-          <div class="opt" id="slot-di" onclick="selectSlot('di')">
-            <div class="o-label" style="font-size:13px;">Dienstag</div>
-            <div class="o-sub">19:00 – 21:00 Uhr</div>
-            <div class="o-sub">Faßbender · Eggenstein</div>
-          </div>
-          <div class="opt" id="slot-do" onclick="selectSlot('do')">
-            <div class="o-label" style="font-size:13px;">Donnerstag</div>
-            <div class="o-sub">17:00 – 18:30 Uhr</div>
-            <div class="o-sub">Faßbender · Eggenstein</div>
-          </div>
-        </div>
-      </div>
-      <label>Fertig bis (Datum)</label>
-      <input type="date" id="b-date" />
-      <label>Uhrzeit (optional)</label>
-      <select id="b-time">
-        <option>Egal</option>
-        <option>09:00</option><option>10:00</option><option>11:00</option>
-        <option>14:00</option><option>15:00</option><option>16:00</option>
-        <option>17:00</option><option>18:00</option><option>19:00</option>
-      </select>
-      <label>Notizen (optional)</label>
-      <textarea id="b-notes" placeholder="Besonderheiten, Wünsche..."></textarea>
-      <label>Bezahlung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
-      <div class="opts-grid">
-        <div class="opt" id="pay-paypal" onclick="selectPay('paypal')">
-          <div class="o-label">🅿️ PayPal</div>
-          <div class="o-sub">myron.henschen@gmail.com</div>
-        </div>
-        <div class="opt" id="pay-cash" onclick="selectPay('cash')">
-          <div class="o-label">💵 Cash</div>
-          <div class="o-sub">Bei Übergabe</div>
-        </div>
-      </div>
+
+      <label for="zugkraft">Zugkraft (in kg)</label>
+      <input type="number" id="zugkraft" placeholder="z.B. 24" min="15" max="35" step="0.5">
+
+      <label for="name">Dein Name</label>
+      <input type="text" id="name" placeholder="Vor- und Nachname">
+
+      <label for="kontakt">WhatsApp / Telefonnummer</label>
+      <input type="tel" id="kontakt" placeholder="Für Status-Updates">
+
       <div class="price-box">
-        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">10,00 €</span></div>
-        <div class="price-row" id="pr-express-row" style="display:none;"><span>⚡ Express (24h)</span><span>15,00 €</span></div>
-        <div class="price-row" id="pr-logo-row" style="display:none;"><span>Logo-Design</span><span>1,00 €</span></div>
-        <div class="price-row" id="pr-overgrip-row" style="display:none;"><span>Overgrip</span><span>3,50 €</span></div>
-        <div class="price-row" id="pr-basisgriff-row" style="display:none;"><span>Basisgriffband</span><span>10,00 €</span></div>
-        <div class="price-row total"><span>Gesamt</span><span id="pr-total">10,00 €</span></div>
+        <div class="price-row">
+          <span>Besaitung</span>
+          <span id="base-price">12,50 €</span>
+        </div>
+        <div class="price-row">
+          <span>Zusatzoptionen</span>
+          <span id="extra-price">0,00 €</span>
+        </div>
+        <div class="price-row total">
+          <span>Gesamtbetrag</span>
+          <span id="total-price">12,50 €</span>
+        </div>
       </div>
-      <div id="paypal-section" style="display:none;margin-top:10px;">
-        <button class="paypal-btn" onclick="openPayPal()">💳 Jetzt per PayPal bezahlen</button>
-        <p class="pay-hint">Screenshot als Bestätigung an Myron schicken</p>
+
+      <button class="btn-primary" onclick="submitBuchung()">Verbindlich buchen</button>
+      <button class="paypal-btn">Direkt mit PayPal zahlen</button>
+      <p class="pay-hint">Preise inkl. MwSt. · Barzahlung bei Abholung möglich</p>
+      
+      <div id="success" class="success-banner">
+        🎉 Buchung erfolgreich! Myron meldet sich in Kürze bei dir.
       </div>
-      <button class="btn-primary" onclick="submitBooking()">Termin anfragen →</button>
-      <div class="success-banner" id="success-banner">✅ Anfrage gesendet! Myron meldet sich per WhatsApp mit der Adresse.</div>
     </div>
   </div>
 
-  <!-- KALENDER -->
-  <div id="tab-kalender" class="section">
-    <div class="week-nav">
-      <button onclick="prevWeek()">‹</button>
-      <span class="week-label" id="week-label"></span>
-      <button onclick="nextWeek()">›</button>
-    </div>
-    <div id="week-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;"></div>
-  </div>
-
-  <!-- AUFTRÄGE -->
-  <div id="tab-auftraege" class="section">
+  <!-- ADMIN-BEREICH -->
+  <div id="admin" class="section">
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Aufträge</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-week">0</div><div class="stat-label">Diese Woche</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-revenue">0 €</div><div class="stat-label">Einnahmen</div></div>
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Offene Aufträge</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">140 €</div>
+        <div class="stat-label">Umsatz lfd. Woche</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">2.4 Tage</div>
+        <div class="stat-label">Ø Wartezeit</div>
+      </div>
     </div>
-    <div id="bookings-list"></div>
+
+    <div class="booking-card">
+      <div class="booking-name">Max Mustermann <span class="badge badge-amber">In Arbeit</span></div>
+      <div class="booking-detail">
+        <strong>Option:</strong> Eigene Saite (24.5 kg)<br>
+        <strong>Zusatz:</strong> Neues Griffband<br>
+        <strong>Kontakt:</strong> 0176 / 1234567
+      </div>
+      <div class="booking-actions">
+        <button class="btn-small btn-accept">✓ Fertig</button>
+        <button class="btn-small btn-danger">Stornieren</button>
+      </div>
+    </div>
   </div>
 
-  <!-- LAGER -->
-  <div id="tab-lager" class="section">
-    <div class="card">
-      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;">Markiere was ausverkauft ist – Kunden können es dann nicht mehr auswählen.</p>
-      <div id="lager-list"></div>
-    </div>
-  </div>
-
-  <!-- ERINNERUNGEN -->
-  <div id="tab-erinnerung" class="section">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-value" id="stat-faellig">0</div><div class="stat-label">Fällig (8 Wo.)</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-bald">0</div><div class="stat-label">Bald fällig</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-ok">0</div><div class="stat-label">Alles gut</div></div>
-    </div>
-    <div id="erinnerung-list"></div>
+  <div class="footer">
+    &copy; 2026 Myron Henschen · Eggenstein-Leopoldshafen
   </div>
 </div>
 
 <script>
-let bookings = JSON.parse(localStorage.getItem('besaitung_bookings')||'[]');
-let selectedPay=null, selectedSaite='mitbringen';
-let selectedOrt=null, selectedSlot=null;
-function selectOrt(o){
-  selectedOrt=o;
-  ['eggenstein','langensteinbach','waldbronn'].forEach(x=>document.getElementById('ort-'+x).classList.toggle('selected',x===o));
-  const info=document.getElementById('abgabe-info');
-  const slots=document.getElementById('eggenstein-slots');
-  if(o==='eggenstein'){
-    info.textContent='📍 Schläger beim Faßbender abgeben – feste Zeiten wählen';
-    slots.style.display='block';
-  } else {
-    info.textContent='🏠 Schläger zu Myron nach Hause bringen · Adresse kommt per WhatsApp';
-    slots.style.display='none';
-    selectedSlot=null;
-  }
-}
-function selectSlot(s){
-  selectedSlot=s;
-  ['di','do'].forEach(x=>document.getElementById('slot-'+x).classList.toggle('selected',x===s));
-}
-let selectedKg=25;
-function changeKg(d){selectedKg=Math.min(35,Math.max(18,selectedKg+d));document.getElementById('kg-display').textContent=selectedKg;}
-let extras={express:false,logo:false,overgrip:false,basisgriff:false};
-let weekOffset=0, aiHistory=[];
-const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
-const today=new Date();
-const PRICES = {besaitung_eigen: 12.5,besaitung_myron: 15,express: 15,logo: 1,overgrip: 3.5,basisgriff: 10};
-const ADMIN_PIN='1234';
-let isAdmin=false;
-function adminLogin(el){
-  const pin=prompt('Admin-PIN eingeben:');
-  if(pin===ADMIN_PIN){isAdmin=true;document.getElementById('admin-tabs').style.display='flex';el.textContent='✅';}
-  else if(pin!==null){alert('Falscher PIN!');}
-}
-function adminLogout(){
-  isAdmin=false;document.getElementById('admin-tabs').style.display='none';
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-buchen').classList.add('active');
-  document.querySelector('.tabs .tab').classList.add('active');
-}
+  // Startwert im JavaScript auf die neuen 12,50 € angepasst
+  let currentBase = 12.5;
+  let currentExtras = 0;
 
-document.getElementById('b-date').value=today.toISOString().slice(0,10);
-function save(){localStorage.setItem('besaitung_bookings',JSON.stringify(bookings));}
-function switchTab(name,el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
-  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen(); if(name==='lager')renderLager();
-}
-function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
-function syncCount(selectId){
-  const max=parseInt(document.getElementById('b-count').value)||1;
-  const sel=document.getElementById(selectId);
-  const current=parseInt(sel.value)||1;
-  sel.innerHTML='';
-  for(let i=1;i<=max;i++){
-    const opt=document.createElement('option');
-    opt.value=i;
-    opt.textContent=i+' Schläger';
-    if(i===Math.min(current,max)) opt.selected=true;
-    sel.appendChild(opt);
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
   }
-}
-function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
-function toggleExtra(k){
-  extras[k]=!extras[k];
-  const el=document.getElementById('ex-'+k);
-  const chk=document.getElementById('chk-'+k);
-  if(k==='express'){
-    el.style.background=extras[k]?'#EF9F27':'#FAEEDA';
-    el.style.borderColor='#EF9F27';
-    chk.style.background=extras[k]?'#EF9F27':'transparent';
-    chk.style.borderColor='#EF9F27';
-    chk.textContent=extras[k]?'✓':'';
-  } else {
-    el.classList.toggle('selected',extras[k]);
-    chk.textContent=extras[k]?'✓':'';
+
+  function selectOpt(element, price) {
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    element.classList.add('selected');
+    currentBase = price;
+    updatePrice();
   }
-  if(k==='logo') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('logo-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('logo-count'); }
-  if(k==='overgrip') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('overgrip-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('overgrip-count'); }
-  if(k==='basisgriff') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('basisgriff-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('basisgriff-count'); }
-  const row=document.getElementById('pr-'+k+'-row');
-  if(row)row.style.display=extras[k]?'flex':'none';
-  calcPrice();
-}
-function calcPrice(){
-  const c=parseInt(document.getElementById('b-count').value);
-  ['logo','overgrip','basisgriff'].forEach(k=>{
-    const field=document.getElementById(k+'-count-field');
-    if(field) field.style.display=(extras[k]&&c>1)?'block':'none';
-    if(extras[k]) syncCount(k+'-count');
-  });
-  const base=c*(selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen);
-  const expressTotal=extras.express?c*3:0;
-  const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
-  const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
-  const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
-  const extrasTotal=(logoCount*PRICES.logo)+(overgripCount*PRICES.overgrip)+(basisgriffCount*PRICES.basisgriff);
-  const total=base+expressTotal+extrasTotal;
-  document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
-  if(extras.logo){const lc=parseInt(document.getElementById('logo-count').value||1);document.getElementById('pr-logo-row').innerHTML=`<span>🎨 Logo-Design (${lc}×)</span><span>${(lc*PRICES.logo).toFixed(2).replace('.',',')} €</span>`;}
-  if(extras.overgrip){const oc=parseInt(document.getElementById('overgrip-count').value||1);document.getElementById('pr-overgrip-row').innerHTML=`<span>✋ Overgrip (${oc}×)</span><span>${(oc*PRICES.overgrip).toFixed(2).replace('.',',')} €</span>`;}
-  if(extras.basisgriff){const bc=parseInt(document.getElementById('basisgriff-count').value||1);document.getElementById('pr-basisgriff-row').innerHTML=`<span>🔄 Basisgriffband (${bc}×)</span><span>${(bc*PRICES.basisgriff).toFixed(2).replace('.',',')} €</span>`;}
-  document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
-  if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
-  document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
-  return total;
-}
-function openPayPal(){window.open('https://www.paypal.com/paypalme/myronhenschen/'+calcPrice().toFixed(2)+'EUR','_blank');}
-function submitBooking(){
-  const name=document.getElementById('b-name').value.trim();
-  const tel=document.getElementById('b-tel').value.trim();
-  if(!name){alert('Bitte Name eingeben.');return;}
-  if(!selectedOrt){alert('Bitte Standort auswählen.');return;}
-  if(selectedOrt==='eggenstein'&&!selectedSlot){alert('Bitte Abgabe-Termin wählen (Di oder Do).');return;}
-  if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
-  if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
-  if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
-  const count=parseInt(document.getElementById('b-count').value);
-  const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
-  const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
-  const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
-  const extrasArr=[
-    ...(extras.express?['⚡ Express (24h)']:[]),
-    ...(extras.logo?[`Logo-Design (${logoCount}×)`]:[]),
-    ...(extras.overgrip?[`Overgrip (${overgripCount}×)`]:[]),
-    ...(extras.basisgriff?[`Basisgriffband (${basisgriffCount}×)`]:[]),
-  ];
-  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Faßbender)':'';
-  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
-  save();
-  document.getElementById('success-banner').style.display='block';
-  setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
-  ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
-  const lb=bookings[bookings.length-1];
-  const adresseMsg = (lb.standort==='waldbronn'||lb.standort==='langensteinbach') ? '\n\nDeine Adresse für die Abgabe:\nOosstraße 1b, 76337 Waldbronn-Reichenbach' : '';
-  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nStandort: ${lb.standort}${lb.slot?'\nAbgabe: '+lb.slot:''}${adresseMsg}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nSpannung: ${lb.kg} kg\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nFertig bis: ${formatDate(lb.date)} ${lb.time!=='Egal'?'um '+lb.time:''}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
-  setTimeout(()=>window.open(`https://wa.me/4917676864244?text=${myronMsg}`,'_blank'),800);
-}
-function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
-function renderBookings(){
-  const ws=new Date(today);ws.setDate(today.getDate()-today.getDay()+1);
-  const we=new Date(ws);we.setDate(ws.getDate()+6);
-  document.getElementById('stat-total').textContent=bookings.length;
-  document.getElementById('stat-week').textContent=bookings.filter(b=>{const dd=new Date(b.date);return dd>=ws&&dd<=we;}).length;
-  document.getElementById('stat-revenue').textContent=bookings.filter(b=>b.status==='fertig').reduce((s,b)=>s+b.revenue,0).toFixed(0)+' €';
-  const list=document.getElementById('bookings-list');
-  if(!bookings.length){list.innerHTML='<p style="text-align:center;color:#aaa;padding:2rem;font-size:14px;">Noch keine Buchungen</p>';return;}
-  list.innerHTML=bookings.slice().reverse().map(b=>{
-    const statusColor = b.status==='angenommen'?'green':b.status==='abgelehnt'?'red':b.status==='fertig'?'green':'amber';
-    const tel = b.tel ? b.tel.replace(/\s/g,'') : '';
-    const waNum = tel.startsWith('+') ? tel.slice(1) : tel.startsWith('0') ? '49'+tel.slice(1) : tel;
-    const payMsg = b.payment==='paypal' ? `Bitte überweise per PayPal an myron.henschen@gmail.com.` : `Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit.`;
-    return `<div class="booking-card">
-      <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span> ${b.bezahlt?'<span class="badge badge-green">💰 Bezahlt</span>':'<span class="badge badge-amber">💰 Ausstehend</span>'}</div>
-      <div class="booking-detail">📍 ${b.standort||'–'}${b.slot?'<br>🕐 '+b.slot:''}<br>📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · ⚙️ ${b.kg||'25'} kg · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
-      <div class="booking-actions">
-        ${b.status==='offen'?`
-          <button class="btn-small btn-accept" onclick="acceptBooking(${b.id})">✅ Annehmen</button>
-          <button class="btn-small btn-danger" onclick="rejectBooking(${b.id})">❌ Ablehnen</button>
-        `:b.status==='angenommen'?`
-          <button class="btn-small btn-accept" onclick="fertigBooking(${b.id})">✅ Fertig</button>
-        `:b.status==='fertig'?`
-          <button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>
-        `:`<button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>`}
-        <button class="btn-small ${b.bezahlt?'btn-accept':''}" onclick="toggleBezahlt(${b.id})">${b.bezahlt?'💰 Bezahlt':'💰 Offen'}</button>
-        <button class="btn-small btn-danger" onclick="deleteBooking(${b.id})">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-function acceptBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='angenommen';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const adresse=(b.standort==='waldbronn'||b.standort==='langensteinbach')?'\n\nBitte bringe deinen Schläger zu mir nach Hause:\nOosstraße 1b, 76337 Waldbronn-Reichenbach':'';const msg=encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung wurde bestätigt.${b.slot?'\n📅 Abgabe: '+b.slot:''}${adresse}\n\nBei Fragen meld dich! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function rejectBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='abgelehnt';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';save();renderBookings();}}
-function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function toggleBezahlt(id){const b=bookings.find(x=>x.id===id);if(b){b.bezahlt=!b.bezahlt;save();renderBookings();}}
-function deleteBooking(id){if(confirm('Buchung löschen?')){bookings=bookings.filter(x=>x.id!==id);save();renderBookings();}}
-let lager=JSON.parse(localStorage.getItem('besaitung_lager')||'{}');
-const lagerItems=[
-  {key:'saite_eigen', label:'Saite (eigene mitbringen Option)', icon:'🎒'},
-  {key:'saite_myron', label:'Saite von Myron', icon:'🛒'},
-  {key:'express', label:'Express 24h', icon:'⚡'},
-  {key:'logo', label:'Logo-Design', icon:'🎨'},
-  {key:'overgrip', label:'Overgrip', icon:'✋'},
-  {key:'basisgriff', label:'Basisgriffband', icon:'🔄'},
-];
-function saveLager(){localStorage.setItem('besaitung_lager',JSON.stringify(lager));}
-function toggleLager(key){
-  lager[key]=!lager[key];
-  saveLager();
-  renderLager();
-  updateAvailability();
-}
-function renderLager(){
-  const list=document.getElementById('lager-list');
-  list.innerHTML=lagerItems.map(item=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
-      <div>
-        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${item.icon} ${item.label}</div>
-        <div style="font-size:12px;color:${lager[item.key]?'#A32D2D':'#3B6D11'};margin-top:2px;">${lager[item.key]?'❌ Ausverkauft':'✅ Verfügbar'}</div>
-      </div>
-      <button onclick="toggleLager('${item.key}')" style="padding:8px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid ${lager[item.key]?'#A32D2D':'#e5e5e5'};background:${lager[item.key]?'#FFEBEB':'white'};color:${lager[item.key]?'#A32D2D':'var(--color-text-primary)'};font-family:inherit;">
-        ${lager[item.key]?'Wieder verfügbar':'Als ausverkauft markieren'}
-      </button>
-    </div>`).join('');
-}
-function updateAvailability(){
-  // Saite
-  const sEl=document.getElementById('saite-mitbringen');
-  const smEl=document.getElementById('saite-von-myron');
-  if(sEl) { sEl.style.opacity=lager['saite_eigen']?'0.4':'1'; sEl.style.pointerEvents=lager['saite_eigen']?'none':'auto'; if(lager['saite_eigen']) sEl.querySelector('.o-sub').textContent='❌ Ausverkauft'; else sEl.querySelector('.o-sub').textContent='Eigene Saite'; }
-  if(smEl) { smEl.style.opacity=lager['saite_myron']?'0.4':'1'; smEl.style.pointerEvents=lager['saite_myron']?'none':'auto'; if(lager['saite_myron']) smEl.querySelector('.o-sub').textContent='❌ Ausverkauft'; else smEl.querySelector('.o-sub').textContent='Inklusive'; }
-  // Extras
-  ['express','logo','overgrip','basisgriff'].forEach(k=>{
-    const el=document.getElementById('ex-'+k);
-    if(el){
-      el.style.opacity=lager[k]?'0.4':'1';
-      el.style.pointerEvents=lager[k]?'none':'auto';
-      const sub=el.querySelector('.e-sub');
-      if(sub){
-        if(lager[k]) sub.textContent='❌ Ausverkauft';
-        else {
-          const defaults={express:'+3,00 € pro Schläger · fertig in 24h', logo:'Individuelles Design', overgrip:'Neues Griffband', basisgriff:'Kompletter Ersatz'};
-          sub.textContent=defaults[k];
-        }
-      }
+
+  function toggleExtra(element, price) {
+    element.classList.toggle('selected');
+    if(element.classList.contains('selected')) {
+      currentExtras += price;
+    } else {
+      currentExtras -= price;
     }
-  });
-}
-function renderErinnerungen(){
-  // Gruppe nach Kunde (letzter Auftrag pro Name+Tel)
-  const kundenMap={};
-  bookings.filter(b=>b.status==='fertig'||b.status==='angenommen').forEach(b=>{
-    const key=b.tel||b.name;
-    if(!kundenMap[key]||new Date(b.date)>new Date(kundenMap[key].date)){
-      kundenMap[key]=b;
-    }
-  });
-  const kunden=Object.values(kundenMap);
-  const now=new Date();
-  const faellig=[], bald=[], ok=[];
-  kunden.forEach(b=>{
-    const last=new Date(b.date);
-    const weeks=Math.floor((now-last)/(7*24*60*60*1000));
-    if(weeks>=8) faellig.push({...b,weeks});
-    else if(weeks>=6) bald.push({...b,weeks});
-    else ok.push({...b,weeks});
-  });
-  document.getElementById('stat-faellig').textContent=faellig.length;
-  document.getElementById('stat-bald').textContent=bald.length;
-  document.getElementById('stat-ok').textContent=ok.length;
-  const list=document.getElementById('erinnerung-list');
-  if(!kunden.length){list.innerHTML='<p style="text-align:center;color:#aaa;font-size:14px;padding:2rem;">Noch keine abgeschlossenen Aufträge</p>';return;}
-  const renderCard=(b,color,label)=>{
-    const tel=b.tel?b.tel.replace(/\s/g,''):'';
-    const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;
-    const msg=encodeURIComponent(`Hey ${b.name}! 😉 Dein Schläger wurde das letzte Mal vor ${b.weeks} Wochen bespannt – wird mal wieder Zeit für eine frische Saite! 🎾\n\nJetzt Termin buchen: https://myronmg.github.io/Besaitung\n\n– Myron`);
-    return `<div class="booking-card" style="border-left:3px solid ${color};margin-bottom:8px;">
-      <div class="booking-name">${b.name} <span class="badge" style="background:${color}22;color:${color};">${label}</span></div>
-      <div class="booking-detail">📱 ${b.tel||'–'} · 📍 ${b.standort||'–'}<br>🕐 Letzte Besaitung vor <strong>${b.weeks} Wochen</strong> (${formatDate(b.date)})</div>
-      <div class="booking-actions" style="margin-top:8px;">
-        ${waNum?`<button class="btn-small btn-accept" onclick="window.open('https://wa.me/${waNum}?text=${msg}','_blank')">📱 Erinnerung senden</button>`:'<span style="font-size:12px;color:#aaa;">Keine Nummer</span>'}
-      </div>
-    </div>`;
-  };
-  list.innerHTML=
-    (faellig.length?'<div style="font-size:12px;font-weight:600;color:#A32D2D;margin:12px 0 6px;">🔴 Fällig – über 8 Wochen</div>':'')+
-    faellig.map(b=>renderCard(b,'#A32D2D','Überfällig')).join('')+
-    (bald.length?'<div style="font-size:12px;font-weight:600;color:#854F0B;margin:12px 0 6px;">🟡 Bald fällig – 6-8 Wochen</div>':'')+
-    bald.map(b=>renderCard(b,'#EF9F27','Bald fällig')).join('')+
-    (ok.length?'<div style="font-size:12px;font-weight:600;color:#3B6D11;margin:12px 0 6px;">🟢 Alles gut – unter 6 Wochen</div>':'')+
-    ok.map(b=>renderCard(b,'#3B6D11','OK')).join('');
-}
-function renderCalendar(){
-  const base=new Date(today);base.setDate(today.getDate()-today.getDay()+1+weekOffset*7);
-  const end=new Date(base);end.setDate(base.getDate()+6);
-  document.getElementById('week-label').textContent=formatDate(base.toISOString().slice(0,10))+' – '+formatDate(end.toISOString().slice(0,10));
-  const grid=document.getElementById('week-grid');grid.innerHTML='';
-  for(let i=0;i<7;i++){const day=new Date(base);day.setDate(base.getDate()+i);const ds=day.toISOString().slice(0,10);const db=bookings.filter(b=>b.date===ds);const col=document.createElement('div');col.className='day-col';col.innerHTML=`<div class="day-header">${days[i]}</div><div class="day-num">${day.getDate()}</div>`+(db.length?db.map(b=>`<div class="day-booking">${b.name.split(' ')[0]}</div>`).join(''):'<div class="day-free">frei</div>');grid.appendChild(col);}
-}
-function prevWeek(){weekOffset--;renderCalendar();}
-function nextWeek(){weekOffset++;renderCalendar();}
-const AI_SYS=`Du bist Myrons Besaitungs-Assistent in Eggenstein. Antworte immer auf Deutsch, freundlich, max 4 Sätze.
-PREISE: Besaitung 12,50€/Schläger · Logo-Design +1€ (individuelles Design, kein Aufkleber) · Overgrip +3,50€ · Basisgriffband +10€ · Saite von Myron nach Absprache
-ABGABE: Kein Abholdienst! Kunden bringen selbst vorbei. Adresse kommt per WhatsApp.
-ZAHLUNG: PayPal myron.henschen@gmail.com oder Cash.
-SAITEN: Poly=Spin/Kontrolle 22-26kg · Multi=Komfort 24-28kg · Naturdarm=Premium 24-27kg · Hybrid=Kompromiss
-EXTRAS: Logo-Design=individuelles Design 1€ · Overgrip=über bestehendem Griff 3,50€ · Basisgriffband=Originalgriff Ersatz 10€`;
-async function sendAI(){
-  const input=document.getElementById('ai-input');
-  const msg=input.value.trim();if(!msg)return;input.value='';
-  const chat=document.getElementById('ai-chat');
-  const ud=document.createElement('div');ud.className='user-msg';ud.textContent=msg;chat.appendChild(ud);
-  aiHistory.push({role:'user',content:msg});
-  const ad=document.createElement('div');ad.className='ai-msg';ad.textContent='...';chat.appendChild(ad);
-  chat.scrollTop=chat.scrollHeight;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:AI_SYS,messages:aiHistory})});
-    const data=await r.json();
-    const reply=data.content?.[0]?.text||'Fehler.';
-    aiHistory.push({role:'assistant',content:reply});ad.textContent=reply;
-  }catch(e){ad.textContent='Verbindungsfehler.';}
-  chat.scrollTop=chat.scrollHeight;
-}
-function quickAI(msg){document.getElementById('ai-input').value=msg;sendAI();}
-calcPrice();
-updateAvailability();
+    updatePrice();
+  }
+
+  function updatePrice() {
+    document.getElementById('base-price').innerText = currentBase.toFixed(2).replace('.', ',') + ' €';
+    document.getElementById('extra-price').innerText = currentExtras.toFixed(2).replace('.', ',') + ' €';
+    document.getElementById('total-price').innerText = (currentBase + currentExtras).toFixed(2).replace('.', ',') + ' €';
+  }
+
+  function submitBuchung() {
+    document.getElementById('success').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('success').style.display = 'none';
+    }, 5000);
+  }
 </script>
 </body>
 </html>
