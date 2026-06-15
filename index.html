@@ -166,21 +166,48 @@ textarea { resize: vertical; min-height: 70px; }
             <div class="extra-check" id="chk-logo"></div>
             <div class="extra-info"><div class="e-label">🎨 Logo-Design</div><div class="e-sub">Individuelles Design</div></div>
           </div>
-          <div class="extra-price">+ 1,00 €</div>
+          <div class="extra-price">+ 1,00 €/Schl.</div>
+        </div>
+        <div id="logo-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
+          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
+          <select id="logo-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
+            <option value="1">1 Schläger</option>
+            <option value="2">2 Schläger</option>
+            <option value="3">3 Schläger</option>
+            <option value="4">4 Schläger</option>
+          </select>
         </div>
         <div class="extra-row" id="ex-overgrip" onclick="toggleExtra('overgrip')">
           <div class="extra-left">
             <div class="extra-check" id="chk-overgrip"></div>
             <div class="extra-info"><div class="e-label">✋ Overgrip</div><div class="e-sub">Neues Griffband</div></div>
           </div>
-          <div class="extra-price">+ 3,50 €</div>
+          <div class="extra-price">+ 3,50 €/Schl.</div>
+        </div>
+        <div id="overgrip-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
+          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
+          <select id="overgrip-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
+            <option value="1">1 Schläger</option>
+            <option value="2">2 Schläger</option>
+            <option value="3">3 Schläger</option>
+            <option value="4">4 Schläger</option>
+          </select>
         </div>
         <div class="extra-row" id="ex-basisgriff" onclick="toggleExtra('basisgriff')">
           <div class="extra-left">
             <div class="extra-check" id="chk-basisgriff"></div>
             <div class="extra-info"><div class="e-label">🔄 Basisgriffband</div><div class="e-sub">Kompletter Ersatz</div></div>
           </div>
-          <div class="extra-price">+ 10,00 €</div>
+          <div class="extra-price">+ 10,00 €/Schl.</div>
+        </div>
+        <div id="basisgriff-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
+          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
+          <select id="basisgriff-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
+            <option value="1">1 Schläger</option>
+            <option value="2">2 Schläger</option>
+            <option value="3">3 Schläger</option>
+            <option value="4">4 Schläger</option>
+          </select>
         </div>
       </div>
       <label>Abgabe</label>
@@ -338,6 +365,9 @@ function toggleExtra(k){
     el.classList.toggle('selected',extras[k]);
     chk.textContent=extras[k]?'✓':'';
   }
+  if(k==='logo') document.getElementById('logo-count-field').style.display=extras[k]?'block':'none';
+  if(k==='overgrip') document.getElementById('overgrip-count-field').style.display=extras[k]?'block':'none';
+  if(k==='basisgriff') document.getElementById('basisgriff-count-field').style.display=extras[k]?'block':'none';
   const row=document.getElementById('pr-'+k+'-row');
   if(row)row.style.display=extras[k]?'flex':'none';
   calcPrice();
@@ -347,9 +377,15 @@ function calcPrice(){
   const basePrice=selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen;
   const pricePerRacket=basePrice+(extras.express?3:0);
   const base=c*pricePerRacket;
-  const extrasTotal=c*((extras.logo?PRICES.logo:0)+(extras.overgrip?PRICES.overgrip:0)+(extras.basisgriff?PRICES.basisgriff:0));
+  const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
+  const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
+  const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
+  const extrasTotal=(logoCount*PRICES.logo)+(overgripCount*PRICES.overgrip)+(basisgriffCount*PRICES.basisgriff);
   const total=base+extrasTotal;
   document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
+  if(extras.logo){const lc=parseInt(document.getElementById('logo-count').value||1);document.getElementById('pr-logo-row').innerHTML=`<span>🎨 Logo-Design (${lc}×)</span><span>${(lc*PRICES.logo).toFixed(2).replace('.',',')} €</span>`;}
+  if(extras.overgrip){const oc=parseInt(document.getElementById('overgrip-count').value||1);document.getElementById('pr-overgrip-row').innerHTML=`<span>✋ Overgrip (${oc}×)</span><span>${(oc*PRICES.overgrip).toFixed(2).replace('.',',')} €</span>`;}
+  if(extras.basisgriff){const bc=parseInt(document.getElementById('basisgriff-count').value||1);document.getElementById('pr-basisgriff-row').innerHTML=`<span>🔄 Basisgriffband (${bc}×)</span><span>${(bc*PRICES.basisgriff).toFixed(2).replace('.',',')} €</span>`;}
   document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
   if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${(c*3).toFixed(2).replace('.',',')} €</span>`;
   document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
@@ -366,7 +402,15 @@ function submitBooking(){
   if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
   if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
   const count=parseInt(document.getElementById('b-count').value);
-  const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='express'?'⚡ Express (24h)':k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
+  const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
+  const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
+  const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
+  const extrasArr=[
+    ...(extras.express?['⚡ Express (24h)']:[]),
+    ...(extras.logo?[`Logo-Design (${logoCount}×)`]:[]),
+    ...(extras.overgrip?[`Overgrip (${overgripCount}×)`]:[]),
+    ...(extras.basisgriff?[`Basisgriffband (${basisgriffCount}×)`]:[]),
+  ];
   const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Faßbender)':'';
   bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
