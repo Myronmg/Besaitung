@@ -106,6 +106,18 @@ textarea { resize: vertical; min-height: 70px; }
   <!-- BUCHEN -->
   <div id="tab-buchen" class="section active">
     <div class="card">
+      <label>Standort *</label>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <div class="opt" id="ort-eggenstein" onclick="selectOrt('eggenstein')" style="flex:1;text-align:center;">
+          <div class="o-label" style="font-size:12px;">📍 Eggenstein</div>
+        </div>
+        <div class="opt" id="ort-langensteinbach" onclick="selectOrt('langensteinbach')" style="flex:1;text-align:center;">
+          <div class="o-label" style="font-size:12px;">📍 Langensteinbach</div>
+        </div>
+        <div class="opt" id="ort-waldbronn" onclick="selectOrt('waldbronn')" style="flex:1;text-align:center;">
+          <div class="o-label" style="font-size:12px;">📍 Waldbronn</div>
+        </div>
+      </div>
       <div class="form-row">
         <div><label>Name</label><input type="text" id="b-name" placeholder="Max Mustermann" /></div>
         <div><label>WhatsApp / Tel. *</label><input type="tel" id="b-tel" placeholder="+49 ..." required /></div>
@@ -144,9 +156,9 @@ textarea { resize: vertical; min-height: 70px; }
         <div class="extra-row" id="ex-express" onclick="toggleExtra('express')" style="border-color:#EF9F27;background:#FAEEDA;">
           <div class="extra-left">
             <div class="extra-check" id="chk-express" style="border-color:#EF9F27;"></div>
-            <div class="extra-info"><div class="e-label" style="color:#854F0B;">⚡ Express 24h</div><div class="e-sub">Fertig innerhalb von 24 Stunden</div></div>
+            <div class="extra-info"><div class="e-label" style="color:#854F0B;">⚡ Express 24h</div><div class="e-sub">+3,00 € pro Schläger · fertig in 24h</div></div>
           </div>
-          <div class="extra-price" style="color:#854F0B;">+ 15,00 €</div>
+          <div class="extra-price" style="color:#854F0B;">+ 3 €</div>
         </div>
         <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
           <div class="extra-left">
@@ -171,7 +183,22 @@ textarea { resize: vertical; min-height: 70px; }
         </div>
       </div>
       <label>Abgabe</label>
-      <div class="abgabe-info">🚶 Schläger persönlich vorbeibringen · Adresse kommt per WhatsApp</div>
+      <div class="abgabe-info" id="abgabe-info">📍 Bitte zuerst Standort auswählen</div>
+      <div id="eggenstein-slots" style="display:none;margin-top:8px;">
+        <label>Abgabe-Termin *</label>
+        <div class="opts-grid">
+          <div class="opt" id="slot-di" onclick="selectSlot('di')">
+            <div class="o-label" style="font-size:13px;">Dienstag</div>
+            <div class="o-sub">19:00 – 21:00 Uhr</div>
+            <div class="o-sub">Faßbender · Eggenstein</div>
+          </div>
+          <div class="opt" id="slot-do" onclick="selectSlot('do')">
+            <div class="o-label" style="font-size:13px;">Donnerstag</div>
+            <div class="o-sub">17:00 – 18:30 Uhr</div>
+            <div class="o-sub">Faßbender · Eggenstein</div>
+          </div>
+        </div>
+      </div>
       <label>Fertig bis (Datum)</label>
       <input type="date" id="b-date" />
       <label>Uhrzeit (optional)</label>
@@ -237,6 +264,25 @@ textarea { resize: vertical; min-height: 70px; }
 <script>
 let bookings = JSON.parse(localStorage.getItem('besaitung_bookings')||'[]');
 let selectedPay=null, selectedSaite='mitbringen';
+let selectedOrt=null, selectedSlot=null;
+function selectOrt(o){
+  selectedOrt=o;
+  ['eggenstein','langensteinbach','waldbronn'].forEach(x=>document.getElementById('ort-'+x).classList.toggle('selected',x===o));
+  const info=document.getElementById('abgabe-info');
+  const slots=document.getElementById('eggenstein-slots');
+  if(o==='eggenstein'){
+    info.textContent='📍 Schläger beim Faßbender abgeben – feste Zeiten wählen';
+    slots.style.display='block';
+  } else {
+    info.textContent='🏠 Schläger zu Myron nach Hause bringen · Adresse kommt per WhatsApp';
+    slots.style.display='none';
+    selectedSlot=null;
+  }
+}
+function selectSlot(s){
+  selectedSlot=s;
+  ['di','do'].forEach(x=>document.getElementById('slot-'+x).classList.toggle('selected',x===s));
+}
 let selectedKg=25;
 function changeKg(d){selectedKg=Math.min(35,Math.max(18,selectedKg+d));document.getElementById('kg-display').textContent=selectedKg;}
 let extras={express:false,logo:false,overgrip:false,basisgriff:false};
@@ -289,9 +335,14 @@ function toggleExtra(k){
 }
 function calcPrice(){
   const c=parseInt(document.getElementById('b-count').value);
-  const base=c*(selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen);
-  const total=base+(extras.express?PRICES.express:0)+(extras.logo?PRICES.logo:0)+(extras.overgrip?PRICES.overgrip:0)+(extras.basisgriff?PRICES.basisgriff:0);
+  const basePrice=selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen;
+  const pricePerRacket=basePrice+(extras.express?3:0);
+  const base=c*pricePerRacket;
+  const extrasTotal=c*((extras.logo?PRICES.logo:0)+(extras.overgrip?PRICES.overgrip:0)+(extras.basisgriff?PRICES.basisgriff:0));
+  const total=base+extrasTotal;
   document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
+  document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
+  if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${(c*3).toFixed(2).replace('.',',')} €</span>`;
   document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
   return total;
 }
@@ -300,18 +351,22 @@ function submitBooking(){
   const name=document.getElementById('b-name').value.trim();
   const tel=document.getElementById('b-tel').value.trim();
   if(!name){alert('Bitte Name eingeben.');return;}
+  if(!selectedOrt){alert('Bitte Standort auswählen.');return;}
+  if(selectedOrt==='eggenstein'&&!selectedSlot){alert('Bitte Abgabe-Termin wählen (Di oder Do).');return;}
   if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
   if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
   if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
   const count=parseInt(document.getElementById('b-count').value);
   const extrasArr=Object.entries(extras).filter(([k,v])=>v).map(([k])=>k==='express'?'⚡ Express (24h)':k==='logo'?'Logo-Design':k==='overgrip'?'Overgrip':'Basisgriffband');
-  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
+  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Faßbender)':'';
+  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
   ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
   const lb=bookings[bookings.length-1];
-  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nSpannung: ${lb.kg} kg\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nFertig bis: ${formatDate(lb.date)} ${lb.time!=='Egal'?'um '+lb.time:''}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
+  const adresseMsg = (lb.standort==='waldbronn'||lb.standort==='langensteinbach') ? '\n\nDeine Adresse für die Abgabe:\nOosstraße 1b, 76337 Waldbronn-Reichenbach' : '';
+  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nStandort: ${lb.standort}${lb.slot?'\nAbgabe: '+lb.slot:''}${adresseMsg}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nSpannung: ${lb.kg} kg\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nFertig bis: ${formatDate(lb.date)} ${lb.time!=='Egal'?'um '+lb.time:''}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
   setTimeout(()=>window.open(`https://wa.me/4917676864244?text=${myronMsg}`,'_blank'),800);
 }
 function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
@@ -329,8 +384,8 @@ function renderBookings(){
     const waNum = tel.startsWith('+') ? tel.slice(1) : tel.startsWith('0') ? '49'+tel.slice(1) : tel;
     const payMsg = b.payment==='paypal' ? `Bitte überweise per PayPal an myron.henschen@gmail.com.` : `Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit.`;
     return `<div class="booking-card">
-      <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span></div>
-      <div class="booking-detail">📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · ⚙️ ${b.kg||'25'} kg · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
+      <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span> ${b.bezahlt?'<span class="badge badge-green">💰 Bezahlt</span>':'<span class="badge badge-amber">💰 Ausstehend</span>'}</div>
+      <div class="booking-detail">📍 ${b.standort||'–'}${b.slot?'<br>🕐 '+b.slot:''}<br>📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · ⚙️ ${b.kg||'25'} kg · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
       <div class="booking-actions">
         ${b.status==='offen'?`
           <button class="btn-small btn-accept" onclick="acceptBooking(${b.id})">✅ Annehmen</button>
@@ -340,16 +395,17 @@ function renderBookings(){
         `:b.status==='fertig'?`
           <button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>
         `:`<button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>`}
+        <button class="btn-small ${b.bezahlt?'btn-accept':''}" onclick="toggleBezahlt(${b.id})">${b.bezahlt?'💰 Bezahlt':'💰 Offen'}</button>
         <button class="btn-small btn-danger" onclick="deleteBooking(${b.id})">🗑</button>
       </div>
     </div>`;
   }).join('');
 }
-function acceptBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='angenommen';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung am ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''} wurde bestätigt. Bitte bringe deinen Schläger vorbei! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
+function acceptBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='angenommen';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const adresse=(b.standort==='waldbronn'||b.standort==='langensteinbach')?'\n\nBitte bringe deinen Schläger zu mir nach Hause:\nOosstraße 1b, 76337 Waldbronn-Reichenbach':'';const msg=encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung wurde bestätigt.${b.slot?'\n📅 Abgabe: '+b.slot:''}${adresse}\n\nBei Fragen meld dich! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function rejectBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='abgelehnt';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';save();renderBookings();}}
 function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';save();renderBookings();}}
+function toggleBezahlt(id){const b=bookings.find(x=>x.id===id);if(b){b.bezahlt=!b.bezahlt;save();renderBookings();}}
 function deleteBooking(id){if(confirm('Buchung löschen?')){bookings=bookings.filter(x=>x.id!==id);save();renderBookings();}}
 function renderCalendar(){
   const base=new Date(today);base.setDate(today.getDate()-today.getDay()+1+weekOffset*7);
