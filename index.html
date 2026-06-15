@@ -101,6 +101,7 @@ textarea { resize: vertical; min-height: 70px; }
     <button class="tab" onclick="switchTab('kalender',this)">📅 Kalender</button>
     <button class="tab" onclick="switchTab('auftraege',this)">📋 Aufträge</button>
     <button class="tab" onclick="switchTab('erinnerung',this)">🔔 Erinnerungen</button>
+    <button class="tab" onclick="switchTab('lager',this)">📦 Lager</button>
     <button class="tab" onclick="adminLogout()">🔓 Logout</button>
   </div>
 
@@ -286,6 +287,14 @@ textarea { resize: vertical; min-height: 70px; }
     <div id="bookings-list"></div>
   </div>
 
+  <!-- LAGER -->
+  <div id="tab-lager" class="section">
+    <div class="card">
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;">Markiere was ausverkauft ist – Kunden können es dann nicht mehr auswählen.</p>
+      <div id="lager-list"></div>
+    </div>
+  </div>
+
   <!-- ERINNERUNGEN -->
   <div id="tab-erinnerung" class="section">
     <div class="stats-grid">
@@ -347,7 +356,7 @@ function switchTab(name,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
-  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen();
+  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen(); if(name==='lager')renderLager();
 }
 function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
 function syncCount(selectId){
@@ -392,20 +401,19 @@ function calcPrice(){
     if(field) field.style.display=(extras[k]&&c>1)?'block':'none';
     if(extras[k]) syncCount(k+'-count');
   });
-  const basePrice=selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen;
-  const pricePerRacket=basePrice+(extras.express?3:0);
-  const base=c*pricePerRacket;
+  const base=c*(selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen);
+  const expressTotal=extras.express?c*3:0;
   const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
   const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
   const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
   const extrasTotal=(logoCount*PRICES.logo)+(overgripCount*PRICES.overgrip)+(basisgriffCount*PRICES.basisgriff);
-  const total=base+extrasTotal;
+  const total=base+expressTotal+extrasTotal;
   document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
   if(extras.logo){const lc=parseInt(document.getElementById('logo-count').value||1);document.getElementById('pr-logo-row').innerHTML=`<span>🎨 Logo-Design (${lc}×)</span><span>${(lc*PRICES.logo).toFixed(2).replace('.',',')} €</span>`;}
   if(extras.overgrip){const oc=parseInt(document.getElementById('overgrip-count').value||1);document.getElementById('pr-overgrip-row').innerHTML=`<span>✋ Overgrip (${oc}×)</span><span>${(oc*PRICES.overgrip).toFixed(2).replace('.',',')} €</span>`;}
   if(extras.basisgriff){const bc=parseInt(document.getElementById('basisgriff-count').value||1);document.getElementById('pr-basisgriff-row').innerHTML=`<span>🔄 Basisgriffband (${bc}×)</span><span>${(bc*PRICES.basisgriff).toFixed(2).replace('.',',')} €</span>`;}
   document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
-  if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${(c*3).toFixed(2).replace('.',',')} €</span>`;
+  if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
   document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
   return total;
 }
@@ -478,6 +486,58 @@ function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='of
 function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function toggleBezahlt(id){const b=bookings.find(x=>x.id===id);if(b){b.bezahlt=!b.bezahlt;save();renderBookings();}}
 function deleteBooking(id){if(confirm('Buchung löschen?')){bookings=bookings.filter(x=>x.id!==id);save();renderBookings();}}
+let lager=JSON.parse(localStorage.getItem('besaitung_lager')||'{}');
+const lagerItems=[
+  {key:'saite_eigen', label:'Saite (eigene mitbringen Option)', icon:'🎒'},
+  {key:'saite_myron', label:'Saite von Myron', icon:'🛒'},
+  {key:'express', label:'Express 24h', icon:'⚡'},
+  {key:'logo', label:'Logo-Design', icon:'🎨'},
+  {key:'overgrip', label:'Overgrip', icon:'✋'},
+  {key:'basisgriff', label:'Basisgriffband', icon:'🔄'},
+];
+function saveLager(){localStorage.setItem('besaitung_lager',JSON.stringify(lager));}
+function toggleLager(key){
+  lager[key]=!lager[key];
+  saveLager();
+  renderLager();
+  updateAvailability();
+}
+function renderLager(){
+  const list=document.getElementById('lager-list');
+  list.innerHTML=lagerItems.map(item=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+      <div>
+        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${item.icon} ${item.label}</div>
+        <div style="font-size:12px;color:${lager[item.key]?'#A32D2D':'#3B6D11'};margin-top:2px;">${lager[item.key]?'❌ Ausverkauft':'✅ Verfügbar'}</div>
+      </div>
+      <button onclick="toggleLager('${item.key}')" style="padding:8px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid ${lager[item.key]?'#A32D2D':'#e5e5e5'};background:${lager[item.key]?'#FFEBEB':'white'};color:${lager[item.key]?'#A32D2D':'var(--color-text-primary)'};font-family:inherit;">
+        ${lager[item.key]?'Wieder verfügbar':'Als ausverkauft markieren'}
+      </button>
+    </div>`).join('');
+}
+function updateAvailability(){
+  // Saite
+  const sEl=document.getElementById('saite-mitbringen');
+  const smEl=document.getElementById('saite-von-myron');
+  if(sEl) { sEl.style.opacity=lager['saite_eigen']?'0.4':'1'; sEl.style.pointerEvents=lager['saite_eigen']?'none':'auto'; if(lager['saite_eigen']) sEl.querySelector('.o-sub').textContent='❌ Ausverkauft'; else sEl.querySelector('.o-sub').textContent='Eigene Saite'; }
+  if(smEl) { smEl.style.opacity=lager['saite_myron']?'0.4':'1'; smEl.style.pointerEvents=lager['saite_myron']?'none':'auto'; if(lager['saite_myron']) smEl.querySelector('.o-sub').textContent='❌ Ausverkauft'; else smEl.querySelector('.o-sub').textContent='Inklusive'; }
+  // Extras
+  ['express','logo','overgrip','basisgriff'].forEach(k=>{
+    const el=document.getElementById('ex-'+k);
+    if(el){
+      el.style.opacity=lager[k]?'0.4':'1';
+      el.style.pointerEvents=lager[k]?'none':'auto';
+      const sub=el.querySelector('.e-sub');
+      if(sub){
+        if(lager[k]) sub.textContent='❌ Ausverkauft';
+        else {
+          const defaults={express:'+3,00 € pro Schläger · fertig in 24h', logo:'Individuelles Design', overgrip:'Neues Griffband', basisgriff:'Kompletter Ersatz'};
+          sub.textContent=defaults[k];
+        }
+      }
+    }
+  });
+}
 function renderErinnerungen(){
   // Gruppe nach Kunde (letzter Auftrag pro Name+Tel)
   const kundenMap={};
@@ -555,6 +615,7 @@ async function sendAI(){
 }
 function quickAI(msg){document.getElementById('ai-input').value=msg;sendAI();}
 calcPrice();
+updateAvailability();
 </script>
 </body>
 </html>
