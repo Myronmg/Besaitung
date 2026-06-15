@@ -100,6 +100,7 @@ textarea { resize: vertical; min-height: 70px; }
   <div class="tabs" id="admin-tabs" style="display:none;">
     <button class="tab" onclick="switchTab('kalender',this)">📅 Kalender</button>
     <button class="tab" onclick="switchTab('auftraege',this)">📋 Aufträge</button>
+    <button class="tab" onclick="switchTab('erinnerung',this)">🔔 Erinnerungen</button>
     <button class="tab" onclick="adminLogout()">🔓 Logout</button>
   </div>
 
@@ -258,7 +259,15 @@ textarea { resize: vertical; min-height: 70px; }
     <div id="bookings-list"></div>
   </div>
 
-  <div class="footer">Myron Henschen · Eggenstein · myron.henschen@gmail.com</div>
+  <!-- ERINNERUNGEN -->
+  <div id="tab-erinnerung" class="section">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="stat-faellig">0</div><div class="stat-label">Fällig (8 Wo.)</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-bald">0</div><div class="stat-label">Bald fällig</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-ok">0</div><div class="stat-label">Alles gut</div></div>
+    </div>
+    <div id="erinnerung-list"></div>
+  </div>
 </div>
 
 <script>
@@ -311,7 +320,7 @@ function switchTab(name,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
-  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings();
+  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen();
 }
 function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
 function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
@@ -407,6 +416,50 @@ function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='of
 function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';save();renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function toggleBezahlt(id){const b=bookings.find(x=>x.id===id);if(b){b.bezahlt=!b.bezahlt;save();renderBookings();}}
 function deleteBooking(id){if(confirm('Buchung löschen?')){bookings=bookings.filter(x=>x.id!==id);save();renderBookings();}}
+function renderErinnerungen(){
+  // Gruppe nach Kunde (letzter Auftrag pro Name+Tel)
+  const kundenMap={};
+  bookings.filter(b=>b.status==='fertig'||b.status==='angenommen').forEach(b=>{
+    const key=b.tel||b.name;
+    if(!kundenMap[key]||new Date(b.date)>new Date(kundenMap[key].date)){
+      kundenMap[key]=b;
+    }
+  });
+  const kunden=Object.values(kundenMap);
+  const now=new Date();
+  const faellig=[], bald=[], ok=[];
+  kunden.forEach(b=>{
+    const last=new Date(b.date);
+    const weeks=Math.floor((now-last)/(7*24*60*60*1000));
+    if(weeks>=8) faellig.push({...b,weeks});
+    else if(weeks>=6) bald.push({...b,weeks});
+    else ok.push({...b,weeks});
+  });
+  document.getElementById('stat-faellig').textContent=faellig.length;
+  document.getElementById('stat-bald').textContent=bald.length;
+  document.getElementById('stat-ok').textContent=ok.length;
+  const list=document.getElementById('erinnerung-list');
+  if(!kunden.length){list.innerHTML='<p style="text-align:center;color:#aaa;font-size:14px;padding:2rem;">Noch keine abgeschlossenen Aufträge</p>';return;}
+  const renderCard=(b,color,label)=>{
+    const tel=b.tel?b.tel.replace(/\s/g,''):'';
+    const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;
+    const msg=encodeURIComponent(`Hey ${b.name}! 😉 Dein Schläger wurde das letzte Mal vor ${b.weeks} Wochen bespannt – wird mal wieder Zeit für eine frische Saite! 🎾\n\nJetzt Termin buchen: https://myronmg.github.io/Besaitung\n\n– Myron`);
+    return `<div class="booking-card" style="border-left:3px solid ${color};margin-bottom:8px;">
+      <div class="booking-name">${b.name} <span class="badge" style="background:${color}22;color:${color};">${label}</span></div>
+      <div class="booking-detail">📱 ${b.tel||'–'} · 📍 ${b.standort||'–'}<br>🕐 Letzte Besaitung vor <strong>${b.weeks} Wochen</strong> (${formatDate(b.date)})</div>
+      <div class="booking-actions" style="margin-top:8px;">
+        ${waNum?`<button class="btn-small btn-accept" onclick="window.open('https://wa.me/${waNum}?text=${msg}','_blank')">📱 Erinnerung senden</button>`:'<span style="font-size:12px;color:#aaa;">Keine Nummer</span>'}
+      </div>
+    </div>`;
+  };
+  list.innerHTML=
+    (faellig.length?'<div style="font-size:12px;font-weight:600;color:#A32D2D;margin:12px 0 6px;">🔴 Fällig – über 8 Wochen</div>':'')+
+    faellig.map(b=>renderCard(b,'#A32D2D','Überfällig')).join('')+
+    (bald.length?'<div style="font-size:12px;font-weight:600;color:#854F0B;margin:12px 0 6px;">🟡 Bald fällig – 6-8 Wochen</div>':'')+
+    bald.map(b=>renderCard(b,'#EF9F27','Bald fällig')).join('')+
+    (ok.length?'<div style="font-size:12px;font-weight:600;color:#3B6D11;margin:12px 0 6px;">🟢 Alles gut – unter 6 Wochen</div>':'')+
+    ok.map(b=>renderCard(b,'#3B6D11','OK')).join('');
+}
 function renderCalendar(){
   const base=new Date(today);base.setDate(today.getDate()-today.getDay()+1+weekOffset*7);
   const end=new Date(base);end.setDate(base.getDate()+6);
