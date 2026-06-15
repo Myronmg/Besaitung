@@ -350,6 +350,19 @@ function switchTab(name,el){
   if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen();
 }
 function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
+function syncCount(selectId){
+  const max=parseInt(document.getElementById('b-count').value)||1;
+  const sel=document.getElementById(selectId);
+  const current=parseInt(sel.value)||1;
+  sel.innerHTML='';
+  for(let i=1;i<=max;i++){
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=i+' Schläger';
+    if(i===Math.min(current,max)) opt.selected=true;
+    sel.appendChild(opt);
+  }
+}
 function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
 function toggleExtra(k){
   extras[k]=!extras[k];
@@ -365,15 +378,20 @@ function toggleExtra(k){
     el.classList.toggle('selected',extras[k]);
     chk.textContent=extras[k]?'✓':'';
   }
-  if(k==='logo') document.getElementById('logo-count-field').style.display=extras[k]?'block':'none';
-  if(k==='overgrip') document.getElementById('overgrip-count-field').style.display=extras[k]?'block':'none';
-  if(k==='basisgriff') document.getElementById('basisgriff-count-field').style.display=extras[k]?'block':'none';
+  if(k==='logo') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('logo-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('logo-count'); }
+  if(k==='overgrip') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('overgrip-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('overgrip-count'); }
+  if(k==='basisgriff') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('basisgriff-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('basisgriff-count'); }
   const row=document.getElementById('pr-'+k+'-row');
   if(row)row.style.display=extras[k]?'flex':'none';
   calcPrice();
 }
 function calcPrice(){
   const c=parseInt(document.getElementById('b-count').value);
+  ['logo','overgrip','basisgriff'].forEach(k=>{
+    const field=document.getElementById(k+'-count-field');
+    if(field) field.style.display=(extras[k]&&c>1)?'block':'none';
+    if(extras[k]) syncCount(k+'-count');
+  });
   const basePrice=selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen;
   const pricePerRacket=basePrice+(extras.express?3:0);
   const base=c*pricePerRacket;
