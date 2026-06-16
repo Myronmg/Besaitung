@@ -748,10 +748,6 @@ function saveRabatt(){
   setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
   updateRabattFieldOnBooking();
 }
-function updateRabattFieldOnBooking(){
-  const field=document.getElementById('rabatt-booking-field');
-  if(field) field.style.display=rabattSettings.active?'block':'none';
-}
 
 // ── VERFÜGBARKEIT ────────────────────────────────────────
 let maxSlots=parseInt(localStorage.getItem('max_slots')||'10');
