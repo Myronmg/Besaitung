@@ -126,6 +126,12 @@ textarea { resize: vertical; min-height: 70px; }
         <div><label>Name</label><input type="text" id="b-name" placeholder="Max Mustermann" /></div>
         <div><label>WhatsApp / Tel. *</label><input type="tel" id="b-tel" placeholder="+49 ..." required /></div>
       </div>
+      <label>Email <span style="font-size:11px;color:#888;">(optional)</span></label>
+      <input type="email" id="b-email" placeholder="max@beispiel.de" style="margin-bottom:8px;" />
+      <div style="display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:14px;">
+        <span style="font-size:16px;">📬</span>
+        <span style="font-size:12px;color:var(--color-text-secondary);line-height:1.4;">Bleib auf dem neusten Stand & erhalte exklusive Rabatte</span>
+      </div>
       <label>Anzahl Schläger</label>
       <select id="b-count" onchange="calcPrice()">
         <option value="1">1 Schläger</option>
@@ -292,6 +298,11 @@ textarea { resize: vertical; min-height: 70px; }
       <div class="stat-card"><div class="stat-value" id="stat-week">0</div><div class="stat-label">Diese Woche</div></div>
       <div class="stat-card"><div class="stat-value" id="stat-revenue">0 €</div><div class="stat-label">Einnahmen</div></div>
     </div>
+    <div class="stats-grid" style="margin-top:-8px;">
+      <div class="stat-card"><div class="stat-value" id="stat-kunden">0</div><div class="stat-label">Kunden</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-emails">0</div><div class="stat-label">Emails</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-schlager">0</div><div class="stat-label">Schläger</div></div>
+    </div>
     <div id="bookings-list"></div>
   </div>
 
@@ -329,6 +340,15 @@ textarea { resize: vertical; min-height: 70px; }
         <button onclick="saveRabatt()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">Speichern</button>
         <div id="rabatt-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
       </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">📧 Email-Liste exportieren</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Exportiere alle Kunden-Emails für Mailchimp oder Gmail</div>
+      <div id="email-export-stats" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;"></div>
+      <button onclick="exportEmails()" style="width:100%;padding:10px;background:#E24B4A;color:white;border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:8px;">📥 CSV exportieren (Mailchimp)</button>
+      <button onclick="copyEmails()" style="width:100%;padding:10px;background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">📋 Alle Emails kopieren (Gmail BCC)</button>
+      <div id="copy-email-msg" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Kopiert!</div>
     </div>
 
     <div class="card">
@@ -525,7 +545,7 @@ function submitBooking(){
     ...(extras.basisgriff?[`Basisgriffband (${basisgriffCount}×)`]:[]),
   ];
   const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Faßbender)':'';
-  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
+  bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),email:document.getElementById('b-email').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
@@ -544,6 +564,9 @@ function renderBookings(){
   document.getElementById('stat-total').textContent=bookings.length;
   document.getElementById('stat-week').textContent=bookings.filter(b=>{const dd=new Date(b.date);return dd>=ws&&dd<=we;}).length;
   document.getElementById('stat-revenue').textContent=bookings.filter(b=>b.status==='fertig').reduce((s,b)=>s+b.revenue,0).toFixed(0)+' €';
+  document.getElementById('stat-kunden').textContent=[...new Set(bookings.map(b=>b.tel||b.name))].length;
+  document.getElementById('stat-emails').textContent=[...new Set(bookings.filter(b=>b.email).map(b=>b.email))].length;
+  document.getElementById('stat-schlager').textContent=bookings.reduce((s,b)=>s+(b.count||1),0);
   const list=document.getElementById('bookings-list');
   if(!bookings.length){list.innerHTML='<p style="text-align:center;color:#aaa;padding:2rem;font-size:14px;">Noch keine Buchungen</p>';return;}
   list.innerHTML=bookings.slice().reverse().map(b=>{
@@ -639,6 +662,27 @@ function renderEinstellungen(){
   const ms=parseInt(localStorage.getItem('max_slots')||'10');
   document.getElementById('max-slots-display').textContent=ms;
   maxSlots=ms;
+  const emails=bookings.filter(b=>b.email).map(b=>b.email);
+  const unique=[...new Set(emails)];
+  const stats=document.getElementById('email-export-stats');
+  if(stats) stats.textContent=`${unique.length} Emails gespeichert`;
+}
+function exportEmails(){
+  const unique=[...new Set(bookings.filter(b=>b.email).map(b=>({name:b.name,email:b.email})).map(JSON.stringify))].map(JSON.parse);
+  if(!unique.length){alert('Noch keine Emails vorhanden.');return;}
+  const csv='Email Adresse,Vorname\n'+unique.map(b=>`${b.email},${b.name.split(' ')[0]}`).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='kunden_emails.csv';
+  a.click();
+}
+function copyEmails(){
+  const emails=[...new Set(bookings.filter(b=>b.email).map(b=>b.email))];
+  if(!emails.length){alert('Noch keine Emails vorhanden.');return;}
+  navigator.clipboard.writeText(emails.join(', ')).then(()=>{
+    document.getElementById('copy-email-msg').style.display='block';
+    setTimeout(()=>document.getElementById('copy-email-msg').style.display='none',2000);
+  });
 }
 function toggleRabatt(){rabattSettings.active=!rabattSettings.active;localStorage.setItem('rabatt_settings',JSON.stringify(rabattSettings));updateRabattUI();}
 function updateRabattUI(){
