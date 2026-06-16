@@ -89,7 +89,7 @@ textarea { resize: vertical; min-height: 70px; }
   <div class="header">
     <div style="font-size:44px;margin-bottom:8px;">🎾</div>
     <h1>Schläger-Besaitung</h1>
-    <p>Myron Henschen · Eggenstein</p>
+    <p>Myron Henschen</p>
     <span class="price-pill">ab 15,00 € pro Schläger</span>
   </div>
 
@@ -107,7 +107,13 @@ textarea { resize: vertical; min-height: 70px; }
     <button class="tab" onclick="adminLogout()">🔓 Logout</button>
   </div>
 
-  <!-- BUCHEN -->
+  <!-- PROMO BANNER -->
+  <div id="promo-banner" style="background:linear-gradient(135deg,#E24B4A,#c0392b);color:white;text-align:center;padding:12px 16px;font-size:13px;letter-spacing:0.2px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:rgba(255,255,255,0.1);transform:skewX(-20deg);animation:shine 3s infinite;"></div>
+    <style>@keyframes shine{0%{left:-100%}50%,100%{left:150%}}</style>
+    🎾 <strong>START20</strong> eingeben & 20% sparen – nur für kurze Zeit!
+    <span style="display:inline-block;background:rgba(255,255,255,0.2);border-radius:99px;padding:2px 10px;margin-left:6px;font-size:11px;">Jetzt buchen ↓</span>
+  </div>
   <div id="tab-buchen" class="section active">
     <div class="card">
       <label>Standort *</label>
@@ -227,12 +233,12 @@ textarea { resize: vertical; min-height: 70px; }
           <div class="opt" id="slot-di" onclick="selectSlot('di')">
             <div class="o-label" style="font-size:13px;">Dienstag</div>
             <div class="o-sub">19:00 – 21:00 Uhr</div>
-            <div class="o-sub">Faßbender · Eggenstein</div>
+            <div class="o-sub">Im Heiderweg · Eggenstein</div>
           </div>
           <div class="opt" id="slot-do" onclick="selectSlot('do')">
             <div class="o-label" style="font-size:13px;">Donnerstag</div>
             <div class="o-sub">17:00 – 18:30 Uhr</div>
-            <div class="o-sub">Faßbender · Eggenstein</div>
+            <div class="o-sub">Im Heiderweg · Eggenstein</div>
           </div>
         </div>
       </div>
@@ -326,20 +332,10 @@ textarea { resize: vertical; min-height: 70px; }
   <!-- EINSTELLUNGEN -->
   <div id="tab-einstellungen" class="section">
     <div class="card">
-      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">🎁 Rabattcode</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Aktiviere einen Rabattcode für Kunden beim Buchen</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <span style="font-size:14px;color:var(--color-text-primary);">Rabattcode aktiv</span>
-        <button id="rabatt-toggle" onclick="toggleRabatt()" style="padding:8px 18px;border-radius:99px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;"></button>
-      </div>
-      <div id="rabatt-settings" style="display:none;">
-        <label style="font-size:13px;color:var(--color-text-secondary);">Code</label>
-        <input type="text" id="rabatt-code" placeholder="z.B. START10" style="margin-bottom:10px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" />
-        <label style="font-size:13px;color:var(--color-text-secondary);">Rabatt (%)</label>
-        <input type="number" id="rabatt-prozent" placeholder="z.B. 10" min="1" max="50" style="margin-bottom:10px;" />
-        <button onclick="saveRabatt()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">Speichern</button>
-        <div id="rabatt-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
-      </div>
+      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">🎁 Rabattcodes</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Bis zu 3 Codes gleichzeitig aktiv</div>
+      <div id="rabatt-codes-list"></div>
+      <div id="rabatt-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
     </div>
 
     <div class="card">
@@ -396,7 +392,7 @@ function selectOrt(o){
   const info=document.getElementById('abgabe-info');
   const slots=document.getElementById('eggenstein-slots');
   if(o==='eggenstein'){
-    info.textContent='📍 Schläger beim Faßbender abgeben – feste Zeiten wählen';
+    info.textContent='📍 Schläger Im Heiderweg abgeben – feste Zeiten wählen';
     slots.style.display='block';
   } else {
     info.textContent='🏠 Schläger zu Myron nach Hause bringen · Adresse kommt per WhatsApp';
@@ -452,24 +448,6 @@ function syncCount(selectId){
     sel.appendChild(opt);
   }
 }
-let rabattApplied=false;
-function applyRabatt(){
-  const input=document.getElementById('b-rabatt').value.toUpperCase();
-  const msg=document.getElementById('rabatt-msg');
-  if(rabattSettings.active&&input===rabattSettings.code){
-    rabattApplied=true;
-    msg.textContent=`✅ ${rabattSettings.prozent}% Rabatt wird angewendet!`;
-    msg.style.color='#3B6D11';
-  } else if(input.length>0){
-    rabattApplied=false;
-    msg.textContent='❌ Ungültiger Code';
-    msg.style.color='#A32D2D';
-  } else {
-    rabattApplied=false;
-    msg.textContent='';
-  }
-  calcPrice();
-}
 function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
 function toggleExtra(k){
   extras[k]=!extras[k];
@@ -512,12 +490,12 @@ function calcPrice(){
   if(extras.basisgriff){const bc=parseInt(document.getElementById('basisgriff-count').value||1);document.getElementById('pr-basisgriff-row').innerHTML=`<span>🔄 Basisgriffband (${bc}×)</span><span>${(bc*PRICES.basisgriff).toFixed(2).replace('.',',')} €</span>`;}
   document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
   if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
-  const rabattTotal=rabattApplied?(total*(rabattSettings.prozent/100)):0;
+  const rabattTotal=rabattApplied?(total*(appliedProzent/100)):0;
   const finalTotal=total-rabattTotal;
   const rabattRow=document.getElementById('pr-rabatt-row');
   if(rabattApplied&&rabattRow){
     rabattRow.style.display='flex';
-    rabattRow.innerHTML=`<span>🎁 Rabatt ${rabattSettings.prozent}%</span><span>−${rabattTotal.toFixed(2).replace('.',',')} €</span>`;
+    rabattRow.innerHTML=`<span>🎁 Rabatt ${appliedProzent}%</span><span>−${rabattTotal.toFixed(2).replace('.',',')} €</span>`;
   } else if(rabattRow){
     rabattRow.style.display='none';
   }
@@ -544,7 +522,7 @@ function submitBooking(){
     ...(extras.overgrip?[`Overgrip (${overgripCount}×)`]:[]),
     ...(extras.basisgriff?[`Basisgriffband (${basisgriffCount}×)`]:[]),
   ];
-  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Faßbender)':'';
+  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Im Heiderweg)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Im Heiderweg)':'';
   bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),email:document.getElementById('b-email').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
@@ -656,14 +634,77 @@ function renderStatistik(){
 }
 
 // ── RABATT ───────────────────────────────────────────────
-let rabattSettings=JSON.parse(localStorage.getItem('rabatt_settings')||'{"active":false,"code":"","prozent":10}');
+// ── RABATT (3 Codes) ─────────────────────────────────────
+let rabattCodes=JSON.parse(localStorage.getItem('rabatt_codes')||'[{"active":false,"code":"","prozent":20},{"active":false,"code":"","prozent":10},{"active":false,"code":"","prozent":5}]');
+let rabattSettings={active:false,code:'',prozent:0}; // legacy compat
+let rabattApplied=false;
+let appliedProzent=0;
+
+function renderRabattCodes(){
+  const list=document.getElementById('rabatt-codes-list');
+  if(!list) return;
+  list.innerHTML=rabattCodes.map((r,i)=>`
+    <div style="border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:10px;${r.active?'border-color:#3B6D11;background:#EAF3DE;':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Code ${i+1}</span>
+        <button onclick="toggleRabattCode(${i})" style="padding:5px 14px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:inherit;background:${r.active?'#3B6D11':'#f0f0f0'};color:${r.active?'white':'#666'};">
+          ${r.active?'✅ Aktiv':'⭕ Inaktiv'}
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+        <div>
+          <label style="font-size:11px;color:var(--color-text-secondary);">Code</label>
+          <input type="text" value="${r.code}" placeholder="z.B. FREUND10" oninput="rabattCodes[${i}].code=this.value.toUpperCase();this.value=this.value.toUpperCase()" style="margin-top:2px;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--color-text-secondary);">Rabatt %</label>
+          <input type="number" value="${r.prozent}" min="1" max="50" oninput="rabattCodes[${i}].prozent=parseInt(this.value)||0" style="margin-top:2px;" />
+        </div>
+      </div>
+    </div>`).join('');
+  list.innerHTML+=`<button onclick="saveRabattCodes()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">Speichern</button>`;
+}
+
+function toggleRabattCode(i){rabattCodes[i].active=!rabattCodes[i].active;renderRabattCodes();}
+function saveRabattCodes(){
+  localStorage.setItem('rabatt_codes',JSON.stringify(rabattCodes));
+  document.getElementById('rabatt-saved').style.display='block';
+  setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
+  updateRabattFieldOnBooking();
+}
+function updateRabattFieldOnBooking(){
+  const field=document.getElementById('rabatt-booking-field');
+  if(field) field.style.display=rabattCodes.some(r=>r.active&&r.code)?'block':'none';
+}
+function toggleRabatt(){} // legacy compat
+
+function applyRabatt(){
+  const input=document.getElementById('b-rabatt').value.toUpperCase();
+  const msg=document.getElementById('rabatt-msg');
+  const match=rabattCodes.find(r=>r.active&&r.code&&r.code===input);
+  if(match){
+    rabattApplied=true;
+    appliedProzent=match.prozent;
+    msg.textContent=`✅ ${match.prozent}% Rabatt wird angewendet!`;
+    msg.style.color='#3B6D11';
+  } else if(input.length>0){
+    rabattApplied=false;
+    appliedProzent=0;
+    msg.textContent='❌ Ungültiger Code';
+    msg.style.color='#A32D2D';
+  } else {
+    rabattApplied=false;
+    appliedProzent=0;
+    msg.textContent='';
+  }
+  calcPrice();
+}
 function renderEinstellungen(){
-  updateRabattUI();
+  renderRabattCodes();
   const ms=parseInt(localStorage.getItem('max_slots')||'10');
   document.getElementById('max-slots-display').textContent=ms;
   maxSlots=ms;
-  const emails=bookings.filter(b=>b.email).map(b=>b.email);
-  const unique=[...new Set(emails)];
+  const unique=[...new Set(bookings.filter(b=>b.email).map(b=>b.email))];
   const stats=document.getElementById('email-export-stats');
   if(stats) stats.textContent=`${unique.length} Emails gespeichert`;
 }
