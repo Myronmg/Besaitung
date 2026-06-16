@@ -90,18 +90,20 @@ textarea { resize: vertical; min-height: 70px; }
     <div style="font-size:44px;margin-bottom:8px;">🎾</div>
     <h1>Schläger-Besaitung</h1>
     <p>Myron Henschen · Eggenstein</p>
-    <span class="price-pill">ab 12,50 € pro Schläger</span>
+    <span class="price-pill">ab 15,00 € pro Schläger</span>
   </div>
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('buchen',this)">Buchen</button>
     <button class="tab" onclick="adminLogin(this)">🔒</button>
   </div>
-  <div class="tabs" id="admin-tabs" style="display:none;">
+  <div class="tabs" id="admin-tabs" style="display:none;flex-wrap:wrap;">
     <button class="tab" onclick="switchTab('kalender',this)">📅 Kalender</button>
     <button class="tab" onclick="switchTab('auftraege',this)">📋 Aufträge</button>
     <button class="tab" onclick="switchTab('erinnerung',this)">🔔 Erinnerungen</button>
     <button class="tab" onclick="switchTab('lager',this)">📦 Lager</button>
+    <button class="tab" onclick="switchTab('statistik',this)">📊 Statistik</button>
+    <button class="tab" onclick="switchTab('einstellungen',this)">⚙️ Einstellungen</button>
     <button class="tab" onclick="adminLogout()">🔓 Logout</button>
   </div>
 
@@ -136,12 +138,12 @@ textarea { resize: vertical; min-height: 70px; }
         <div class="opt selected" id="saite-mitbringen" onclick="selectSaite('mitbringen')">
           <div class="o-label">🎒 Ich bringe Saite mit</div>
           <div class="o-sub">Eigene Saite</div>
-          <div class="o-price">12,50 €</div>
+          <div class="o-price">15,00 €</div>
         </div>
         <div class="opt" id="saite-von-myron" onclick="selectSaite('von-myron')">
           <div class="o-label">🛒 Saite von Myron</div>
           <div class="o-sub">Saite inklusive</div>
-          <div class="o-price">15,00 €</div>
+          <div class="o-price">18,00 €</div>
         </div>
       </div>
       <label>Bespannungsspannung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
@@ -239,6 +241,11 @@ textarea { resize: vertical; min-height: 70px; }
       </select>
       <label>Notizen (optional)</label>
       <textarea id="b-notes" placeholder="Besonderheiten, Wünsche..."></textarea>
+      <div id="rabatt-booking-field" style="display:none;margin-bottom:12px;">
+        <label>Rabattcode (optional)</label>
+        <input type="text" id="b-rabatt" placeholder="Code eingeben..." oninput="this.value=this.value.toUpperCase();applyRabatt()" />
+        <div id="rabatt-msg" style="font-size:12px;margin-top:4px;"></div>
+      </div>
       <label>Bezahlung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
       <div class="opts-grid">
         <div class="opt" id="pay-paypal" onclick="selectPay('paypal')">
@@ -251,12 +258,12 @@ textarea { resize: vertical; min-height: 70px; }
         </div>
       </div>
       <div class="price-box">
-        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">12,50 €</span></div>
+        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">15,00 €</span></div>
         <div class="price-row" id="pr-express-row" style="display:none;"><span>⚡ Express (24h)</span><span>15,00 €</span></div>
         <div class="price-row" id="pr-logo-row" style="display:none;"><span>Logo-Design</span><span>1,00 €</span></div>
         <div class="price-row" id="pr-overgrip-row" style="display:none;"><span>Overgrip</span><span>3,50 €</span></div>
         <div class="price-row" id="pr-basisgriff-row" style="display:none;"><span>Basisgriffband</span><span>10,00 €</span></div>
-        <div class="price-row total"><span>Gesamt</span><span id="pr-total">12,50 €</span></div>
+        <div class="price-row total"><span>Gesamt</span><span id="pr-total">15,00 €</span></div>
       </div>
       <div id="paypal-section" style="display:none;margin-top:10px;">
         <button class="paypal-btn" onclick="openPayPal()">💳 Jetzt per PayPal bezahlen</button>
@@ -285,6 +292,58 @@ textarea { resize: vertical; min-height: 70px; }
       <div class="stat-card"><div class="stat-value" id="stat-revenue">0 €</div><div class="stat-label">Einnahmen</div></div>
     </div>
     <div id="bookings-list"></div>
+  </div>
+
+  <!-- STATISTIK -->
+  <div id="tab-statistik" class="section">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="st-gesamt">0 €</div><div class="stat-label">Gesamt</div></div>
+      <div class="stat-card"><div class="stat-value" id="st-monat">0 €</div><div class="stat-label">Dieser Monat</div></div>
+      <div class="stat-card"><div class="stat-value" id="st-woche">0 €</div><div class="stat-label">Diese Woche</div></div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:600;color:var(--color-text-primary);margin-bottom:12px;">📍 Einnahmen pro Standort</div>
+      <div id="st-standorte"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;color:var(--color-text-primary);margin-bottom:12px;">📅 Letzte Monate</div>
+      <div id="st-monate"></div>
+    </div>
+  </div>
+
+  <!-- EINSTELLUNGEN -->
+  <div id="tab-einstellungen" class="section">
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">🎁 Rabattcode</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Aktiviere einen Rabattcode für Kunden beim Buchen</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span style="font-size:14px;color:var(--color-text-primary);">Rabattcode aktiv</span>
+        <button id="rabatt-toggle" onclick="toggleRabatt()" style="padding:8px 18px;border-radius:99px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;"></button>
+      </div>
+      <div id="rabatt-settings" style="display:none;">
+        <label style="font-size:13px;color:var(--color-text-secondary);">Code</label>
+        <input type="text" id="rabatt-code" placeholder="z.B. START10" style="margin-bottom:10px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" />
+        <label style="font-size:13px;color:var(--color-text-secondary);">Rabatt (%)</label>
+        <input type="number" id="rabatt-prozent" placeholder="z.B. 10" min="1" max="50" style="margin-bottom:10px;" />
+        <button onclick="saveRabatt()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">Speichern</button>
+        <div id="rabatt-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">📅 Verfügbarkeit</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Maximale Aufträge pro Woche</div>
+      <div style="display:flex;align-items:center;gap:16px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;">
+        <button onclick="changeMaxSlots(-1)" style="width:36px;height:36px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:18px;cursor:pointer;font-family:inherit;">−</button>
+        <div style="text-align:center;flex:1;">
+          <div id="max-slots-display" style="font-size:32px;font-weight:500;color:var(--color-text-primary);">10</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);">Schläger / Woche</div>
+        </div>
+        <button onclick="changeMaxSlots(1)" style="width:36px;height:36px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:18px;cursor:pointer;font-family:inherit;">+</button>
+      </div>
+      <button onclick="saveMaxSlots()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:10px;">Speichern</button>
+      <div id="slots-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
+    </div>
   </div>
 
   <!-- LAGER -->
@@ -334,7 +393,7 @@ let extras={express:false,logo:false,overgrip:false,basisgriff:false};
 let weekOffset=0, aiHistory=[];
 const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const today=new Date();
-const PRICES={besaitung_eigen:12.5,besaitung_myron:15,express:3,logo:1,overgrip:3.5,basisgriff:10};
+const PRICES={besaitung_eigen:15,besaitung_myron:18,express:3,logo:1,overgrip:3.5,basisgriff:10};
 const ADMIN_PIN='H07MGHKH0200';
 let isAdmin=false;
 function adminLogin(el){
@@ -356,7 +415,7 @@ function switchTab(name,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
-  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen(); if(name==='lager')renderLager();
+  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen(); if(name==='lager')renderLager(); if(name==='statistik')renderStatistik(); if(name==='einstellungen')renderEinstellungen();
 }
 function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
 function syncCount(selectId){
@@ -371,6 +430,24 @@ function syncCount(selectId){
     if(i===Math.min(current,max)) opt.selected=true;
     sel.appendChild(opt);
   }
+}
+let rabattApplied=false;
+function applyRabatt(){
+  const input=document.getElementById('b-rabatt').value.toUpperCase();
+  const msg=document.getElementById('rabatt-msg');
+  if(rabattSettings.active&&input===rabattSettings.code){
+    rabattApplied=true;
+    msg.textContent=`✅ ${rabattSettings.prozent}% Rabatt wird angewendet!`;
+    msg.style.color='#3B6D11';
+  } else if(input.length>0){
+    rabattApplied=false;
+    msg.textContent='❌ Ungültiger Code';
+    msg.style.color='#A32D2D';
+  } else {
+    rabattApplied=false;
+    msg.textContent='';
+  }
+  calcPrice();
 }
 function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
 function toggleExtra(k){
@@ -414,8 +491,21 @@ function calcPrice(){
   if(extras.basisgriff){const bc=parseInt(document.getElementById('basisgriff-count').value||1);document.getElementById('pr-basisgriff-row').innerHTML=`<span>🔄 Basisgriffband (${bc}×)</span><span>${(bc*PRICES.basisgriff).toFixed(2).replace('.',',')} €</span>`;}
   document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
   if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
-  document.getElementById('pr-total').textContent=total.toFixed(2).replace('.',',')+' €';
-  return total;
+  const rabattTotal=rabattApplied?(total*(rabattSettings.prozent/100)):0;
+  const finalTotal=total-rabattTotal;
+  if(rabattApplied){
+    document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
+    if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
+    // show rabatt row
+    let rabattRow=document.getElementById('pr-rabatt-row');
+    if(!rabattRow){rabattRow=document.createElement('div');rabattRow.id='pr-rabatt-row';rabattRow.className='price-row';rabattRow.style.color='#3B6D11';document.getElementById('pr-total').parentNode.insertBefore(rabattRow,document.getElementById('pr-total'));}
+    rabattRow.innerHTML=`<span>🎁 Rabatt (${rabattSettings.prozent}%)</span><span>−${rabattTotal.toFixed(2).replace('.',',')} €</span>`;
+  } else {
+    const rr=document.getElementById('pr-rabatt-row');
+    if(rr) rr.remove();
+  }
+  document.getElementById('pr-total').textContent=finalTotal.toFixed(2).replace('.',',')+' €';
+  return finalTotal;
 }
 function openPayPal(){window.open('https://www.paypal.com/paypalme/myronhenschen/'+calcPrice().toFixed(2)+'EUR','_blank');}
 function submitBooking(){
@@ -443,10 +533,12 @@ function submitBooking(){
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
   ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
+  // Notify Myron silently
   const lb=bookings[bookings.length-1];
-  const adresseMsg = (lb.standort==='waldbronn'||lb.standort==='langensteinbach') ? '\n\nDeine Adresse für die Abgabe:\nOosstraße 1b, 76337 Waldbronn-Reichenbach' : '';
+  const adresseMsg=(lb.standort==='waldbronn'||lb.standort==='langensteinbach')?'\nAdresse: Oosstraße 1b, 76337 Waldbronn-Reichenbach':'';
   const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nStandort: ${lb.standort}${lb.slot?'\nAbgabe: '+lb.slot:''}${adresseMsg}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nSpannung: ${lb.kg} kg\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nFertig bis: ${formatDate(lb.date)} ${lb.time!=='Egal'?'um '+lb.time:''}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
   setTimeout(()=>window.open(`https://wa.me/4917676864244?text=${myronMsg}`,'_blank'),800);
+
 }
 function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function renderBookings(){
@@ -502,6 +594,88 @@ function toggleLager(key){
   renderLager();
   updateAvailability();
 }
+// ── STATISTIK ────────────────────────────────────────────
+function renderStatistik(){
+  const now=new Date();
+  const ws=new Date(now); ws.setDate(now.getDate()-now.getDay()+1);
+  const ms=new Date(now.getFullYear(),now.getMonth(),1);
+  const fertig=bookings.filter(b=>b.status==='fertig');
+  const gesamt=fertig.reduce((s,b)=>s+b.revenue,0);
+  const monat=fertig.filter(b=>new Date(b.date)>=ms).reduce((s,b)=>s+b.revenue,0);
+  const woche=fertig.filter(b=>new Date(b.date)>=ws).reduce((s,b)=>s+b.revenue,0);
+  document.getElementById('st-gesamt').textContent=gesamt.toFixed(0)+' €';
+  document.getElementById('st-monat').textContent=monat.toFixed(0)+' €';
+  document.getElementById('st-woche').textContent=woche.toFixed(0)+' €';
+  // Standorte
+  const orte={eggenstein:0,langensteinbach:0,waldbronn:0};
+  fertig.forEach(b=>{if(orte[b.standort]!==undefined)orte[b.standort]+=b.revenue;});
+  document.getElementById('st-standorte').innerHTML=Object.entries(orte).map(([o,v])=>`
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px;">
+      <span style="color:var(--color-text-primary);text-transform:capitalize;">📍 ${o}</span>
+      <strong>${v.toFixed(0)} €</strong>
+    </div>`).join('');
+  // Letzte 4 Monate
+  const monate=[];
+  for(let i=3;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const label=d.toLocaleString('de-DE',{month:'long',year:'numeric'});
+    const sum=fertig.filter(b=>{const bd=new Date(b.date);return bd.getMonth()===d.getMonth()&&bd.getFullYear()===d.getFullYear();}).reduce((s,b)=>s+b.revenue,0);
+    monate.push({label,sum});
+  }
+  const maxSum=Math.max(...monate.map(m=>m.sum),1);
+  document.getElementById('st-monate').innerHTML=monate.map(m=>`
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span style="color:var(--color-text-secondary);">${m.label}</span>
+        <strong>${m.sum.toFixed(0)} €</strong>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:99px;height:8px;">
+        <div style="background:#E24B4A;border-radius:99px;height:8px;width:${(m.sum/maxSum*100).toFixed(0)}%;transition:width 0.3s;"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── RABATT ───────────────────────────────────────────────
+let rabattSettings=JSON.parse(localStorage.getItem('rabatt_settings')||'{"active":false,"code":"","prozent":10}');
+function renderEinstellungen(){
+  updateRabattUI();
+  const ms=parseInt(localStorage.getItem('max_slots')||'10');
+  document.getElementById('max-slots-display').textContent=ms;
+  maxSlots=ms;
+}
+function toggleRabatt(){rabattSettings.active=!rabattSettings.active;localStorage.setItem('rabatt_settings',JSON.stringify(rabattSettings));updateRabattUI();}
+function updateRabattUI(){
+  const btn=document.getElementById('rabatt-toggle');
+  const settings=document.getElementById('rabatt-settings');
+  btn.textContent=rabattSettings.active?'✅ Aktiv':'❌ Inaktiv';
+  btn.style.background=rabattSettings.active?'#EAF3DE':'#FFEBEB';
+  btn.style.color=rabattSettings.active?'#3B6D11':'#A32D2D';
+  btn.style.border=`1.5px solid ${rabattSettings.active?'#3B6D11':'#A32D2D'}`;
+  settings.style.display=rabattSettings.active?'block':'none';
+  if(rabattSettings.active){
+    document.getElementById('rabatt-code').value=rabattSettings.code||'';
+    document.getElementById('rabatt-prozent').value=rabattSettings.prozent||10;
+  }
+  updateRabattFieldOnBooking();
+}
+function saveRabatt(){
+  rabattSettings.code=document.getElementById('rabatt-code').value.toUpperCase();
+  rabattSettings.prozent=parseInt(document.getElementById('rabatt-prozent').value)||10;
+  localStorage.setItem('rabatt_settings',JSON.stringify(rabattSettings));
+  document.getElementById('rabatt-saved').style.display='block';
+  setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
+  updateRabattFieldOnBooking();
+}
+function updateRabattFieldOnBooking(){
+  const field=document.getElementById('rabatt-booking-field');
+  if(field) field.style.display=rabattSettings.active?'block':'none';
+}
+
+// ── VERFÜGBARKEIT ────────────────────────────────────────
+let maxSlots=parseInt(localStorage.getItem('max_slots')||'10');
+function changeMaxSlots(d){maxSlots=Math.max(1,Math.min(50,maxSlots+d));document.getElementById('max-slots-display').textContent=maxSlots;}
+function saveMaxSlots(){localStorage.setItem('max_slots',maxSlots);document.getElementById('slots-saved').style.display='block';setTimeout(()=>document.getElementById('slots-saved').style.display='none',2000);}
+
 function renderLager(){
   const list=document.getElementById('lager-list');
   list.innerHTML=lagerItems.map(item=>`
@@ -616,7 +790,7 @@ async function sendAI(){
 function quickAI(msg){document.getElementById('ai-input').value=msg;sendAI();}
 calcPrice();
 updateAvailability();
+updateRabattFieldOnBooking();
 </script>
 </body>
 </html>
-
