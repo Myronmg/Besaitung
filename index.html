@@ -259,10 +259,11 @@ textarea { resize: vertical; min-height: 70px; }
       </div>
       <div class="price-box">
         <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">15,00 €</span></div>
-        <div class="price-row" id="pr-express-row" style="display:none;"><span>⚡ Express (24h)</span><span>15,00 €</span></div>
-        <div class="price-row" id="pr-logo-row" style="display:none;"><span>Logo-Design</span><span>1,00 €</span></div>
-        <div class="price-row" id="pr-overgrip-row" style="display:none;"><span>Overgrip</span><span>3,50 €</span></div>
-        <div class="price-row" id="pr-basisgriff-row" style="display:none;"><span>Basisgriffband</span><span>10,00 €</span></div>
+        <div class="price-row" id="pr-express-row" style="display:none;"></div>
+        <div class="price-row" id="pr-logo-row" style="display:none;"></div>
+        <div class="price-row" id="pr-overgrip-row" style="display:none;"></div>
+        <div class="price-row" id="pr-basisgriff-row" style="display:none;"></div>
+        <div class="price-row" id="pr-rabatt-row" style="display:none;color:#3B6D11;"></div>
         <div class="price-row total"><span>Gesamt</span><span id="pr-total">15,00 €</span></div>
       </div>
       <div id="paypal-section" style="display:none;margin-top:10px;">
@@ -493,16 +494,12 @@ function calcPrice(){
   if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
   const rabattTotal=rabattApplied?(total*(rabattSettings.prozent/100)):0;
   const finalTotal=total-rabattTotal;
-  if(rabattApplied){
-    document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
-    if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
-    // show rabatt row
-    let rabattRow=document.getElementById('pr-rabatt-row');
-    if(!rabattRow){rabattRow=document.createElement('div');rabattRow.id='pr-rabatt-row';rabattRow.className='price-row';rabattRow.style.color='#3B6D11';document.getElementById('pr-total').parentNode.insertBefore(rabattRow,document.getElementById('pr-total'));}
-    rabattRow.innerHTML=`<span>🎁 Rabatt (${rabattSettings.prozent}%)</span><span>−${rabattTotal.toFixed(2).replace('.',',')} €</span>`;
-  } else {
-    const rr=document.getElementById('pr-rabatt-row');
-    if(rr) rr.remove();
+  const rabattRow=document.getElementById('pr-rabatt-row');
+  if(rabattApplied&&rabattRow){
+    rabattRow.style.display='flex';
+    rabattRow.innerHTML=`<span>🎁 Rabatt ${rabattSettings.prozent}%</span><span>−${rabattTotal.toFixed(2).replace('.',',')} €</span>`;
+  } else if(rabattRow){
+    rabattRow.style.display='none';
   }
   document.getElementById('pr-total').textContent=finalTotal.toFixed(2).replace('.',',')+' €';
   return finalTotal;
