@@ -674,7 +674,7 @@ function saveRabattCodes(){
 }
 function updateRabattFieldOnBooking(){
   const field=document.getElementById('rabatt-booking-field');
-  if(field) field.style.display=rabattCodes.some(r=>r.active&&r.code)?'block':'none';
+  if(field) field.style.display='block';
 }
 function toggleRabatt(){} // legacy compat
 
