@@ -20,7 +20,7 @@ label { font-size: 13px; color: #666; display: block; margin-bottom: 6px; margin
 label:first-child { margin-top: 0; }
 input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e5e5e5; border-radius: 10px; font-size: 14px; background: white; color: #1a1a1a; font-family: inherit; outline: none; }
 input:focus, select:focus, textarea:focus { border-color: #1a1a1a; }
-textarea { resize: vertical; min-height: 70px; }
+textarea { resize: none; min-height: 70px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .btn-primary { background: #1a1a1a; color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px; font-family: inherit; }
 .section { display: none; }
@@ -233,12 +233,12 @@ textarea { resize: vertical; min-height: 70px; }
           <div class="opt" id="slot-di" onclick="selectSlot('di')">
             <div class="o-label" style="font-size:13px;">Dienstag</div>
             <div class="o-sub">19:00 – 21:00 Uhr</div>
-            <div class="o-sub">Im Heiderweg · Eggenstein</div>
+            <div class="o-sub">Faßbender Außenanlage · Eggenstein</div>
           </div>
           <div class="opt" id="slot-do" onclick="selectSlot('do')">
             <div class="o-label" style="font-size:13px;">Donnerstag</div>
             <div class="o-sub">17:00 – 18:30 Uhr</div>
-            <div class="o-sub">Im Heiderweg · Eggenstein</div>
+            <div class="o-sub">TC Eggenstein · Außenanlage</div>
           </div>
         </div>
       </div>
@@ -253,7 +253,7 @@ textarea { resize: vertical; min-height: 70px; }
       </select>
       <label>Notizen (optional)</label>
       <textarea id="b-notes" placeholder="Besonderheiten, Wünsche..."></textarea>
-      <div id="rabatt-booking-field" style="display:none;margin-bottom:12px;">
+      <div id="rabatt-booking-field" style="margin-bottom:12px;">
         <label>Rabattcode (optional)</label>
         <input type="text" id="b-rabatt" placeholder="Code eingeben..." oninput="this.value=this.value.toUpperCase();applyRabatt()" />
         <div id="rabatt-msg" style="font-size:12px;margin-top:4px;"></div>
@@ -392,7 +392,7 @@ function selectOrt(o){
   const info=document.getElementById('abgabe-info');
   const slots=document.getElementById('eggenstein-slots');
   if(o==='eggenstein'){
-    info.textContent='📍 Schläger Im Heiderweg abgeben – feste Zeiten wählen';
+    info.textContent='📍 Schläger beim Faßbender (Außenanlage) abgeben – feste Zeiten wählen';
     slots.style.display='block';
   } else {
     info.textContent='🏠 Schläger zu Myron nach Hause bringen · Adresse kommt per WhatsApp';
@@ -522,7 +522,7 @@ function submitBooking(){
     ...(extras.overgrip?[`Overgrip (${overgripCount}×)`]:[]),
     ...(extras.basisgriff?[`Basisgriffband (${basisgriffCount}×)`]:[]),
   ];
-  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Im Heiderweg)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (Im Heiderweg)':'';
+  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender Außenanlage)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (TC Eggenstein Außenanlage)':'';
   bookings.push({id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),email:document.getElementById('b-email').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',revenue:calcPrice()});
   save();
   document.getElementById('success-banner').style.display='block';
