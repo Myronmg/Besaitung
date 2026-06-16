@@ -90,7 +90,7 @@ textarea { resize: vertical; min-height: 70px; }
     <div style="font-size:44px;margin-bottom:8px;">🎾</div>
     <h1>Schläger-Besaitung</h1>
     <p>Myron Henschen · Eggenstein</p>
-    <span class="price-pill">ab 10,00 € pro Schläger</span>
+    <span class="price-pill">ab 12,50 € pro Schläger</span>
   </div>
 
   <div class="tabs">
@@ -136,12 +136,12 @@ textarea { resize: vertical; min-height: 70px; }
         <div class="opt selected" id="saite-mitbringen" onclick="selectSaite('mitbringen')">
           <div class="o-label">🎒 Ich bringe Saite mit</div>
           <div class="o-sub">Eigene Saite</div>
-          <div class="o-price">10,00 €</div>
+          <div class="o-price">12,50 €</div>
         </div>
         <div class="opt" id="saite-von-myron" onclick="selectSaite('von-myron')">
           <div class="o-label">🛒 Saite von Myron</div>
           <div class="o-sub">Saite inklusive</div>
-          <div class="o-price">12,50 €</div>
+          <div class="o-price">15,00 €</div>
         </div>
       </div>
       <label>Bespannungsspannung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
@@ -251,12 +251,12 @@ textarea { resize: vertical; min-height: 70px; }
         </div>
       </div>
       <div class="price-box">
-        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">10,00 €</span></div>
+        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">12,50 €</span></div>
         <div class="price-row" id="pr-express-row" style="display:none;"><span>⚡ Express (24h)</span><span>15,00 €</span></div>
         <div class="price-row" id="pr-logo-row" style="display:none;"><span>Logo-Design</span><span>1,00 €</span></div>
         <div class="price-row" id="pr-overgrip-row" style="display:none;"><span>Overgrip</span><span>3,50 €</span></div>
         <div class="price-row" id="pr-basisgriff-row" style="display:none;"><span>Basisgriffband</span><span>10,00 €</span></div>
-        <div class="price-row total"><span>Gesamt</span><span id="pr-total">10,00 €</span></div>
+        <div class="price-row total"><span>Gesamt</span><span id="pr-total">12,50 €</span></div>
       </div>
       <div id="paypal-section" style="display:none;margin-top:10px;">
         <button class="paypal-btn" onclick="openPayPal()">💳 Jetzt per PayPal bezahlen</button>
@@ -334,7 +334,7 @@ let extras={express:false,logo:false,overgrip:false,basisgriff:false};
 let weekOffset=0, aiHistory=[];
 const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const today=new Date();
-const PRICES={besaitung_eigen:10,besaitung_myron:12.5,express:15,logo:1,overgrip:3.5,basisgriff:10};
+const PRICES={besaitung_eigen:12.5,besaitung_myron:15,express:3,logo:1,overgrip:3.5,basisgriff:10};
 const ADMIN_PIN='1234';
 let isAdmin=false;
 function adminLogin(el){
