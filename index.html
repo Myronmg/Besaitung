@@ -437,6 +437,20 @@ window.listenBookings = function(callback) {
 };
 
 // Start app after Firebase is ready
+window.saveSettings = async function(key, value) {
+  try {
+    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js");
+    await setDoc(doc(db, "settings", key), { value: JSON.stringify(value) });
+  } catch(e) { localStorage.setItem(key, JSON.stringify(value)); }
+};
+window.loadSettings = async function(key, defaultVal) {
+  try {
+    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js");
+    const snap = await getDoc(doc(db, "settings", key));
+    if(snap.exists()) return JSON.parse(snap.data().value);
+  } catch(e) {}
+  return defaultVal;
+};
 window.firebaseReady = true;
 if(window.initApp) window.initApp();
 </script>
@@ -447,6 +461,13 @@ const today = new Date();
 // Load bookings from Firebase on start
 async function initApp() {
   if(!window.firebaseReady) { window.initApp = initApp; return; }
+  // Load settings
+  lager = await window.loadSettings('lager', {});
+  rabattCodes = await window.loadSettings('rabatt_codes', rabattCodes);
+  maxSlots = await window.loadSettings('max_slots', 10);
+  updateAvailability();
+  updateRabattFieldOnBooking();
+  // Load bookings
   bookings = await window.loadBookings();
   // Start realtime listener
   window.listenBookings((bks) => {
@@ -654,7 +675,7 @@ function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='of
 function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{status:'fertig'});renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
 function toggleBezahlt(id){const b=bookings.find(x=>x.id===id);if(b){b.bezahlt=!b.bezahlt;if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{bezahlt:b.bezahlt});renderBookings();}}
 function deleteBooking(id){if(confirm('Buchung löschen?')){const b=bookings.find(x=>x.id===id);if(b&&b.firestoreId)window.deleteBookingFromDB(b.firestoreId);bookings=bookings.filter(x=>x.id!==id);renderBookings();}}
-let lager=JSON.parse(localStorage.getItem('besaitung_lager')||'{}');
+let lager={}; window.loadSettings && window.loadSettings('lager',{}).then(v=>{lager=v;updateAvailability();});
 const lagerItems=[
   {key:'saite_eigen', label:'Saite (eigene mitbringen Option)', icon:'🎒'},
   {key:'saite_myron', label:'Saite von Myron', icon:'🛒'},
@@ -663,7 +684,7 @@ const lagerItems=[
   {key:'overgrip', label:'Overgrip', icon:'✋'},
   {key:'basisgriff', label:'Basisgriffband', icon:'🔄'},
 ];
-function saveLager(){localStorage.setItem('besaitung_lager',JSON.stringify(lager));}
+function saveLager(){if(window.saveSettings)window.saveSettings('lager',lager);}
 function toggleLager(key){
   lager[key]=!lager[key];
   saveLager();
@@ -713,7 +734,7 @@ function renderStatistik(){
 
 // ── RABATT ───────────────────────────────────────────────
 // ── RABATT (3 Codes) ─────────────────────────────────────
-let rabattCodes=JSON.parse(localStorage.getItem('rabatt_codes')||'[{"active":false,"code":"","prozent":20},{"active":false,"code":"","prozent":10},{"active":false,"code":"","prozent":5}]');
+let rabattCodes=[{"active":false,"code":"","prozent":20},{"active":false,"code":"","prozent":10},{"active":false,"code":"","prozent":5}]; if(window.loadSettings)window.loadSettings('rabatt_codes',rabattCodes).then(v=>{rabattCodes=v;updateRabattFieldOnBooking();});
 let rabattSettings={active:false,code:'',prozent:0}; // legacy compat
 let rabattApplied=false;
 let appliedProzent=0;
@@ -745,7 +766,7 @@ function renderRabattCodes(){
 
 function toggleRabattCode(i){rabattCodes[i].active=!rabattCodes[i].active;renderRabattCodes();}
 function saveRabattCodes(){
-  localStorage.setItem('rabatt_codes',JSON.stringify(rabattCodes));
+  if(window.saveSettings)window.saveSettings('rabatt_codes',rabattCodes);
   document.getElementById('rabatt-saved').style.display='block';
   setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
   updateRabattFieldOnBooking();
@@ -803,7 +824,7 @@ function copyEmails(){
     setTimeout(()=>document.getElementById('copy-email-msg').style.display='none',2000);
   });
 }
-function toggleRabatt(){rabattSettings.active=!rabattSettings.active;localStorage.setItem('rabatt_settings',JSON.stringify(rabattSettings));updateRabattUI();}
+function toggleRabatt(){rabattSettings.active=!rabattSettings.active;updateRabattUI();}
 function updateRabattUI(){
   const btn=document.getElementById('rabatt-toggle');
   const settings=document.getElementById('rabatt-settings');
@@ -821,16 +842,16 @@ function updateRabattUI(){
 function saveRabatt(){
   rabattSettings.code=document.getElementById('rabatt-code').value.toUpperCase();
   rabattSettings.prozent=parseInt(document.getElementById('rabatt-prozent').value)||10;
-  localStorage.setItem('rabatt_settings',JSON.stringify(rabattSettings));
+  
   document.getElementById('rabatt-saved').style.display='block';
   setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
   updateRabattFieldOnBooking();
 }
 
 // ── VERFÜGBARKEIT ────────────────────────────────────────
-let maxSlots=parseInt(localStorage.getItem('max_slots')||'10');
+let maxSlots=10; if(window.loadSettings)window.loadSettings('max_slots',10).then(v=>{maxSlots=v;});
 function changeMaxSlots(d){maxSlots=Math.max(1,Math.min(50,maxSlots+d));document.getElementById('max-slots-display').textContent=maxSlots;}
-function saveMaxSlots(){localStorage.setItem('max_slots',maxSlots);document.getElementById('slots-saved').style.display='block';setTimeout(()=>document.getElementById('slots-saved').style.display='none',2000);}
+function saveMaxSlots(){if(window.saveSettings)window.saveSettings('max_slots',maxSlots);document.getElementById('slots-saved').style.display='block';setTimeout(()=>document.getElementById('slots-saved').style.display='none',2000);}
 
 function renderLager(){
   const list=document.getElementById('lager-list');
@@ -950,3 +971,4 @@ updateRabattFieldOnBooking();
 </script>
 </body>
 </html>
+
