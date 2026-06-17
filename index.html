@@ -528,12 +528,15 @@ function submitBooking(){
   document.getElementById('success-banner').style.display='block';
   setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
   ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
-  // Notify Myron silently
-  const lb=bookings[bookings.length-1];
-  const adresseMsg=(lb.standort==='waldbronn'||lb.standort==='langensteinbach')?'\nAdresse: Oosstraße 1b, 76337 Waldbronn-Reichenbach':'';
-  const myronMsg=encodeURIComponent(`🎾 Neue Buchung!\n\nName: ${lb.name}\nTel: ${lb.tel}\nStandort: ${lb.standort}${lb.slot?'\nAbgabe: '+lb.slot:''}${adresseMsg}\nSchläger: ${lb.count}\nSaite: ${lb.saite}\nSpannung: ${lb.kg} kg\nExtras: ${lb.extras&&lb.extras.length?lb.extras.join(', '):'keine'}\nFertig bis: ${formatDate(lb.date)} ${lb.time!=='Egal'?'um '+lb.time:''}\nZahlung: ${lb.payment==='paypal'?'PayPal':'Cash'}\nBetrag: ${lb.revenue.toFixed(2).replace('.',',')} €${lb.notes?'\nNotizen: '+lb.notes:''}`);
-  setTimeout(()=>window.open(`https://wa.me/4917676864244?text=${myronMsg}`,'_blank'),800);
-
+  document.getElementById('b-email').value='';
+  selectOrt(null);
+  selectedSlot=null;
+  selectedPay=null;
+  selectedSaite='mitbringen';
+  selectedKg=25;
+  extras={express:false,logo:false,overgrip:false,basisgriff:false};
+  document.getElementById('kg-display').textContent='25';
+  calcPrice();
 }
 function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function renderBookings(){
