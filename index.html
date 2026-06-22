@@ -282,7 +282,7 @@ textarea { resize: none; min-height: 70px; }
         <button class="paypal-btn" onclick="openPayPal()">💳 Jetzt per PayPal bezahlen</button>
         <p class="pay-hint">Screenshot als Bestätigung an Myron schicken</p>
       </div>
-      <button class="btn-primary" onclick="showConfirm()">Termin anfragen →</button>
+      <button class="btn-primary" onclick="submitBooking()">Termin anfragen →</button>
       <div class="success-banner" id="success-banner">✅ Anfrage gesendet! Myron meldet sich per WhatsApp mit der Adresse.</div>
     </div>
   </div>
@@ -601,36 +601,6 @@ function calcPrice(){
   return finalTotal;
 }
 function openPayPal(){window.open('https://www.paypal.com/paypalme/myronhenschen/'+calcPrice().toFixed(2)+'EUR','_blank');}
-function showConfirm(){
-  const name=document.getElementById('b-name').value.trim();
-  const tel=document.getElementById('b-tel').value.trim();
-  if(!name){alert('Bitte Name eingeben.');return;}
-  if(!selectedOrt){alert('Bitte Standort auswählen.');return;}
-  if(selectedOrt==='eggenstein'&&!selectedSlot){alert('Bitte Abgabe-Termin wählen.');return;}
-  if(!tel){alert('Bitte WhatsApp-Nummer eingeben.');return;}
-  if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
-  if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
-  const count=parseInt(document.getElementById('b-count').value);
-  const date=document.getElementById('b-date').value;
-  const time=document.getElementById('b-time').value;
-  const notes=document.getElementById('b-notes').value.trim();
-  const price=calcPrice();
-  const row=(label,val)=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px;"><span style="color:var(--color-text-secondary);">${label}</span><span style="font-weight:500;color:var(--color-text-primary);text-align:right;max-width:60%;">${val}</span></div>`;
-  document.getElementById('confirm-content').innerHTML=
-    row('Name', name)+
-    row('Standort', selectedOrt.charAt(0).toUpperCase()+selectedOrt.slice(1))+
-    (selectedSlot?row('Abgabe', selectedSlot==='di'?'Dienstag 19:00–21:00':'Donnerstag 17:00–18:30'):'')+
-    row('Schläger', count+'x')+
-    row('Saite', selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite')+
-    row('Spannung', selectedKg+' kg')+
-    row('Fertig bis', formatDate(date)+(time!=='Egal'?' um '+time:''))+
-    row('Zahlung', selectedPay==='paypal'?'PayPal':'Cash')+
-    (notes?row('Notizen', notes):'')+
-    `<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:17px;font-weight:600;color:var(--color-text-primary);"><span>Gesamt</span><span>${price.toFixed(2).replace('.',',')} €</span></div>`;
-  document.getElementById('confirm-modal').style.display='block';
-}
-function closeConfirm(){document.getElementById('confirm-modal').style.display='none';}
-function confirmBooking(){closeConfirm();submitBooking();}
 async function submitBooking(){
   const name=document.getElementById('b-name').value.trim();
   const tel=document.getElementById('b-tel').value.trim();
@@ -1029,17 +999,5 @@ calcPrice();
 updateAvailability();
 updateRabattFieldOnBooking();
 </script>
-  <!-- BESTÄTIGUNGS-MODAL -->
-  <div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;padding:20px;box-sizing:border-box;">
-    <div style="background:var(--color-background-primary);border-radius:20px;padding:24px;max-width:420px;margin:40px auto;max-height:85vh;overflow-y:auto;">
-      <div style="font-size:18px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">Alles richtig? 🎾</div>
-      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px;">Bitte überprüfe deine Angaben bevor du buchst.</div>
-      <div id="confirm-content"></div>
-      <div style="display:flex;gap:10px;margin-top:20px;">
-        <button onclick="closeConfirm()" style="flex:1;padding:14px;border-radius:var(--border-radius-lg);border:1.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--color-text-primary);">✏️ Ändern</button>
-        <button onclick="confirmBooking()" style="flex:2;padding:14px;border-radius:var(--border-radius-lg);border:none;background:#1a1a1a;color:white;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;">✅ Jetzt buchen</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
