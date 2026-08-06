@@ -2,1002 +2,979 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schläger-Besaitung · Myron · Eggenstein</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Trading Journal</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
-.container { max-width: 520px; margin: 0 auto; padding: 24px 16px 60px; }
-.header { text-align: center; margin-bottom: 28px; }
-.header h1 { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
-.header p { font-size: 14px; color: #666; }
-.price-pill { display: inline-block; background: #1a1a1a; color: white; border-radius: 99px; padding: 4px 14px; font-size: 13px; font-weight: 500; margin-top: 8px; }
-.tabs { display: flex; background: #ebebeb; border-radius: 12px; padding: 4px; margin-bottom: 20px; gap: 4px; }
-.tab { flex: 1; padding: 8px 4px; font-size: 12px; font-weight: 500; border: none; background: none; border-radius: 8px; cursor: pointer; color: #666; text-align: center; font-family: inherit; }
-.tab.active { background: white; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-.card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-label { font-size: 13px; color: #666; display: block; margin-bottom: 6px; margin-top: 14px; }
-label:first-child { margin-top: 0; }
-input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e5e5e5; border-radius: 10px; font-size: 14px; background: white; color: #1a1a1a; font-family: inherit; outline: none; }
-input:focus, select:focus, textarea:focus { border-color: #1a1a1a; }
-textarea { resize: none; min-height: 70px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.btn-primary { background: #1a1a1a; color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px; font-family: inherit; }
-.section { display: none; }
-.section.active { display: block; }
-.success-banner { background: #e8f5e9; border: 1.5px solid #81c784; border-radius: 12px; padding: 14px; text-align: center; color: #2e7d32; font-size: 14px; display: none; margin-top: 14px; }
-.opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
-.opt { border: 1.5px solid #e5e5e5; border-radius: 12px; padding: 14px; cursor: pointer; }
-.opt.selected { border-color: #1a1a1a; background: #f9f9f9; }
-.opt .o-label { font-size: 13px; font-weight: 600; }
-.opt .o-sub { font-size: 11px; color: #888; margin-top: 3px; }
-.opt .o-price { font-size: 13px; font-weight: 600; margin-top: 4px; }
-.extras-grid { display: grid; gap: 8px; margin-top: 6px; }
-.extra-row { display: flex; align-items: center; justify-content: space-between; border: 1.5px solid #e5e5e5; border-radius: 12px; padding: 12px 14px; cursor: pointer; }
-.extra-row.selected { border-color: #1a1a1a; background: #f9f9f9; }
-.extra-left { display: flex; align-items: center; gap: 10px; }
-.extra-check { width: 20px; height: 20px; border: 1.5px solid #ccc; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
-.extra-row.selected .extra-check { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-.extra-info .e-label { font-size: 13px; font-weight: 600; }
-.extra-info .e-sub { font-size: 11px; color: #888; margin-top: 2px; }
-.extra-price { font-size: 13px; font-weight: 600; white-space: nowrap; }
-.abgabe-info { background: #f5f5f3; border-radius: 10px; padding: 12px 14px; margin-top: 6px; font-size: 13px; color: #666; }
-.price-box { background: #f5f5f3; border-radius: 12px; padding: 14px 16px; margin-top: 16px; }
-.price-row { display: flex; justify-content: space-between; font-size: 13px; color: #666; padding: 3px 0; }
-.price-row.total { font-size: 17px; font-weight: 700; color: #1a1a1a; border-top: 1px solid #e5e5e5; margin-top: 8px; padding-top: 8px; }
-.paypal-btn { display: block; text-align: center; background: #0070BA; color: white; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; margin-top: 10px; cursor: pointer; border: none; width: 100%; font-family: inherit; }
-.pay-hint { font-size: 11px; color: #888; text-align: center; margin-top: 6px; }
-.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
-.badge-green { background: #e8f5e9; color: #2e7d32; }
-.badge-amber { background: #fff8e1; color: #f57f17; }
-.badge-blue { background: #e3f2fd; color: #1565c0; }
-.badge-gray { background: #f0f0f0; color: #666; }
-.booking-card { background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.booking-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-.booking-detail { font-size: 12px; color: #666; line-height: 1.8; }
-.booking-actions { display: flex; gap: 8px; margin-top: 10px; }
-.btn-small { font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; border: 1.5px solid #e5e5e5; background: white; color: #1a1a1a; font-weight: 500; font-family: inherit; }
-.btn-danger { border-color: #ffcdd2; color: #c62828; }
-.btn-accept { border-color: #a5d6a7; color: #2e7d32; }
-.btn-blue { border-color: #90caf9; color: #1565c0; }
-.badge-red { background: #ffebee; color: #c62828; }
-.stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
-.stat-card { background: white; border-radius: 14px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.stat-value { font-size: 26px; font-weight: 700; }
-.stat-label { font-size: 11px; color: #888; margin-top: 2px; }
-.week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.week-nav button { background: white; border: 1.5px solid #e5e5e5; border-radius: 10px; padding: 8px 14px; cursor: pointer; font-size: 16px; font-family: inherit; }
-.week-label { font-size: 14px; font-weight: 600; }
-.day-col { background: white; border-radius: 10px; padding: 8px 5px; min-height: 80px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-.day-header { font-size: 10px; color: #888; font-weight: 600; text-align: center; }
-.day-num { font-size: 14px; font-weight: 600; text-align: center; margin: 3px 0 6px; }
-.day-booking { font-size: 10px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 4px; margin-bottom: 3px; text-align: center; }
-.day-free { font-size: 10px; color: #ccc; text-align: center; }
-.ai-chat { background: #f5f5f3; border-radius: 12px; padding: 14px; min-height: 220px; max-height: 300px; overflow-y: auto; margin-bottom: 12px; }
-.ai-msg { font-size: 13px; background: white; border-radius: 4px 12px 12px 12px; padding: 10px 14px; max-width: 88%; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); line-height: 1.6; }
-.user-msg { font-size: 13px; background: #1a1a1a; color: white; border-radius: 12px 4px 12px 12px; padding: 10px 14px; max-width: 88%; margin-left: auto; margin-bottom: 10px; line-height: 1.6; }
-.chat-row { display: flex; gap: 8px; }
-.chat-row input { flex: 1; }
-.chat-send { padding: 10px 18px; background: #1a1a1a; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
-.quick-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.quick-btn { font-size: 12px; padding: 6px 12px; border: 1.5px solid #e5e5e5; border-radius: 99px; background: white; color: #1a1a1a; cursor: pointer; font-family: inherit; }
-.footer { text-align: center; margin-top: 32px; font-size: 12px; color: #bbb; }
+  :root {
+    color-scheme: light;
+    --bg: #f2f3f7;
+    --card: #ffffff;
+    --ink: #12131a;
+    --muted: #7a7f8c;
+    --line: #ecedf1;
+    --green: #12a150;
+    --green-bg: #e5f6ec;
+    --red: #e0364a;
+    --red-bg: #fce8ea;
+    --grey: #8a8f9c;
+    --grey-bg: #eef0f3;
+    --accent: #1a1a1a;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 16px 16px 60px;
+    max-width: 480px;
+  }
+  h1 { font-size: 22px; margin: 0 0 2px; letter-spacing: -0.02em; }
+  h2 { font-size: 15px; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(20,20,30,0.04), 0 4px 16px rgba(20,20,30,0.03);
+  }
+
+  .capital-card {
+    background: linear-gradient(150deg, #1c1d24 0%, #2c2e3a 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 20px 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 20px rgba(20,20,30,0.18);
+  }
+  .capital-card .lbl { font-size: 12px; color: #a0a3af; letter-spacing: 0.02em; }
+  .capital-card .val { font-size: 32px; font-weight: 700; margin: 3px 0 10px; letter-spacing: -0.02em; }
+  .capital-card .eur { font-size: 14px; color: #c8cad2; margin-bottom: 4px; }
+  .capital-card .delta { font-size: 13px; font-weight: 600; }
+  .capital-card .delta.pos { color: #4ade80; }
+  .capital-card .delta.neg { color: #ff8a95; }
+  .capital-edit { display: flex; gap: 8px; margin-top: 14px; }
+  .capital-edit input {
+    flex: 1;
+    padding: 11px 13px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 14px;
+  }
+  .capital-edit input::placeholder { color: #9599a5; }
+  .capital-edit button {
+    background: #fff;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .banner {
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 14px;
+    font-size: 14px;
+  }
+  .banner.ok { background: var(--green-bg); color: var(--green); }
+  .banner.warn { background: var(--red-bg); color: var(--red); }
+
+  .stats-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px 6px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(20,20,30,0.04), 0 4px 16px rgba(20,20,30,0.03);
+  }
+  .stat-card .num { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+  .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(20,20,30,0.04), 0 4px 16px rgba(20,20,30,0.03);
+  }
+  .month-nav button {
+    border: none;
+    background: var(--grey-bg);
+    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .month-nav .center { text-align: center; font-weight: 700; font-size: 15px; }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-head { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; padding-bottom: 4px; }
+  .cal-cell {
+    background: var(--grey-bg);
+    border-radius: 10px;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .cal-cell.empty { background: transparent; }
+  .cal-cell .cal-day { font-weight: 600; font-size: 12px; }
+  .cal-cell .cal-val { font-size: 9px; margin-top: 1px; font-weight: 600; }
+  .cal-cell.pos { background: var(--green-bg); color: var(--green); }
+  .cal-cell.neg { background: var(--red-bg); color: var(--red); }
+  .cal-cell.today { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+  .chart-box { position: relative; margin-bottom: 16px; }
+  .chart-box:last-child { margin-bottom: 0; }
+  .chart-title { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .chart-canvas-wrap { position: relative; height: 160px; }
+  .chart-canvas-wrap.donut { height: 150px; }
+  .chart-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 30px 0; }
+
+  label.field-label { display: block; font-size: 13px; margin-bottom: 6px; color: #333; }
+  .setting-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .setting-row .setting-input {
+    width: 90px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    font-size: 15px;
+  }
+  .setting-note { color: #999; font-size: 12px; margin-top: -6px; margin-bottom: 12px; }
+
+  details.section summary {
+    list-style: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  details.section summary::-webkit-details-marker { display: none; }
+  details.section[open] summary { margin-bottom: 12px; }
+
+  ul.rules { padding-left: 0; margin: 0; list-style: none; }
+  ul.rules li.rule-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  .rule-text { flex: 1; outline: none; padding: 2px 4px; border-radius: 4px; }
+  .rule-text:focus { background: #f3f4f6; }
+  .rule-del {
+    border: none; background: var(--red-bg); color: var(--red); font-weight: 700;
+    width: 24px; height: 24px; border-radius: 8px; font-size: 12px; flex-shrink: 0;
+  }
+  .rule-group-title {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; color: #999; margin: 14px 0 4px;
+  }
+  .rule-group-title:first-child { margin-top: 0; }
+  .rule-del-group {
+    border: none; background: none; color: #ccc; font-size: 10px; text-transform: none;
+    letter-spacing: normal; text-decoration: underline;
+  }
+  .rule-add-row { display: flex; gap: 6px; padding: 8px 0; }
+  .rule-add-row input {
+    flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 13px;
+  }
+  .rule-add-row button {
+    border: none; background: #1a1a1a; color: #fff; border-radius: 8px; padding: 0 14px; font-weight: 700;
+  }
+  .rule-add-row.group-add { margin-top: 14px; border-top: 1px solid #eee; padding-top: 14px; }
+  .rule-add-row.group-add button { background: #eef1f5; color: #1a1a1a; font-weight: 600; font-size: 12px; padding: 0 10px; }
+
+  .form-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  select, input[type=text], input[type=number], input[type=date], textarea {
+    padding: 11px 13px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+    width: 100%;
+    font-family: inherit;
+    background: #fbfbfc;
+  }
+  textarea { resize: vertical; min-height: 50px; }
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-group button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #fbfbfc;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .toggle-group button.active.win { background: var(--green); color: #fff; border-color: var(--green); }
+  .toggle-group button.active.loss { background: var(--red); color: #fff; border-color: var(--red); }
+  .toggle-group button.active.be { background: var(--grey); color: #fff; border-color: var(--grey); }
+  .toggle-group button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  .leg-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+  .leg-row input[type=text] { padding: 9px 10px; font-size: 13px; border-radius: 10px; border: 1px solid var(--line); }
+  .leg-row input.leg-label { flex: 1 1 auto; min-width: 0; }
+  .leg-row input.leg-pct { flex: 0 0 54px; text-align: center; }
+  .leg-row input.leg-amount { flex: 0 0 78px; text-align: center; }
+  .leg-row button {
+    border: none; background: var(--red-bg); color: var(--red); font-weight: 700;
+    width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+  }
+  .legs-detail { margin-top: 6px; font-size: 12px; color: #888; }
+  .legs-detail div { padding: 1px 0; }
+
+  .primary-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .week-group {
+    border: 1px solid #eee; border-radius: 12px; padding: 10px; margin-bottom: 14px;
+  }
+  .week-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 700; padding-bottom: 8px; margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  .week-header .pos { color: var(--green); }
+  .week-header .neg { color: var(--red); }
+  .week-del-btn {
+    border: none; background: var(--red-bg); color: var(--red); font-weight: 600;
+    font-size: 11px; padding: 5px 9px; border-radius: 8px;
+  }
+  .day-group { margin-bottom: 10px; }
+  .day-group:last-child { margin-bottom: 0; }
+  .day-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 700; color: #666; padding: 6px 2px;
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .day-header .pos { color: var(--green); }
+  .day-header .neg { color: var(--red); }
+  .result-badge {
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  }
+  .result-badge.win { background: var(--green-bg); color: var(--green); }
+  .result-badge.loss { background: var(--red-bg); color: var(--red); }
+  .result-badge.be { background: #eee; color: #666; }
+  .show-more-btn {
+    width: 100%; padding: 10px; margin-top: 6px; border-radius: 10px;
+    border: 1px solid #ddd; background: #f9fafb; color: #333; font-weight: 600; font-size: 13px;
+  }
+
+  .entry {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    position: relative;
+  }
+  .entry .top-row { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; }
+  .entry .top-row .amt.win { color: var(--green); }
+  .entry .top-row .amt.loss { color: var(--red); }
+  .entry .top-row .amt.be { color: #888; }
+  .entry .meta { color: #888; font-size: 12px; }
+  .entry .note { margin-top: 6px; color: #444; }
+  .entry .del {
+    position: absolute; top: 8px; right: 8px;
+    border: none; background: var(--red-bg); color: var(--red); font-size: 13px; cursor: pointer;
+    width: 26px; height: 26px; border-radius: 8px; font-weight: 700;
+  }
+  .empty { color: #999; font-size: 13px; text-align: center; padding: 10px 0; }
+  .loading { text-align: center; color: #999; font-size: 13px; padding: 20px 0; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <div style="font-size:44px;margin-bottom:8px;">🎾</div>
-    <h1>Schläger-Besaitung</h1>
-    <p>Myron Henschen</p>
-    <span class="price-pill">ab 15,00 € pro Schläger</span>
-  </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('buchen',this)">Buchen</button>
-    <button class="tab" onclick="adminLogin(this)">🔒</button>
-  </div>
-  <div class="tabs" id="admin-tabs" style="display:none;flex-wrap:wrap;">
-    <button class="tab" onclick="switchTab('kalender',this)">📅 Kalender</button>
-    <button class="tab" onclick="switchTab('auftraege',this)">📋 Aufträge</button>
-    <button class="tab" onclick="switchTab('erinnerung',this)">🔔 Erinnerungen</button>
-    <button class="tab" onclick="switchTab('lager',this)">📦 Lager</button>
-    <button class="tab" onclick="switchTab('statistik',this)">📊 Statistik</button>
-    <button class="tab" onclick="switchTab('einstellungen',this)">⚙️ Einstellungen</button>
-    <button class="tab" onclick="adminLogout()">🔓 Logout</button>
-  </div>
+<h1>📔 Trading Journal</h1>
+<div class="sub">Kapital, Regeln, Trades – alles an einem Ort.</div>
 
-  <!-- PROMO BANNER -->
-  <div id="promo-banner" style="background:linear-gradient(135deg,#E24B4A,#c0392b);color:white;text-align:center;padding:12px 16px;font-size:13px;letter-spacing:0.2px;position:relative;overflow:hidden;border-radius:12px;margin:0 16px 16px;">
-    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:rgba(255,255,255,0.1);transform:skewX(-20deg);animation:shine 3s infinite;"></div>
-    <style>@keyframes shine{0%{left:-100%}50%,100%{left:150%}}</style>
-    🎾 <strong>START20</strong> eingeben & 20% sparen – nur für kurze Zeit!
-    <span style="display:inline-block;background:rgba(255,255,255,0.2);border-radius:99px;padding:2px 10px;margin-left:6px;font-size:11px;">Jetzt buchen ↓</span>
-  </div>
-  <div id="tab-buchen" class="section active">
-    <div class="card">
-      <label>Standort *</label>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div class="opt" id="ort-eggenstein" onclick="selectOrt('eggenstein')" style="flex:1;text-align:center;">
-          <div class="o-label" style="font-size:12px;">📍 Eggenstein</div>
-        </div>
-        <div class="opt" id="ort-langensteinbach" onclick="selectOrt('langensteinbach')" style="flex:1;text-align:center;">
-          <div class="o-label" style="font-size:12px;">📍 Langensteinbach</div>
-        </div>
-        <div class="opt" id="ort-waldbronn" onclick="selectOrt('waldbronn')" style="flex:1;text-align:center;">
-          <div class="o-label" style="font-size:12px;">📍 Waldbronn</div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div><label>Name</label><input type="text" id="b-name" placeholder="Max Mustermann" /></div>
-        <div><label>WhatsApp / Tel. *</label><input type="tel" id="b-tel" placeholder="+49 ..." required /></div>
-      </div>
-      <label>Email <span style="font-size:11px;color:#888;">(optional)</span></label>
-      <input type="email" id="b-email" placeholder="max@beispiel.de" style="margin-bottom:8px;" />
-      <div style="display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:14px;">
-        <span style="font-size:16px;">📬</span>
-        <span style="font-size:12px;color:var(--color-text-secondary);line-height:1.4;">Bleib auf dem neusten Stand & erhalte exklusive Rabatte</span>
-      </div>
-      <label>Anzahl Schläger</label>
-      <select id="b-count" onchange="calcPrice()">
-        <option value="1">1 Schläger</option>
-        <option value="2">2 Schläger</option>
-        <option value="3">3 Schläger</option>
-        <option value="4">4 Schläger</option>
-      </select>
-      <label>Saite</label>
-      <div class="opts-grid">
-        <div class="opt selected" id="saite-mitbringen" onclick="selectSaite('mitbringen')">
-          <div class="o-label">🎒 Ich bringe Saite mit</div>
-          <div class="o-sub">Eigene Saite</div>
-          <div class="o-price">15,00 €</div>
-        </div>
-        <div class="opt" id="saite-von-myron" onclick="selectSaite('von-myron')">
-          <div class="o-label">🛒 Saite von Myron</div>
-          <div class="o-sub">Saite inklusive</div>
-          <div class="o-price">18,00 €</div>
-        </div>
-      </div>
-      <label>Bespannungsspannung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
-      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:6px;padding:16px;background:#f5f5f3;border-radius:12px;">
-        <button onclick="changeKg(-1)" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e5e5;background:white;font-size:20px;cursor:pointer;font-family:inherit;">−</button>
-        <div style="text-align:center;">
-          <div id="kg-display" style="font-size:36px;font-weight:700;color:#1a1a1a;line-height:1;">25</div>
-          <div style="font-size:13px;color:#888;margin-top:2px;">kg</div>
-        </div>
-        <button onclick="changeKg(1)" style="width:40px;height:40px;border-radius:50%;border:1.5px solid #e5e5e5;background:white;font-size:20px;cursor:pointer;font-family:inherit;">+</button>
-      </div>
-      <label>Extras (optional)</label>
-      <div class="extras-grid">
-        <div class="extra-row" id="ex-express" onclick="toggleExtra('express')" style="border-color:#EF9F27;background:#FAEEDA;">
-          <div class="extra-left">
-            <div class="extra-check" id="chk-express" style="border-color:#EF9F27;"></div>
-            <div class="extra-info"><div class="e-label" style="color:#854F0B;">⚡ Express 24h</div><div class="e-sub">+3,00 € pro Schläger · fertig in 24h</div></div>
-          </div>
-          <div class="extra-price" style="color:#854F0B;">+ 3 €</div>
-        </div>
-        <div class="extra-row" id="ex-logo" onclick="toggleExtra('logo')">
-          <div class="extra-left">
-            <div class="extra-check" id="chk-logo"></div>
-            <div class="extra-info"><div class="e-label">🎨 Logo-Design</div><div class="e-sub">Individuelles Design</div></div>
-          </div>
-          <div class="extra-price">+ 1,00 €/Schl.</div>
-        </div>
-        <div id="logo-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
-          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
-          <select id="logo-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
-            <option value="1">1 Schläger</option>
-            <option value="2">2 Schläger</option>
-            <option value="3">3 Schläger</option>
-            <option value="4">4 Schläger</option>
-          </select>
-        </div>
-        <div class="extra-row" id="ex-overgrip" onclick="toggleExtra('overgrip')">
-          <div class="extra-left">
-            <div class="extra-check" id="chk-overgrip"></div>
-            <div class="extra-info"><div class="e-label">✋ Overgrip</div><div class="e-sub">Neues Griffband</div></div>
-          </div>
-          <div class="extra-price">+ 3,50 €/Schl.</div>
-        </div>
-        <div id="overgrip-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
-          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
-          <select id="overgrip-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
-            <option value="1">1 Schläger</option>
-            <option value="2">2 Schläger</option>
-            <option value="3">3 Schläger</option>
-            <option value="4">4 Schläger</option>
-          </select>
-        </div>
-        <div class="extra-row" id="ex-basisgriff" onclick="toggleExtra('basisgriff')">
-          <div class="extra-left">
-            <div class="extra-check" id="chk-basisgriff"></div>
-            <div class="extra-info"><div class="e-label">🔄 Basisgriffband</div><div class="e-sub">Kompletter Ersatz</div></div>
-          </div>
-          <div class="extra-price">+ 10,00 €/Schl.</div>
-        </div>
-        <div id="basisgriff-count-field" style="display:none;padding:10px 14px;background:#f5f5f3;border-radius:var(--border-radius-md);margin-top:-4px;margin-bottom:8px;">
-          <label style="font-size:13px;color:#666;margin-bottom:6px;display:block;">Für wie viele Schläger?</label>
-          <select id="basisgriff-count" onchange="calcPrice()" style="width:100%;padding:8px 12px;border:0.5px solid #e5e5e5;border-radius:8px;font-size:14px;background:white;">
-            <option value="1">1 Schläger</option>
-            <option value="2">2 Schläger</option>
-            <option value="3">3 Schläger</option>
-            <option value="4">4 Schläger</option>
-          </select>
-        </div>
-      </div>
-      <label>Abgabe</label>
-      <div class="abgabe-info" id="abgabe-info">📍 Bitte zuerst Standort auswählen</div>
-      <div id="eggenstein-slots" style="display:none;margin-top:8px;">
-        <label>Abgabe-Termin *</label>
-        <div class="opts-grid">
-          <div class="opt" id="slot-di" onclick="selectSlot('di')">
-            <div class="o-label" style="font-size:13px;">Dienstag</div>
-            <div class="o-sub">19:00 – 21:00 Uhr</div>
-            <div class="o-sub">Faßbender Außenanlage · Eggenstein</div>
-          </div>
-          <div class="opt" id="slot-do" onclick="selectSlot('do')">
-            <div class="o-label" style="font-size:13px;">Donnerstag</div>
-            <div class="o-sub">17:00 – 18:30 Uhr</div>
-            <div class="o-sub">TC Eggenstein · Außenanlage</div>
-          </div>
-        </div>
-      </div>
-      <label>Fertig bis (Datum)</label>
-      <input type="date" id="b-date" />
-      <label>Uhrzeit (optional)</label>
-      <select id="b-time">
-        <option>Egal</option>
-        <option>09:00</option><option>10:00</option><option>11:00</option>
-        <option>14:00</option><option>15:00</option><option>16:00</option>
-        <option>17:00</option><option>18:00</option><option>19:00</option>
-      </select>
-      <label>Notizen (optional)</label>
-      <textarea id="b-notes" placeholder="Besonderheiten, Wünsche..."></textarea>
-      <div id="rabatt-booking-field" style="margin-bottom:12px;">
-        <label>Rabattcode (optional)</label>
-        <input type="text" id="b-rabatt" placeholder="Code eingeben..." oninput="this.value=this.value.toUpperCase();applyRabatt()" />
-        <div id="rabatt-msg" style="font-size:12px;margin-top:4px;"></div>
-      </div>
-      <label>Bezahlung * <span style="font-size:11px;color:#888;">(Pflichtfeld)</span></label>
-      <div class="opts-grid">
-        <div class="opt" id="pay-paypal" onclick="selectPay('paypal')">
-          <div class="o-label">🅿️ PayPal</div>
-          <div class="o-sub">myron.henschen@gmail.com</div>
-        </div>
-        <div class="opt" id="pay-cash" onclick="selectPay('cash')">
-          <div class="o-label">💵 Cash</div>
-          <div class="o-sub">Bei Übergabe</div>
-        </div>
-      </div>
-      <div class="price-box">
-        <div class="price-row"><span>Besaitung</span><span id="pr-besaitung">15,00 €</span></div>
-        <div class="price-row" id="pr-express-row" style="display:none;"></div>
-        <div class="price-row" id="pr-logo-row" style="display:none;"></div>
-        <div class="price-row" id="pr-overgrip-row" style="display:none;"></div>
-        <div class="price-row" id="pr-basisgriff-row" style="display:none;"></div>
-        <div class="price-row" id="pr-rabatt-row" style="display:none;color:#3B6D11;"></div>
-        <div class="price-row total"><span>Gesamt</span><span id="pr-total">15,00 €</span></div>
-      </div>
-      <div id="paypal-section" style="display:none;margin-top:10px;">
-        <button class="paypal-btn" onclick="openPayPal()">💳 Jetzt per PayPal bezahlen</button>
-        <p class="pay-hint">Screenshot als Bestätigung an Myron schicken</p>
-      </div>
-      <button class="btn-primary" onclick="submitBooking()">Termin anfragen →</button>
-      <div class="success-banner" id="success-banner">✅ Anfrage gesendet! Myron meldet sich per WhatsApp mit der Adresse.</div>
+<div id="loading" class="loading">Lädt...</div>
+
+<div id="app" style="display:none;">
+
+  <div class="capital-card">
+    <div class="lbl">Aktuelles Kapital</div>
+    <div class="val" id="capitalVal">0,00 USDT</div>
+    <div class="eur" id="capitalEur">≈ 0,00 €</div>
+    <div class="delta" id="capitalDelta">± 0,00 USDT seit Start</div>
+    <div class="capital-edit">
+      <input type="text" id="startCapitalInput" placeholder="Startkapital in USDT" inputmode="decimal">
+      <button onclick="saveStartCapital()">Speichern</button>
     </div>
   </div>
 
-  <!-- KALENDER -->
-  <div id="tab-kalender" class="section">
-    <div class="week-nav">
-      <button onclick="prevWeek()">‹</button>
-      <span class="week-label" id="week-label"></span>
-      <button onclick="nextWeek()">›</button>
-    </div>
-    <div id="week-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;"></div>
+  <div id="banner" class="banner ok">Alles im grünen Bereich. Viel Erfolg heute.</div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="num" id="statStreak">0</div><div class="lbl">Verluste in Folge</div></div>
+    <div class="stat-card"><div class="num" id="statWinrate">–</div><div class="lbl">Winrate</div></div>
+    <div class="stat-card"><div class="num" id="statToday">0</div><div class="lbl">Trades heute</div></div>
   </div>
 
-  <!-- AUFTRÄGE -->
-  <div id="tab-auftraege" class="section">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Aufträge</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-week">0</div><div class="stat-label">Diese Woche</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-revenue">0 €</div><div class="stat-label">Einnahmen</div></div>
-    </div>
-    <div class="stats-grid" style="margin-top:-8px;">
-      <div class="stat-card"><div class="stat-value" id="stat-kunden">0</div><div class="stat-label">Kunden</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-emails">0</div><div class="stat-label">Emails</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-schlager">0</div><div class="stat-label">Schläger</div></div>
-    </div>
-    <div id="bookings-list"></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="num" id="statWins" style="color:var(--green);">0</div><div class="lbl">Wins</div></div>
+    <div class="stat-card"><div class="num" id="statLosses" style="color:var(--red);">0</div><div class="lbl">Losses</div></div>
+    <div class="stat-card"><div class="num" id="statBE" style="color:var(--grey);">0</div><div class="lbl">Breakeven</div></div>
   </div>
 
-  <!-- STATISTIK -->
-  <div id="tab-statistik" class="section">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-value" id="st-gesamt">0 €</div><div class="stat-label">Gesamt</div></div>
-      <div class="stat-card"><div class="stat-value" id="st-monat">0 €</div><div class="stat-label">Dieser Monat</div></div>
-      <div class="stat-card"><div class="stat-value" id="st-woche">0 €</div><div class="stat-label">Diese Woche</div></div>
-    </div>
-    <div class="card" style="margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:600;color:var(--color-text-primary);margin-bottom:12px;">⏱️ Bearbeitungszeit</div>
-      <div id="st-bearbeitung"></div>
-    </div>
-    <div class="card" style="margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:600;color:var(--color-text-primary);margin-bottom:12px;">📍 Einnahmen pro Standort</div>
-      <div id="st-standorte"></div>
-    </div>
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;color:var(--color-text-primary);margin-bottom:12px;">📅 Letzte Monate</div>
-      <div id="st-monate"></div>
-    </div>
-  </div>
-
-  <!-- EINSTELLUNGEN -->
-  <div id="tab-einstellungen" class="section">
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">🎁 Rabattcodes</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Bis zu 3 Codes gleichzeitig aktiv</div>
-      <div id="rabatt-codes-list"></div>
-      <div id="rabatt-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
-    </div>
-
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">📧 Email-Liste exportieren</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Exportiere alle Kunden-Emails für Mailchimp oder Gmail</div>
-      <div id="email-export-stats" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;"></div>
-      <button onclick="exportEmails()" style="width:100%;padding:10px;background:#E24B4A;color:white;border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:8px;">📥 CSV exportieren (Mailchimp)</button>
-      <button onclick="copyEmails()" style="width:100%;padding:10px;background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">📋 Alle Emails kopieren (Gmail BCC)</button>
-      <div id="copy-email-msg" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Kopiert!</div>
-    </div>
-
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px;">📅 Verfügbarkeit</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;">Maximale Aufträge pro Woche</div>
-      <div style="display:flex;align-items:center;gap:16px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;">
-        <button onclick="changeMaxSlots(-1)" style="width:36px;height:36px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:18px;cursor:pointer;font-family:inherit;">−</button>
-        <div style="text-align:center;flex:1;">
-          <div id="max-slots-display" style="font-size:32px;font-weight:500;color:var(--color-text-primary);">10</div>
-          <div style="font-size:12px;color:var(--color-text-secondary);">Schläger / Woche</div>
-        </div>
-        <button onclick="changeMaxSlots(1)" style="width:36px;height:36px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:18px;cursor:pointer;font-family:inherit;">+</button>
+  <details class="section card" id="statsSection">
+    <summary>📈 Statistik <span id="statsHint" style="font-weight:400; color:var(--muted); font-size:12px;">antippen</span></summary>
+    <div style="margin-top:8px;">
+      <div class="chart-box">
+        <div class="chart-title">Kapitalverlauf</div>
+        <div class="chart-canvas-wrap"><canvas id="chartEquity"></canvas></div>
       </div>
-      <button onclick="saveMaxSlots()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:10px;">Speichern</button>
-      <div id="slots-saved" style="display:none;text-align:center;color:#3B6D11;font-size:13px;margin-top:8px;">✅ Gespeichert!</div>
+      <div class="chart-box">
+        <div class="chart-title">Gewinn / Verlust pro Tag</div>
+        <div class="chart-canvas-wrap"><canvas id="chartDaily"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Verteilung</div>
+        <div class="chart-canvas-wrap donut"><canvas id="chartDist"></canvas></div>
+      </div>
     </div>
+  </details>
+
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <div class="center">Monat: <span id="monthLabel">–</span></div>
+    <button onclick="changeMonth(1)">›</button>
   </div>
 
-  <!-- LAGER -->
-  <div id="tab-lager" class="section">
-    <div class="card">
-      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;">Markiere was ausverkauft ist – Kunden können es dann nicht mehr auswählen.</p>
-      <div id="lager-list"></div>
-    </div>
+  <div class="card">
+    <h2>🗓 Kalender</h2>
+    <div id="calendarGrid" class="cal-grid"></div>
   </div>
 
-  <!-- ERINNERUNGEN -->
-  <div id="tab-erinnerung" class="section">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-value" id="stat-faellig">0</div><div class="stat-label">Fällig (8 Wo.)</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-bald">0</div><div class="stat-label">Bald fällig</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-ok">0</div><div class="stat-label">Alles gut</div></div>
+  <div class="card">
+    <div class="setting-row">
+      <label class="field-label" style="flex:1;">🚫 Overtrading-Schutz: max. Trades pro Tag</label>
+      <input type="number" class="setting-input" id="maxTradesInput" value="3" min="1">
     </div>
-    <div id="erinnerung-list"></div>
+    <div class="setting-note">Gilt für Gewinne UND Verluste – zählt jeden Trade des Tages, egal wie er ausgeht.</div>
+
+    <div class="setting-row">
+      <label class="field-label" style="flex:1;">💱 USDT → EUR Kurs</label>
+      <input type="text" class="setting-input" id="eurRateInput" value="0,8776" inputmode="decimal">
+    </div>
+    <div class="setting-note">Alles wird in USDT geführt und automatisch in EUR umgerechnet. Kurs bei Bedarf anpassen.</div>
+    <button class="primary-btn" style="width:100%;" onclick="saveSettings()">Einstellungen speichern</button>
   </div>
+
+  <details class="section card" open>
+    <summary>📐 Regeln <span id="rulesProgress" style="font-weight:400; color:#999; font-size:12px;"></span></summary>
+    <ul class="rules" id="rulesList"></ul>
+  </details>
+
+  <details class="section card">
+    <summary>📊 Trade hinzufügen</summary>
+    <div class="form-grid" style="margin-top:12px;">
+      <div>
+        <label class="field-label">Datum</label>
+        <input type="date" id="tradeDate">
+      </div>
+      <div>
+        <label class="field-label">Ergebnis</label>
+        <div class="toggle-group">
+          <button type="button" id="tradeWinBtn" class="win" onclick="setTradeResult('win')">Gewinn</button>
+          <button type="button" id="tradeLossBtn" class="loss" onclick="setTradeResult('loss')">Verlust</button>
+          <button type="button" id="tradeBeBtn" class="be" onclick="setTradeResult('be')">Breakeven</button>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Betrag in USDT</label>
+        <input type="text" id="tradeAmount" inputmode="decimal" placeholder="z.B. 45,50">
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="field-label" style="margin-bottom:0;">Teilausstiege (optional)</label>
+          <button type="button" onclick="addLegRow()" style="border:none; background:#eef1f5; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600;">+ Teilausstieg</button>
+        </div>
+        <div id="tradeLegsContainer"></div>
+        <div id="legTotal" style="font-size:12px; color:#888; margin-top:4px;"></div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">Für Trades mit mehreren Teilausstiegen. Beispiel: Teil 1 „0,5% → BE" mit 0 USDT, Teil 2 „1% Gewinn" mit dem realisierten Betrag. Der Gesamtbetrag oben wird automatisch aus der USDT-Summe berechnet.</div>
+      </div>
+      <div>
+        <label class="field-label">Notiz (optional)</label>
+        <textarea id="tradeNote" placeholder="Setup, Emotion, was lief gut/schlecht..."></textarea>
+      </div>
+      <button class="primary-btn" onclick="addTrade()">Trade speichern</button>
+    </div>
+  </details>
+
+  <div class="card">
+    <h2>Trades – <span id="tradesMonthLabel">–</span> <span id="tradesMonthWinrate" style="font-weight:400; color:#666; font-size:13px;"></span></h2>
+    <div id="tradesList"></div>
+  </div>
+
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBKyp_6D2ja9sx_JDDFmZ7fkVLpx8wMzBA",
-  authDomain: "besaitung-8e998.firebaseapp.com",
-  projectId: "besaitung-8e998",
-  storageBucket: "besaitung-8e998.firebasestorage.app",
-  messagingSenderId: "140085675449",
-  appId: "1:140085675449:web:896a52a8ecb116a70ae268"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Override save/load functions to use Firestore
-window.saveBooking = async function(booking) {
-  try {
-    const docRef = await addDoc(collection(db, "bookings"), booking);
-    booking.firestoreId = docRef.id;
-    return docRef.id;
-  } catch(e) { console.error("Error saving:", e); }
-};
-
-window.loadBookings = async function() {
-  try {
-    const q = query(collection(db, "bookings"), orderBy("id", "desc"));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(d => ({...d.data(), firestoreId: d.id}));
-  } catch(e) { console.error("Error loading:", e); return []; }
-};
-
-window.updateBookingInDB = async function(firestoreId, data) {
-  try {
-    await updateDoc(doc(db, "bookings", firestoreId), data);
-  } catch(e) { console.error("Error updating:", e); }
-};
-
-window.deleteBookingFromDB = async function(firestoreId) {
-  try {
-    await deleteDoc(doc(db, "bookings", firestoreId));
-  } catch(e) { console.error("Error deleting:", e); }
-};
-
-// Real-time listener
-window.listenBookings = function(callback) {
-  const q = query(collection(db, "bookings"), orderBy("id", "desc"));
-  return onSnapshot(q, (snapshot) => {
-    const bks = snapshot.docs.map(d => ({...d.data(), firestoreId: d.id}));
-    callback(bks);
-  });
-};
-
-// Start app after Firebase is ready
-window.saveSettings = async function(key, value) {
-  try {
-    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js");
-    await setDoc(doc(db, "settings", key), { value: JSON.stringify(value) });
-  } catch(e) { localStorage.setItem(key, JSON.stringify(value)); }
-};
-window.loadSettings = async function(key, defaultVal) {
-  try {
-    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js");
-    const snap = await getDoc(doc(db, "settings", key));
-    if(snap.exists()) return JSON.parse(snap.data().value);
-  } catch(e) {}
-  return defaultVal;
-};
-window.firebaseReady = true;
-if(window.initApp) window.initApp();
-</script>
 <script>
-let bookings = [];
-const today = new Date();
+let state = {
+  startCapital: 0,
+  maxTradesPerDay: 3,
+  eurRate: 0.8776,
+  trades: [],
+  rules: null
+};
 
-// Load bookings from Firebase on start
-async function initApp() {
-  if(!window.firebaseReady) { window.initApp = initApp; return; }
-  // Load settings
-  lager = await window.loadSettings('lager', {});
-  rabattCodes = await window.loadSettings('rabatt_codes', rabattCodes);
-  maxSlots = await window.loadSettings('max_slots', 10);
-  updateAvailability();
-  updateRabattFieldOnBooking();
-  // Load bookings
-  bookings = await window.loadBookings();
-  // Start realtime listener
-  window.listenBookings((bks) => {
-    bookings = bks;
-    if(document.getElementById('tab-auftraege').classList.contains('active')) renderBookings();
-    if(document.getElementById('tab-kalender').classList.contains('active')) renderCalendar();
-    if(document.getElementById('tab-erinnerung').classList.contains('active')) renderErinnerungen();
-    if(document.getElementById('tab-statistik').classList.contains('active')) renderStatistik();
-  });
+let tradeResult = 'win';
+let tradeLegs = [];
+
+function addLegRow() {
+  tradeLegs.push({ label: '', percent: '', amount: '' });
+  renderLegRows();
 }
-initApp();
-let selectedPay=null, selectedSaite='mitbringen';
-let selectedOrt=null, selectedSlot=null;
-function selectOrt(o){
-  selectedOrt=o;
-  ['eggenstein','langensteinbach','waldbronn'].forEach(x=>document.getElementById('ort-'+x).classList.toggle('selected',x===o));
-  const info=document.getElementById('abgabe-info');
-  const slots=document.getElementById('eggenstein-slots');
-  if(o==='eggenstein'){
-    info.textContent='📍 Schläger beim Faßbender (Außenanlage) abgeben – feste Zeiten wählen';
-    slots.style.display='block';
+function removeLeg(i) {
+  tradeLegs.splice(i, 1);
+  renderLegRows();
+}
+function updateLeg(i, field, val) {
+  tradeLegs[i][field] = val;
+  updateLegTotal();
+}
+function renderLegRows() {
+  const container = document.getElementById('tradeLegsContainer');
+  container.innerHTML = tradeLegs.map((leg, i) => `
+    <div class="leg-row">
+      <input type="text" class="leg-label" placeholder="Bezeichnung" value="${leg.label}" oninput="updateLeg(${i},'label',this.value)">
+      <input type="text" class="leg-pct" placeholder="%" value="${leg.percent}" inputmode="decimal" oninput="updateLeg(${i},'percent',this.value)">
+      <input type="text" class="leg-amount" placeholder="USDT" value="${leg.amount}" inputmode="decimal" oninput="updateLeg(${i},'amount',this.value)">
+      <button type="button" onclick="removeLeg(${i})">✕</button>
+    </div>
+  `).join('');
+  updateLegTotal();
+}
+function updateLegTotal() {
+  const total = tradeLegs.reduce((s, l) => s + parseNum(l.amount), 0);
+  const amountField = document.getElementById('tradeAmount');
+  const totalEl = document.getElementById('legTotal');
+  if (tradeLegs.length > 0) {
+    amountField.value = String(total).replace('.', ',');
+    amountField.disabled = true;
+    totalEl.textContent = 'Summe aus Teilausstiegen: ' + (total >= 0 ? '+' : '−') + fmt(Math.abs(total)) + ' USDT';
   } else {
-    info.textContent='🏠 Schläger zu Myron nach Hause bringen · Adresse kommt per WhatsApp';
-    slots.style.display='none';
-    selectedSlot=null;
+    amountField.disabled = false;
+    totalEl.textContent = '';
   }
 }
-function selectSlot(s){
-  selectedSlot=s;
-  ['di','do'].forEach(x=>document.getElementById('slot-'+x).classList.toggle('selected',x===s));
+let viewMonth = new Date();
+let tradesShowAll = false;
+const TRADES_WEEKS_PAGE = 2;
+
+function toggleShowAllTrades() {
+  tradesShowAll = !tradesShowAll;
+  renderAll();
 }
-let selectedKg=25;
-function changeKg(d){selectedKg=Math.min(35,Math.max(18,selectedKg+d));document.getElementById('kg-display').textContent=selectedKg;}
-let extras={express:false,logo:false,overgrip:false,basisgriff:false};
-let weekOffset=0, aiHistory=[];
-const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
-const PRICES={besaitung_eigen:15,besaitung_myron:18,express:3,logo:1,overgrip:3.5,basisgriff:10};
-const ADMIN_PIN='H07MGHKH0200';
-let isAdmin=false;
-function adminLogin(el){
-  const pin=prompt('Admin-PIN eingeben:');
-  if(pin===ADMIN_PIN){isAdmin=true;document.getElementById('admin-tabs').style.display='flex';el.textContent='✅';}
-  else if(pin!==null){alert('Falscher PIN!');}
+function dayLabel(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
-function adminLogout(){
-  isAdmin=false;document.getElementById('admin-tabs').style.display='none';
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-buchen').classList.add('active');
-  document.querySelector('.tabs .tab').classList.add('active');
+function getMonday(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  const day = (d.getDay() + 6) % 7; // Montag = 0
+  d.setDate(d.getDate() - day);
+  return d.toISOString().slice(0, 10);
+}
+function weekRangeLabel(mondayIso) {
+  const monday = new Date(mondayIso + 'T00:00:00');
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const opts = { day: '2-digit', month: '2-digit' };
+  return monday.toLocaleDateString('de-DE', opts) + ' – ' + sunday.toLocaleDateString('de-DE', opts);
+}
+function deleteWeek(mondayIso) {
+  if (!confirm('Wirklich alle Trades dieser Woche löschen? Das kann nicht rückgängig gemacht werden.')) return;
+  state.trades = state.trades.filter(t => getMonday(t.date) !== mondayIso);
+  persist();
+  renderAll();
 }
 
-document.getElementById('b-date').value=today.toISOString().slice(0,10);
-function save(){} // bookings are saved individually to Firebase
-function switchTab(name,el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
-  if(name==='kalender')renderCalendar(); if(name==='auftraege')renderBookings(); if(name==='erinnerung')renderErinnerungen(); if(name==='lager')renderLager(); if(name==='statistik')renderStatistik(); if(name==='einstellungen')renderEinstellungen();
-}
-function selectPay(p){selectedPay=p;['paypal','cash'].forEach(x=>document.getElementById('pay-'+x).classList.toggle('selected',x===p));document.getElementById('paypal-section').style.display=p==='paypal'?'block':'none';}
-function syncCount(selectId){
-  const max=parseInt(document.getElementById('b-count').value)||1;
-  const sel=document.getElementById(selectId);
-  const current=parseInt(sel.value)||1;
-  sel.innerHTML='';
-  for(let i=1;i<=max;i++){
-    const opt=document.createElement('option');
-    opt.value=i;
-    opt.textContent=i+' Schläger';
-    if(i===Math.min(current,max)) opt.selected=true;
-    sel.appendChild(opt);
-  }
-}
-function selectSaite(s){selectedSaite=s;['mitbringen','von-myron'].forEach(x=>document.getElementById('saite-'+x).classList.toggle('selected',x===s));calcPrice();}
-function toggleExtra(k){
-  extras[k]=!extras[k];
-  const el=document.getElementById('ex-'+k);
-  const chk=document.getElementById('chk-'+k);
-  if(k==='express'){
-    el.style.background=extras[k]?'#EF9F27':'#FAEEDA';
-    el.style.borderColor='#EF9F27';
-    chk.style.background=extras[k]?'#EF9F27':'transparent';
-    chk.style.borderColor='#EF9F27';
-    chk.textContent=extras[k]?'✓':'';
-  } else {
-    el.classList.toggle('selected',extras[k]);
-    chk.textContent=extras[k]?'✓':'';
-  }
-  if(k==='logo') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('logo-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('logo-count'); }
-  if(k==='overgrip') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('overgrip-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('overgrip-count'); }
-  if(k==='basisgriff') { const show=extras[k]&&parseInt(document.getElementById('b-count').value)>1; document.getElementById('basisgriff-count-field').style.display=show?'block':'none'; if(extras[k]) syncCount('basisgriff-count'); }
-  const row=document.getElementById('pr-'+k+'-row');
-  if(row)row.style.display=extras[k]?'flex':'none';
-  calcPrice();
-}
-function calcPrice(){
-  const c=parseInt(document.getElementById('b-count').value);
-  ['logo','overgrip','basisgriff'].forEach(k=>{
-    const field=document.getElementById(k+'-count-field');
-    if(field) field.style.display=(extras[k]&&c>1)?'block':'none';
-    if(extras[k]) syncCount(k+'-count');
-  });
-  const base=c*(selectedSaite==='von-myron'?PRICES.besaitung_myron:PRICES.besaitung_eigen);
-  const expressTotal=extras.express?c*3:0;
-  const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
-  const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
-  const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
-  const extrasTotal=(logoCount*PRICES.logo)+(overgripCount*PRICES.overgrip)+(basisgriffCount*PRICES.basisgriff);
-  const total=base+expressTotal+extrasTotal;
-  document.getElementById('pr-besaitung').textContent=base.toFixed(2).replace('.',',')+' €';
-  if(extras.logo){const lc=parseInt(document.getElementById('logo-count').value||1);document.getElementById('pr-logo-row').innerHTML=`<span>🎨 Logo-Design (${lc}×)</span><span>${(lc*PRICES.logo).toFixed(2).replace('.',',')} €</span>`;}
-  if(extras.overgrip){const oc=parseInt(document.getElementById('overgrip-count').value||1);document.getElementById('pr-overgrip-row').innerHTML=`<span>✋ Overgrip (${oc}×)</span><span>${(oc*PRICES.overgrip).toFixed(2).replace('.',',')} €</span>`;}
-  if(extras.basisgriff){const bc=parseInt(document.getElementById('basisgriff-count').value||1);document.getElementById('pr-basisgriff-row').innerHTML=`<span>🔄 Basisgriffband (${bc}×)</span><span>${(bc*PRICES.basisgriff).toFixed(2).replace('.',',')} €</span>`;}
-  document.getElementById('pr-express-row').style.display=extras.express?'flex':'none';
-  if(extras.express) document.getElementById('pr-express-row').innerHTML=`<span>⚡ Express (24h) · ${c}×3€</span><span>${expressTotal.toFixed(2).replace('.',',')} €</span>`;
-  const rabattTotal=rabattApplied?(total*(appliedProzent/100)):0;
-  const finalTotal=total-rabattTotal;
-  const rabattRow=document.getElementById('pr-rabatt-row');
-  if(rabattApplied&&rabattRow){
-    rabattRow.style.display='flex';
-    rabattRow.innerHTML=`<span>🎁 Rabatt ${appliedProzent}%</span><span>−${rabattTotal.toFixed(2).replace('.',',')} €</span>`;
-  } else if(rabattRow){
-    rabattRow.style.display='none';
-  }
-  document.getElementById('pr-total').textContent=finalTotal.toFixed(2).replace('.',',')+' €';
-  return finalTotal;
-}
-function openPayPal(){window.open('https://www.paypal.com/paypalme/myronhenschen/'+calcPrice().toFixed(2)+'EUR','_blank');}
-async function submitBooking(){
-  const name=document.getElementById('b-name').value.trim();
-  const tel=document.getElementById('b-tel').value.trim();
-  if(!name){alert('Bitte Name eingeben.');return;}
-  if(!selectedOrt){alert('Bitte Standort auswählen.');return;}
-  if(selectedOrt==='eggenstein'&&!selectedSlot){alert('Bitte Abgabe-Termin wählen (Di oder Do).');return;}
-  if(!tel){alert('Bitte WhatsApp-Nummer eingeben – wird für die Bestätigung benötigt.');return;}
-  if(!selectedKg){alert('Bitte Bespannungsspannung angeben.');return;}
-  if(!selectedPay){alert('Bitte Zahlungsmethode auswählen.');return;}
-  const count=parseInt(document.getElementById('b-count').value);
-  const logoCount=extras.logo?parseInt(document.getElementById('logo-count').value||1):0;
-  const overgripCount=extras.overgrip?parseInt(document.getElementById('overgrip-count').value||1):0;
-  const basisgriffCount=extras.basisgriff?parseInt(document.getElementById('basisgriff-count').value||1):0;
-  const extrasArr=[
-    ...(extras.express?['⚡ Express (24h)']:[]),
-    ...(extras.logo?[`Logo-Design (${logoCount}×)`]:[]),
-    ...(extras.overgrip?[`Overgrip (${overgripCount}×)`]:[]),
-    ...(extras.basisgriff?[`Basisgriffband (${basisgriffCount}×)`]:[]),
-  ];
-  const slotText = selectedSlot==='di'?'Dienstag 19:00–21:00 Uhr (Faßbender Außenanlage)':selectedSlot==='do'?'Donnerstag 17:00–18:30 Uhr (TC Eggenstein Außenanlage)':'';
-  const booking={id:Date.now(),name,tel:document.getElementById('b-tel').value.trim(),email:document.getElementById('b-email').value.trim(),standort:selectedOrt,slot:slotText,date:document.getElementById('b-date').value,time:document.getElementById('b-time').value,count,saite:selectedSaite==='von-myron'?'Saite von Myron':'Eigene Saite',kg:selectedKg,extras:extrasArr,payment:selectedPay,notes:document.getElementById('b-notes').value.trim(),status:'offen',bezahlt:false,revenue:calcPrice()};
-  await window.saveBooking(booking);
-  bookings.unshift(booking);
-  save();
-  document.getElementById('success-banner').style.display='block';
-  setTimeout(()=>document.getElementById('success-banner').style.display='none',4000);
-  ['b-name','b-tel','b-notes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('b-email').value='';
-  selectOrt(null);
-  selectedSlot=null;
-  selectedPay=null;
-  selectedSaite='mitbringen';
-  selectedKg=25;
-  extras={express:false,logo:false,overgrip:false,basisgriff:false};
-  document.getElementById('kg-display').textContent='25';
-  calcPrice();
-}
-function formatDate(d){if(!d)return'?';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
-function renderBookings(){
-  const ws=new Date(today);ws.setDate(today.getDate()-today.getDay()+1);
-  const we=new Date(ws);we.setDate(ws.getDate()+6);
-  document.getElementById('stat-total').textContent=bookings.length;
-  document.getElementById('stat-week').textContent=bookings.filter(b=>{const dd=new Date(b.date);return dd>=ws&&dd<=we;}).length;
-  document.getElementById('stat-revenue').textContent=bookings.filter(b=>b.status==='fertig').reduce((s,b)=>s+b.revenue,0).toFixed(0)+' €';
-  document.getElementById('stat-kunden').textContent=[...new Set(bookings.map(b=>b.tel||b.name))].length;
-  document.getElementById('stat-emails').textContent=[...new Set(bookings.filter(b=>b.email).map(b=>b.email))].length;
-  document.getElementById('stat-schlager').textContent=bookings.reduce((s,b)=>s+(b.count||1),0);
-  const list=document.getElementById('bookings-list');
-  if(!bookings.length){list.innerHTML='<p style="text-align:center;color:#aaa;padding:2rem;font-size:14px;">Noch keine Buchungen</p>';return;}
-  list.innerHTML=bookings.slice().reverse().map(b=>{
-    const statusColor = b.status==='angenommen'?'green':b.status==='abgelehnt'?'red':b.status==='fertig'?'green':'amber';
-    const tel = b.tel ? b.tel.replace(/\s/g,'') : '';
-    const waNum = tel.startsWith('+') ? tel.slice(1) : tel.startsWith('0') ? '49'+tel.slice(1) : tel;
-    const payMsg = b.payment==='paypal' ? `Bitte überweise per PayPal an myron.henschen@gmail.com.` : `Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit.`;
-    return `<div class="booking-card">
-      <div class="booking-name">${b.name} <span class="badge badge-${statusColor}">${b.status}</span> <span class="badge badge-${b.payment==='paypal'?'blue':'gray'}">${b.payment==='paypal'?'PayPal':'Cash'}</span> ${b.bezahlt?'<span class="badge badge-green">💰 Bezahlt</span>':'<span class="badge badge-amber">💰 Ausstehend</span>'}</div>
-      <div class="booking-detail">📍 ${b.standort||'–'}${b.slot?'<br>🕐 '+b.slot:''}<br>📅 ${formatDate(b.date)} ${b.time!=='Egal'?'um '+b.time:''}<br>🎾 ${b.count} Schl. · ${b.saite} · ⚙️ ${b.kg||'25'} kg · <strong>${b.revenue.toFixed(2).replace('.',',')} €</strong>${b.extras&&b.extras.length?'<br>✨ '+b.extras.join(' · '):''}${b.tel?'<br>📱 '+b.tel:''}${b.notes?'<br>📝 '+b.notes:''}</div>
-      <div class="booking-actions">
-        ${b.status==='offen'?`
-          <button class="btn-small btn-accept" onclick="acceptBooking(${b.id})">✅ Annehmen</button>
-          <button class="btn-small btn-danger" onclick="rejectBooking(${b.id})">❌ Ablehnen</button>
-        `:b.status==='angenommen'?`
-          <button class="btn-small btn-accept" onclick="fertigBooking(${b.id})">✅ Fertig</button>
-        `:b.status==='fertig'?`
-          <button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>
-        `:`<button class="btn-small" onclick="resetBooking(${b.id})">↩ Zurücksetzen</button>`}
-        <button class="btn-small ${b.bezahlt?'btn-accept':''}" onclick="toggleBezahlt(${b.id})">${b.bezahlt?'💰 Bezahlt':'💰 Offen'}</button>
-        <button class="btn-small btn-danger" onclick="deleteBooking(${b.id})">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-function acceptBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='angenommen';b.angenommenAt=Date.now();if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{status:'angenommen',angenommenAt:b.angenommenAt});renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const adresse=(b.standort==='waldbronn'||b.standort==='langensteinbach')?'\n\nBitte bringe deinen Schläger zu mir nach Hause:\nOosstraße 1b, 76337 Waldbronn-Reichenbach':'';const msg=encodeURIComponent(`Hallo ${b.name}! ✅ Dein Termin für die Schläger-Besaitung wurde bestätigt.${b.slot?'\n📅 Abgabe: '+b.slot:''}${adresse}\n\nBei Fragen meld dich! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function rejectBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='abgelehnt';if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{status:'abgelehnt'});renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const msg=encodeURIComponent(`Hallo ${b.name}, leider kann ich deinen Termin am ${formatDate(b.date)} nicht annehmen. Bitte buche einen anderen Termin. Sorry! – Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function resetBooking(id){const b=bookings.find(x=>x.id===id);if(b){b.status='offen';if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{status:'offen'});renderBookings();}}
-function fertigBooking(id){const b=bookings.find(x=>x.id===id);if(!b)return;b.status='fertig';b.fertigAt=Date.now();if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{status:'fertig',fertigAt:b.fertigAt});renderBookings();const tel=b.tel?b.tel.replace(/\s/g,''):'';const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;if(waNum){const payMsg=b.payment==='paypal'?`Bitte überweise per PayPal an myron.henschen@gmail.com 🙏`:`Bitte bring das Geld (${b.revenue.toFixed(2).replace('.',',')} €) in Cash mit 🙏`;const msg=encodeURIComponent(`Hey ${b.name}! ✅ Dein Schläger ist fertig bespannt und kann abgeholt werden.\n\n${payMsg}\n\n– Myron`);window.open(`https://wa.me/${waNum}?text=${msg}`,'_blank');}}
-function toggleBezahlt(id){const b=bookings.find(x=>x.id===id);if(b){b.bezahlt=!b.bezahlt;if(b.firestoreId)window.updateBookingInDB(b.firestoreId,{bezahlt:b.bezahlt});renderBookings();}}
-function deleteBooking(id){if(confirm('Buchung löschen?')){const b=bookings.find(x=>x.id===id);if(b&&b.firestoreId)window.deleteBookingFromDB(b.firestoreId);bookings=bookings.filter(x=>x.id!==id);renderBookings();}}
-let lager={}; window.loadSettings && window.loadSettings('lager',{}).then(v=>{lager=v;updateAvailability();});
-const lagerItems=[
-  {key:'saite_eigen', label:'Saite (eigene mitbringen Option)', icon:'🎒'},
-  {key:'saite_myron', label:'Saite von Myron', icon:'🛒'},
-  {key:'express', label:'Express 24h', icon:'⚡'},
-  {key:'logo', label:'Logo-Design', icon:'🎨'},
-  {key:'overgrip', label:'Overgrip', icon:'✋'},
-  {key:'basisgriff', label:'Basisgriffband', icon:'🔄'},
+const DEFAULT_RULES = [
+  { group: "Mentales & Disziplin", items: [
+    "Kein Trade aus Emotion heraus (Angst, Gier, Frust)",
+    "Nach einem Verlusttrade keine Rache-Trades",
+    "Tagesabbruch nach 2 Verlustrades hintereinander",
+    "Nur traden wenn fokussiert und ausgeschlafen"
+  ]},
+  { group: "Setup & Einstieg", items: [
+    "Nur Trades die dem klaren Setup entsprechen",
+    "Kein Trade ohne definierten Entry, SL und TP",
+    "Im Zweifel kein Trade"
+  ]},
+  { group: "Risiko & Money Management", items: [
+    "Maximaler Verlusttrade: 100€",
+    "Maximaler Tagesverlust: 200€",
+    "Niemals den Stop-Loss verschieben",
+    "Kein Averaging down",
+    "Maximal 2 Trades gleichzeitig offen"
+  ]},
+  { group: "Ausführung", items: [
+    "Trade läuft – nicht ständig reinschauen",
+    "TP und SL sofort nach Einstieg setzen",
+    "Keine Positionen über Nacht (außer geplant)"
+  ]},
+  { group: "Nachbereitung", items: [
+    "Jeden Trade im Journal dokumentieren",
+    "Wöchentliche Auswertung durchführen",
+    "Bei Regelverstößen: Ursache analysieren"
+  ]}
 ];
-function saveLager(){if(window.saveSettings)window.saveSettings('lager',lager);}
-function toggleLager(key){
-  lager[key]=!lager[key];
-  saveLager();
-  renderLager();
-  updateAvailability();
+
+function fmt(n) {
+  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-// ── STATISTIK ────────────────────────────────────────────
-function renderStatistik(){
-  const now=new Date();
-  const ws=new Date(now); ws.setDate(now.getDate()-now.getDay()+1);
-  const ms=new Date(now.getFullYear(),now.getMonth(),1);
-  const fertig=bookings.filter(b=>b.status==='fertig');
-  const gesamt=fertig.reduce((s,b)=>s+b.revenue,0);
-  const monat=fertig.filter(b=>new Date(b.date)>=ms).reduce((s,b)=>s+b.revenue,0);
-  const woche=fertig.filter(b=>new Date(b.date)>=ws).reduce((s,b)=>s+b.revenue,0);
-  document.getElementById('st-gesamt').textContent=gesamt.toFixed(0)+' €';
-  document.getElementById('st-monat').textContent=monat.toFixed(0)+' €';
-  document.getElementById('st-woche').textContent=woche.toFixed(0)+' €';
-  // Bearbeitungszeit (von Annahme bis Fertig)
-  const mitZeiten=fertig.filter(b=>b.angenommenAt&&b.fertigAt);
-  const bearbDiv=document.getElementById('st-bearbeitung');
-  if(mitZeiten.length>0){
-    const dauern=mitZeiten.map(b=>(b.fertigAt-b.angenommenAt)/(1000*60*60)); // in Stunden
-    const avgH=dauern.reduce((s,d)=>s+d,0)/dauern.length;
-    const minH=Math.min(...dauern);
-    const maxH=Math.max(...dauern);
-    const fmt=h=>h<24?`${h.toFixed(1)} Std.`:`${(h/24).toFixed(1)} Tage`;
-    bearbDiv.innerHTML=`
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px;">
-        <span style="color:var(--color-text-primary);">⌀ Durchschnitt</span>
-        <strong>${fmt(avgH)}</strong>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px;">
-        <span style="color:var(--color-text-secondary);">Schnellste</span>
-        <span>${fmt(minH)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
-        <span style="color:var(--color-text-secondary);">Langsamste</span>
-        <span>${fmt(maxH)}</span>
-      </div>
-      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;">Basiert auf ${mitZeiten.length} ${mitZeiten.length===1?'Auftrag':'Aufträgen'} mit erfasster Zeit</div>`;
-  } else {
-    bearbDiv.innerHTML=`<div style="font-size:13px;color:var(--color-text-secondary);text-align:center;padding:8px 0;">Noch keine Daten – wird erfasst sobald du Aufträge annimmst und fertigstellst</div>`;
+function parseNum(s) {
+  if (!s) return 0;
+  return parseFloat(String(s).replace(/\./g,'').replace(',','.')) || 0;
+}
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+function monthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function monthLabelText(d) {
+  return d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+}
+
+async function loadState() {
+  try {
+    const raw = localStorage.getItem('journal-data');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state = Object.assign(state, parsed);
+    }
+  } catch (e) {
+    console.log('Kein gespeicherter Stand gefunden, starte neu.');
   }
-  // Standorte
-  const orte={eggenstein:0,langensteinbach:0,waldbronn:0};
-  fertig.forEach(b=>{if(orte[b.standort]!==undefined)orte[b.standort]+=b.revenue;});
-  document.getElementById('st-standorte').innerHTML=Object.entries(orte).map(([o,v])=>`
-    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px;">
-      <span style="color:var(--color-text-primary);text-transform:capitalize;">📍 ${o}</span>
-      <strong>${v.toFixed(0)} €</strong>
-    </div>`).join('');
-  // Letzte 4 Monate
-  const monate=[];
-  for(let i=3;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    const label=d.toLocaleString('de-DE',{month:'long',year:'numeric'});
-    const sum=fertig.filter(b=>{const bd=new Date(b.date);return bd.getMonth()===d.getMonth()&&bd.getFullYear()===d.getFullYear();}).reduce((s,b)=>s+b.revenue,0);
-    monate.push({label,sum});
+  if (!state.rules) {
+    state.rules = JSON.parse(JSON.stringify(DEFAULT_RULES));
   }
-  const maxSum=Math.max(...monate.map(m=>m.sum),1);
-  document.getElementById('st-monate').innerHTML=monate.map(m=>`
-    <div style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-        <span style="color:var(--color-text-secondary);">${m.label}</span>
-        <strong>${m.sum.toFixed(0)} €</strong>
-      </div>
-      <div style="background:var(--color-background-secondary);border-radius:99px;height:8px;">
-        <div style="background:#E24B4A;border-radius:99px;height:8px;width:${(m.sum/maxSum*100).toFixed(0)}%;transition:width 0.3s;"></div>
-      </div>
-    </div>`).join('');
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('maxTradesInput').value = state.maxTradesPerDay;
+  document.getElementById('eurRateInput').value = String(state.eurRate).replace('.', ',');
+  document.getElementById('tradeDate').value = todayStr();
+  renderRules();
+  setTradeResult('win');
+  renderAll();
 }
 
-// ── RABATT ───────────────────────────────────────────────
-// ── RABATT (3 Codes) ─────────────────────────────────────
-let rabattCodes=[{"active":false,"code":"","prozent":20},{"active":false,"code":"","prozent":10},{"active":false,"code":"","prozent":5}]; if(window.loadSettings)window.loadSettings('rabatt_codes',rabattCodes).then(v=>{rabattCodes=v;updateRabattFieldOnBooking();});
-let rabattSettings={active:false,code:'',prozent:0}; // legacy compat
-let rabattApplied=false;
-let appliedProzent=0;
-
-function renderRabattCodes(){
-  const list=document.getElementById('rabatt-codes-list');
-  if(!list) return;
-  list.innerHTML=rabattCodes.map((r,i)=>`
-    <div style="border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:10px;${r.active?'border-color:#3B6D11;background:#EAF3DE;':''}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Code ${i+1}</span>
-        <button onclick="toggleRabattCode(${i})" style="padding:5px 14px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:inherit;background:${r.active?'#3B6D11':'#f0f0f0'};color:${r.active?'white':'#666'};">
-          ${r.active?'✅ Aktiv':'⭕ Inaktiv'}
-        </button>
-      </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
-        <div>
-          <label style="font-size:11px;color:var(--color-text-secondary);">Code</label>
-          <input type="text" value="${r.code}" placeholder="z.B. FREUND10" oninput="rabattCodes[${i}].code=this.value.toUpperCase();this.value=this.value.toUpperCase()" style="margin-top:2px;" />
-        </div>
-        <div>
-          <label style="font-size:11px;color:var(--color-text-secondary);">Rabatt %</label>
-          <input type="number" value="${r.prozent}" min="1" max="50" oninput="rabattCodes[${i}].prozent=parseInt(this.value)||0" style="margin-top:2px;" />
-        </div>
-      </div>
-    </div>`).join('');
-  list.innerHTML+=`<button onclick="saveRabattCodes()" style="width:100%;padding:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">Speichern</button>`;
-}
-
-function toggleRabattCode(i){rabattCodes[i].active=!rabattCodes[i].active;renderRabattCodes();}
-function saveRabattCodes(){
-  if(window.saveSettings)window.saveSettings('rabatt_codes',rabattCodes);
-  document.getElementById('rabatt-saved').style.display='block';
-  setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
-  updateRabattFieldOnBooking();
-}
-function updateRabattFieldOnBooking(){
-  const field=document.getElementById('rabatt-booking-field');
-  if(field) field.style.display='block';
-}
-function toggleRabatt(){} // legacy compat
-
-function applyRabatt(){
-  const input=document.getElementById('b-rabatt').value.toUpperCase();
-  const msg=document.getElementById('rabatt-msg');
-  const match=rabattCodes.find(r=>r.active&&r.code&&r.code===input);
-  if(match){
-    rabattApplied=true;
-    appliedProzent=match.prozent;
-    msg.textContent=`✅ ${match.prozent}% Rabatt wird angewendet!`;
-    msg.style.color='#3B6D11';
-  } else if(input.length>0){
-    rabattApplied=false;
-    appliedProzent=0;
-    msg.textContent='❌ Ungültiger Code';
-    msg.style.color='#A32D2D';
-  } else {
-    rabattApplied=false;
-    appliedProzent=0;
-    msg.textContent='';
+async function persist() {
+  try {
+    localStorage.setItem('journal-data', JSON.stringify(state));
+  } catch (e) {
+    console.error('Speichern fehlgeschlagen', e);
   }
-  calcPrice();
 }
-function renderEinstellungen(){
-  renderRabattCodes();
-  const ms=parseInt(localStorage.getItem('max_slots')||'10');
-  document.getElementById('max-slots-display').textContent=ms;
-  maxSlots=ms;
-  const unique=[...new Set(bookings.filter(b=>b.email).map(b=>b.email))];
-  const stats=document.getElementById('email-export-stats');
-  if(stats) stats.textContent=`${unique.length} Emails gespeichert`;
+
+function saveStartCapital() {
+  const val = parseNum(document.getElementById('startCapitalInput').value);
+  state.startCapital = val;
+  document.getElementById('startCapitalInput').value = '';
+  persist();
+  renderAll();
 }
-function exportEmails(){
-  const unique=[...new Set(bookings.filter(b=>b.email).map(b=>({name:b.name,email:b.email})).map(JSON.stringify))].map(JSON.parse);
-  if(!unique.length){alert('Noch keine Emails vorhanden.');return;}
-  const csv='Email Adresse,Vorname\n'+unique.map(b=>`${b.email},${b.name.split(' ')[0]}`).join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download='kunden_emails.csv';
-  a.click();
+
+function saveSettings() {
+  state.maxTradesPerDay = parseInt(document.getElementById('maxTradesInput').value) || 3;
+  state.eurRate = parseNum(document.getElementById('eurRateInput').value) || 0;
+  persist();
+  renderAll();
 }
-function copyEmails(){
-  const emails=[...new Set(bookings.filter(b=>b.email).map(b=>b.email))];
-  if(!emails.length){alert('Noch keine Emails vorhanden.');return;}
-  navigator.clipboard.writeText(emails.join(', ')).then(()=>{
-    document.getElementById('copy-email-msg').style.display='block';
-    setTimeout(()=>document.getElementById('copy-email-msg').style.display='none',2000);
+
+function setTradeResult(r) {
+  tradeResult = r;
+  document.getElementById('tradeWinBtn').classList.toggle('active', r === 'win');
+  document.getElementById('tradeLossBtn').classList.toggle('active', r === 'loss');
+  document.getElementById('tradeBeBtn').classList.toggle('active', r === 'be');
+  const amountField = document.getElementById('tradeAmount');
+  amountField.placeholder = r === 'be' ? 'z.B. 30 oder -5 (optional, Standard 0)' : 'z.B. 45,50';
+}
+function addTrade() {
+  const rawInput = document.getElementById('tradeAmount').value;
+  const amt = parseNum(rawInput);
+  if (tradeResult !== 'be' && !amt) return;
+  const legs = tradeLegs
+    .filter(l => l.label.trim() || parseNum(l.amount) || parseNum(l.percent))
+    .map(l => ({ label: l.label.trim(), percent: parseNum(l.percent), amount: parseNum(l.amount) }));
+  state.trades.push({
+    id: Date.now(),
+    date: document.getElementById('tradeDate').value || todayStr(),
+    result: tradeResult,
+    amount: amt,
+    note: document.getElementById('tradeNote').value,
+    legs: legs.length ? legs : undefined
   });
+  document.getElementById('tradeAmount').value = '';
+  document.getElementById('tradeAmount').disabled = false;
+  document.getElementById('tradeNote').value = '';
+  tradeLegs = [];
+  renderLegRows();
+  persist();
+  renderAll();
 }
-function toggleRabatt(){rabattSettings.active=!rabattSettings.active;updateRabattUI();}
-function updateRabattUI(){
-  const btn=document.getElementById('rabatt-toggle');
-  const settings=document.getElementById('rabatt-settings');
-  btn.textContent=rabattSettings.active?'✅ Aktiv':'❌ Inaktiv';
-  btn.style.background=rabattSettings.active?'#EAF3DE':'#FFEBEB';
-  btn.style.color=rabattSettings.active?'#3B6D11':'#A32D2D';
-  btn.style.border=`1.5px solid ${rabattSettings.active?'#3B6D11':'#A32D2D'}`;
-  settings.style.display=rabattSettings.active?'block':'none';
-  if(rabattSettings.active){
-    document.getElementById('rabatt-code').value=rabattSettings.code||'';
-    document.getElementById('rabatt-prozent').value=rabattSettings.prozent||10;
+function deleteTrade(id) {
+  state.trades = state.trades.filter(t => t.id !== id);
+  persist();
+  renderAll();
+}
+
+function renderRules() {
+  const list = document.getElementById('rulesList');
+  list.innerHTML = '';
+  document.getElementById('rulesProgress').textContent = state.rules.reduce((a,g) => a + g.items.length, 0) + ' Regeln';
+
+  state.rules.forEach((group, gi) => {
+    const title = document.createElement('div');
+    title.className = 'rule-group-title';
+    title.innerHTML = `<span>${group.group}</span> <button class="rule-del-group" onclick="deleteRuleGroup(${gi})">Gruppe löschen</button>`;
+    list.appendChild(title);
+
+    group.items.forEach((item, ii) => {
+      const li = document.createElement('li');
+      li.className = 'rule-item';
+      li.innerHTML = `
+        <span class="rule-text" contenteditable="true" onblur="editRuleText(${gi}, ${ii}, this.textContent)">${item}</span>
+        <button class="rule-del" onclick="deleteRuleItem(${gi}, ${ii})">✕</button>
+      `;
+      list.appendChild(li);
+    });
+
+    const addLi = document.createElement('li');
+    addLi.className = 'rule-add-row';
+    addLi.innerHTML = `
+      <input type="text" placeholder="Neue Regel..." id="newRuleInput-${gi}">
+      <button onclick="addRuleItem(${gi})">+</button>
+    `;
+    list.appendChild(addLi);
+  });
+
+  const groupAddDiv = document.createElement('div');
+  groupAddDiv.className = 'rule-add-row group-add';
+  groupAddDiv.innerHTML = `
+    <input type="text" placeholder="Neue Kategorie..." id="newGroupInput">
+    <button onclick="addRuleGroup()">+ Kategorie</button>
+  `;
+  list.appendChild(groupAddDiv);
+}
+
+function editRuleText(gi, ii, newText) {
+  const trimmed = newText.trim();
+  if (trimmed) state.rules[gi].items[ii] = trimmed;
+  persist();
+}
+
+function deleteRuleItem(gi, ii) {
+  state.rules[gi].items.splice(ii, 1);
+  persist();
+  renderRules();
+}
+
+function addRuleItem(gi) {
+  const input = document.getElementById('newRuleInput-' + gi);
+  const val = input.value.trim();
+  if (!val) return;
+  state.rules[gi].items.push(val);
+  persist();
+  renderRules();
+}
+
+function deleteRuleGroup(gi) {
+  state.rules.splice(gi, 1);
+  persist();
+  renderRules();
+}
+
+function addRuleGroup() {
+  const input = document.getElementById('newGroupInput');
+  const val = input.value.trim();
+  if (!val) return;
+  state.rules.push({ group: val, items: [] });
+  persist();
+  renderRules();
+}
+
+function changeMonth(delta) {
+  viewMonth.setMonth(viewMonth.getMonth() + delta);
+  tradesShowAll = false;
+  renderAll();
+}
+
+function renderCalendar() {
+  const year = viewMonth.getFullYear();
+  const month = viewMonth.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const startWeekday = (firstDay.getDay() + 6) % 7; // Montag = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const mk = monthKey(viewMonth);
+  const todayIso = todayStr();
+
+  const dayMap = {};
+  state.trades.filter(t => t.date.startsWith(mk)).forEach(t => {
+    const day = parseInt(t.date.slice(8, 10), 10);
+    dayMap[day] = (dayMap[day] || 0) + (t.result === 'win' ? t.amount : (t.result === 'loss' ? -t.amount : t.amount));
+  });
+
+  const weekdays = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  let html = weekdays.map(w => `<div class="cal-head">${w}</div>`).join('');
+  for (let i = 0; i < startWeekday; i++) html += '<div class="cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const val = dayMap[d];
+    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'cal-cell';
+    let valHtml = '';
+    if (val !== undefined) {
+      cls += val >= 0 ? ' pos' : ' neg';
+      valHtml = `<div class="cal-val">${val >= 0 ? '+' : '−'}${fmt(Math.abs(val))}</div>`;
+    }
+    if (iso === todayIso) cls += ' today';
+    html += `<div class="${cls}"><div class="cal-day">${d}</div>${valHtml}</div>`;
   }
-  updateRabattFieldOnBooking();
-}
-function saveRabatt(){
-  rabattSettings.code=document.getElementById('rabatt-code').value.toUpperCase();
-  rabattSettings.prozent=parseInt(document.getElementById('rabatt-prozent').value)||10;
-  
-  document.getElementById('rabatt-saved').style.display='block';
-  setTimeout(()=>document.getElementById('rabatt-saved').style.display='none',2000);
-  updateRabattFieldOnBooking();
+  document.getElementById('calendarGrid').innerHTML = html;
 }
 
-// ── VERFÜGBARKEIT ────────────────────────────────────────
-let maxSlots=10; if(window.loadSettings)window.loadSettings('max_slots',10).then(v=>{maxSlots=v;});
-function changeMaxSlots(d){maxSlots=Math.max(1,Math.min(50,maxSlots+d));document.getElementById('max-slots-display').textContent=maxSlots;}
-function saveMaxSlots(){if(window.saveSettings)window.saveSettings('max_slots',maxSlots);document.getElementById('slots-saved').style.display='block';setTimeout(()=>document.getElementById('slots-saved').style.display='none',2000);}
+function renderAll() {
+  // Kapital
+  const netTrades = state.trades.reduce((sum, t) => sum + (t.result === 'win' ? t.amount : (t.result === 'loss' ? -t.amount : t.amount)), 0);
+  const currentCapital = state.startCapital + netTrades;
+  document.getElementById('capitalVal').textContent = fmt(currentCapital) + ' USDT';
+  document.getElementById('capitalEur').textContent = '≈ ' + fmt(currentCapital * (state.eurRate || 0)) + ' €';
+  const delta = currentCapital - state.startCapital;
+  const deltaEl = document.getElementById('capitalDelta');
+  deltaEl.textContent = (delta >= 0 ? '+ ' : '− ') + fmt(Math.abs(delta)) + ' USDT seit Start';
+  deltaEl.className = 'delta ' + (delta >= 0 ? 'pos' : 'neg');
 
-function renderLager(){
-  const list=document.getElementById('lager-list');
-  list.innerHTML=lagerItems.map(item=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
-      <div>
-        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${item.icon} ${item.label}</div>
-        <div style="font-size:12px;color:${lager[item.key]?'#A32D2D':'#3B6D11'};margin-top:2px;">${lager[item.key]?'❌ Ausverkauft':'✅ Verfügbar'}</div>
-      </div>
-      <button onclick="toggleLager('${item.key}')" style="padding:8px 14px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid ${lager[item.key]?'#A32D2D':'#e5e5e5'};background:${lager[item.key]?'#FFEBEB':'white'};color:${lager[item.key]?'#A32D2D':'var(--color-text-primary)'};font-family:inherit;">
-        ${lager[item.key]?'Wieder verfügbar':'Als ausverkauft markieren'}
-      </button>
-    </div>`).join('');
+  // Stats
+  const sortedDesc = [...state.trades].sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+  let streak = 0;
+  for (const t of sortedDesc) {
+    if (t.result === 'loss') streak++; else break;
+  }
+  const decisive = state.trades.filter(t => t.result === 'win' || t.result === 'loss');
+  const wins = decisive.filter(t => t.result === 'win').length;
+  const winrate = decisive.length ? Math.round((wins / decisive.length) * 100) + '%' : '–';
+  const today = todayStr();
+  const tradesToday = state.trades.filter(t => t.date === today).length;
+
+  document.getElementById('statStreak').textContent = streak;
+  document.getElementById('statWinrate').textContent = winrate;
+  document.getElementById('statToday').textContent = tradesToday;
+  document.getElementById('statWins').textContent = state.trades.filter(t => t.result === 'win').length;
+  document.getElementById('statLosses').textContent = state.trades.filter(t => t.result === 'loss').length;
+  document.getElementById('statBE').textContent = state.trades.filter(t => t.result === 'be').length;
+
+  const banner = document.getElementById('banner');
+  if (tradesToday >= state.maxTradesPerDay) {
+    banner.className = 'banner warn';
+    banner.textContent = '⚠️ Tageslimit erreicht (' + tradesToday + '/' + state.maxTradesPerDay + '). Overtrading-Schutz: Schluss für heute.';
+  } else if (streak >= 2) {
+    banner.className = 'banner warn';
+    banner.textContent = '⚠️ ' + streak + ' Verluste in Folge. Regel: Tagesabbruch prüfen.';
+  } else {
+    banner.className = 'banner ok';
+    banner.textContent = 'Alles im grünen Bereich. Viel Erfolg heute.';
+  }
+
+  // Month nav + lists
+  const mLabel = monthLabelText(viewMonth);
+  document.getElementById('monthLabel').textContent = mLabel;
+  document.getElementById('tradesMonthLabel').textContent = mLabel;
+  const mk = monthKey(viewMonth);
+
+  const tradesList = document.getElementById('tradesList');
+  const monthTrades = state.trades.filter(t => t.date.startsWith(mk)).sort((a,b) => b.date.localeCompare(a.date));
+  const monthDecisive = monthTrades.filter(t => t.result === 'win' || t.result === 'loss');
+  const monthWinrate = monthDecisive.length ? Math.round((monthDecisive.filter(t => t.result === 'win').length / monthDecisive.length) * 100) + '%' : '–';
+  document.getElementById('tradesMonthWinrate').textContent = monthTrades.length ? `(Winrate: ${monthWinrate})` : '';
+
+  if (!monthTrades.length) {
+    tradesList.innerHTML = '<div class="empty">Keine Trades in diesem Monat.</div>';
+  } else {
+    // Nach Woche, dann nach Tag gruppieren
+    const weekOrder = [];
+    const weekGroups = {};
+    monthTrades.forEach(t => {
+      const wk = getMonday(t.date);
+      if (!weekGroups[wk]) { weekGroups[wk] = { dayOrder: [], dayGroups: {} }; weekOrder.push(wk); }
+      const wg = weekGroups[wk];
+      if (!wg.dayGroups[t.date]) { wg.dayGroups[t.date] = []; wg.dayOrder.push(t.date); }
+      wg.dayGroups[t.date].push(t);
+    });
+
+    const visibleWeeks = tradesShowAll ? weekOrder : weekOrder.slice(0, TRADES_WEEKS_PAGE);
+    let html = '';
+    visibleWeeks.forEach(wk => {
+      const wg = weekGroups[wk];
+      const weekTrades = wg.dayOrder.flatMap(d => wg.dayGroups[d]);
+      const weekNet = weekTrades.reduce((s, t) => s + (t.result === 'win' ? t.amount : (t.result === 'loss' ? -t.amount : t.amount)), 0);
+      html += `<div class="week-group">
+        <div class="week-header">
+          <span>Woche ${weekRangeLabel(wk)}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="${weekNet >= 0 ? 'pos' : 'neg'}">${weekNet >= 0 ? '+' : '−'}${fmt(Math.abs(weekNet))} USDT</span>
+            <button class="week-del-btn" onclick="deleteWeek('${wk}')">Woche löschen</button>
+          </div>
+        </div>`;
+      wg.dayOrder.forEach(date => {
+        const dayTrades = wg.dayGroups[date];
+        const dayNet = dayTrades.reduce((s, t) => s + (t.result === 'win' ? t.amount : (t.result === 'loss' ? -t.amount : t.amount)), 0);
+        html += `<div class="day-group">
+          <div class="day-header">
+            <span>${dayLabel(date)}</span>
+            <span class="${dayNet >= 0 ? 'pos' : 'neg'}">${dayNet >= 0 ? '+' : '−'}${fmt(Math.abs(dayNet))} USDT</span>
+          </div>`;
+        dayTrades.forEach(t => {
+          html += `
+            <div class="entry">
+              <button class="del" onclick="deleteTrade(${t.id})">✕</button>
+              <div class="top-row">
+                <span class="result-badge ${t.result}">${t.result === 'win' ? 'Gewinn' : t.result === 'loss' ? 'Verlust' : 'Breakeven'}</span>
+                <span class="amt ${t.result}">${t.result === 'be' ? (t.amount >= 0 ? '+' : '−') + fmt(Math.abs(t.amount)) + ' USDT' : (t.result === 'win' ? '+' : '−') + fmt(t.amount) + ' USDT'}</span>
+              </div>
+              ${t.legs && t.legs.length ? `<div class="legs-detail">${t.legs.map(l => `<div>${l.label || 'Teilausstieg'}${l.percent ? ' (' + fmt(l.percent).replace(',00','') + '%)' : ''}: ${l.amount >= 0 ? '+' : '−'}${fmt(Math.abs(l.amount))} USDT</div>`).join('')}</div>` : ''}
+              ${t.note ? `<div class="note">${t.note}</div>` : ''}
+            </div>`;
+        });
+        html += `</div>`;
+      });
+      html += `</div>`;
+    });
+    if (!tradesShowAll && weekOrder.length > TRADES_WEEKS_PAGE) {
+      html += `<button class="show-more-btn" onclick="toggleShowAllTrades()">Mehr anzeigen (${weekOrder.length - TRADES_WEEKS_PAGE} weitere Wochen)</button>`;
+    } else if (tradesShowAll && weekOrder.length > TRADES_WEEKS_PAGE) {
+      html += `<button class="show-more-btn" onclick="toggleShowAllTrades()">Weniger anzeigen</button>`;
+    }
+    tradesList.innerHTML = html;
+  }
+
+  renderCalendar();
+  renderCharts();
 }
-function updateAvailability(){
-  // Saite
-  const sEl=document.getElementById('saite-mitbringen');
-  const smEl=document.getElementById('saite-von-myron');
-  if(sEl) { sEl.style.opacity=lager['saite_eigen']?'0.4':'1'; sEl.style.pointerEvents=lager['saite_eigen']?'none':'auto'; if(lager['saite_eigen']) sEl.querySelector('.o-sub').textContent='❌ Ausverkauft'; else sEl.querySelector('.o-sub').textContent='Eigene Saite'; }
-  if(smEl) { smEl.style.opacity=lager['saite_myron']?'0.4':'1'; smEl.style.pointerEvents=lager['saite_myron']?'none':'auto'; if(lager['saite_myron']) smEl.querySelector('.o-sub').textContent='❌ Ausverkauft'; else smEl.querySelector('.o-sub').textContent='Inklusive'; }
-  // Extras
-  ['express','logo','overgrip','basisgriff'].forEach(k=>{
-    const el=document.getElementById('ex-'+k);
-    if(el){
-      el.style.opacity=lager[k]?'0.4':'1';
-      el.style.pointerEvents=lager[k]?'none':'auto';
-      const sub=el.querySelector('.e-sub');
-      if(sub){
-        if(lager[k]) sub.textContent='❌ Ausverkauft';
-        else {
-          const defaults={express:'+3,00 € pro Schläger · fertig in 24h', logo:'Individuelles Design', overgrip:'Neues Griffband', basisgriff:'Kompletter Ersatz'};
-          sub.textContent=defaults[k];
-        }
-      }
+
+let charts = { equity: null, daily: null, dist: null };
+const CH_GREEN = '#12a150', CH_RED = '#e0364a', CH_GREY = '#8a8f9c';
+
+function renderCharts() {
+  if (typeof Chart === 'undefined') return;
+  const mk = monthKey(viewMonth);
+  const monthTrades = state.trades.filter(t => t.date.startsWith(mk)).sort((a,b) => a.date.localeCompare(b.date));
+
+  Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = '#7a7f8c';
+
+  const signed = t => t.result === 'win' ? t.amount : (t.result === 'loss' ? -t.amount : t.amount);
+
+  // 1. Kapitalverlauf (kumuliert übers Monatsgeschehen, Start = Startkapital)
+  const equityLabels = [];
+  const equityData = [];
+  let running = state.startCapital;
+  equityLabels.push('Start');
+  equityData.push(running);
+  const byDayOrder = [];
+  const byDay = {};
+  monthTrades.forEach(t => { if (!byDay[t.date]) { byDay[t.date] = 0; byDayOrder.push(t.date); } byDay[t.date] += signed(t); });
+  byDayOrder.forEach(d => {
+    running += byDay[d];
+    equityLabels.push(d.slice(8,10) + '.' + d.slice(5,7));
+    equityData.push(running);
+  });
+
+  if (charts.equity) charts.equity.destroy();
+  charts.equity = new Chart(document.getElementById('chartEquity'), {
+    type: 'line',
+    data: { labels: equityLabels, datasets: [{
+      data: equityData, borderColor: '#1c1d24', borderWidth: 2,
+      fill: true, backgroundColor: 'rgba(28,29,36,0.06)',
+      tension: 0.25, pointRadius: 0, pointHoverRadius: 4
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.parsed.y) + ' USDT' } } },
+      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 6 } }, y: { grid: { color: '#f0f1f4' }, ticks: { maxTicksLimit: 5 } } }
+    }
+  });
+
+  // 2. Gewinn/Verlust pro Tag (Balken)
+  const dailyLabels = byDayOrder.map(d => d.slice(8,10) + '.' + d.slice(5,7));
+  const dailyData = byDayOrder.map(d => byDay[d]);
+  if (charts.daily) charts.daily.destroy();
+  charts.daily = new Chart(document.getElementById('chartDaily'), {
+    type: 'bar',
+    data: { labels: dailyLabels, datasets: [{
+      data: dailyData,
+      backgroundColor: dailyData.map(v => v >= 0 ? CH_GREEN : CH_RED),
+      borderRadius: 5, maxBarThickness: 26
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => (c.parsed.y >= 0 ? '+' : '') + fmt(c.parsed.y) + ' USDT' } } },
+      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }, y: { grid: { color: '#f0f1f4' }, ticks: { maxTicksLimit: 5 } } }
+    }
+  });
+
+  // 3. Verteilung (Donut) – gesamt
+  const wins = state.trades.filter(t => t.result === 'win').length;
+  const losses = state.trades.filter(t => t.result === 'loss').length;
+  const bes = state.trades.filter(t => t.result === 'be').length;
+  if (charts.dist) charts.dist.destroy();
+  charts.dist = new Chart(document.getElementById('chartDist'), {
+    type: 'doughnut',
+    data: { labels: ['Wins', 'Losses', 'Breakeven'], datasets: [{
+      data: [wins, losses, bes],
+      backgroundColor: [CH_GREEN, CH_RED, CH_GREY], borderWidth: 0
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, padding: 12, usePointStyle: true } } }
     }
   });
 }
-function renderErinnerungen(){
-  // Gruppe nach Kunde (letzter Auftrag pro Name+Tel)
-  const kundenMap={};
-  bookings.filter(b=>b.status==='fertig'||b.status==='angenommen').forEach(b=>{
-    const key=b.tel||b.name;
-    if(!kundenMap[key]||new Date(b.date)>new Date(kundenMap[key].date)){
-      kundenMap[key]=b;
+
+loadState();
+
+const statsSection = document.getElementById('statsSection');
+if (statsSection) {
+  statsSection.addEventListener('toggle', () => {
+    if (statsSection.open) {
+      document.getElementById('statsHint').textContent = '';
+      setTimeout(renderCharts, 50);
     }
   });
-  const kunden=Object.values(kundenMap);
-  const now=new Date();
-  const faellig=[], bald=[], ok=[];
-  kunden.forEach(b=>{
-    const last=new Date(b.date);
-    const weeks=Math.floor((now-last)/(7*24*60*60*1000));
-    if(weeks>=8) faellig.push({...b,weeks});
-    else if(weeks>=6) bald.push({...b,weeks});
-    else ok.push({...b,weeks});
-  });
-  document.getElementById('stat-faellig').textContent=faellig.length;
-  document.getElementById('stat-bald').textContent=bald.length;
-  document.getElementById('stat-ok').textContent=ok.length;
-  const list=document.getElementById('erinnerung-list');
-  if(!kunden.length){list.innerHTML='<p style="text-align:center;color:#aaa;font-size:14px;padding:2rem;">Noch keine abgeschlossenen Aufträge</p>';return;}
-  const renderCard=(b,color,label)=>{
-    const tel=b.tel?b.tel.replace(/\s/g,''):'';
-    const waNum=tel.startsWith('+')?tel.slice(1):tel.startsWith('0')?'49'+tel.slice(1):tel;
-    const msg=encodeURIComponent(`Hey ${b.name}! 😉 Dein Schläger wurde das letzte Mal vor ${b.weeks} Wochen bespannt – wird mal wieder Zeit für eine frische Saite! 🎾\n\nJetzt Termin buchen: https://myronmg.github.io/Besaitung\n\n– Myron`);
-    return `<div class="booking-card" style="border-left:3px solid ${color};margin-bottom:8px;">
-      <div class="booking-name">${b.name} <span class="badge" style="background:${color}22;color:${color};">${label}</span></div>
-      <div class="booking-detail">📱 ${b.tel||'–'} · 📍 ${b.standort||'–'}<br>🕐 Letzte Besaitung vor <strong>${b.weeks} Wochen</strong> (${formatDate(b.date)})</div>
-      <div class="booking-actions" style="margin-top:8px;">
-        ${waNum?`<button class="btn-small btn-accept" onclick="window.open('https://wa.me/${waNum}?text=${msg}','_blank')">📱 Erinnerung senden</button>`:'<span style="font-size:12px;color:#aaa;">Keine Nummer</span>'}
-      </div>
-    </div>`;
-  };
-  list.innerHTML=
-    (faellig.length?'<div style="font-size:12px;font-weight:600;color:#A32D2D;margin:12px 0 6px;">🔴 Fällig – über 8 Wochen</div>':'')+
-    faellig.map(b=>renderCard(b,'#A32D2D','Überfällig')).join('')+
-    (bald.length?'<div style="font-size:12px;font-weight:600;color:#854F0B;margin:12px 0 6px;">🟡 Bald fällig – 6-8 Wochen</div>':'')+
-    bald.map(b=>renderCard(b,'#EF9F27','Bald fällig')).join('')+
-    (ok.length?'<div style="font-size:12px;font-weight:600;color:#3B6D11;margin:12px 0 6px;">🟢 Alles gut – unter 6 Wochen</div>':'')+
-    ok.map(b=>renderCard(b,'#3B6D11','OK')).join('');
 }
-function renderCalendar(){
-  const base=new Date(today);base.setDate(today.getDate()-today.getDay()+1+weekOffset*7);
-  const end=new Date(base);end.setDate(base.getDate()+6);
-  document.getElementById('week-label').textContent=formatDate(base.toISOString().slice(0,10))+' – '+formatDate(end.toISOString().slice(0,10));
-  const grid=document.getElementById('week-grid');grid.innerHTML='';
-  for(let i=0;i<7;i++){const day=new Date(base);day.setDate(base.getDate()+i);const ds=day.toISOString().slice(0,10);const db=bookings.filter(b=>b.date===ds);const col=document.createElement('div');col.className='day-col';col.innerHTML=`<div class="day-header">${days[i]}</div><div class="day-num">${day.getDate()}</div>`+(db.length?db.map(b=>`<div class="day-booking">${b.name.split(' ')[0]}</div>`).join(''):'<div class="day-free">frei</div>');grid.appendChild(col);}
-}
-function prevWeek(){weekOffset--;renderCalendar();}
-function nextWeek(){weekOffset++;renderCalendar();}
-const AI_SYS=`Du bist Myrons Besaitungs-Assistent in Eggenstein. Antworte immer auf Deutsch, freundlich, max 4 Sätze.
-PREISE: Besaitung 12,50€/Schläger · Logo-Design +1€ (individuelles Design, kein Aufkleber) · Overgrip +3,50€ · Basisgriffband +10€ · Saite von Myron nach Absprache
-ABGABE: Kein Abholdienst! Kunden bringen selbst vorbei. Adresse kommt per WhatsApp.
-ZAHLUNG: PayPal myron.henschen@gmail.com oder Cash.
-SAITEN: Poly=Spin/Kontrolle 22-26kg · Multi=Komfort 24-28kg · Naturdarm=Premium 24-27kg · Hybrid=Kompromiss
-EXTRAS: Logo-Design=individuelles Design 1€ · Overgrip=über bestehendem Griff 3,50€ · Basisgriffband=Originalgriff Ersatz 10€`;
-async function sendAI(){
-  const input=document.getElementById('ai-input');
-  const msg=input.value.trim();if(!msg)return;input.value='';
-  const chat=document.getElementById('ai-chat');
-  const ud=document.createElement('div');ud.className='user-msg';ud.textContent=msg;chat.appendChild(ud);
-  aiHistory.push({role:'user',content:msg});
-  const ad=document.createElement('div');ad.className='ai-msg';ad.textContent='...';chat.appendChild(ad);
-  chat.scrollTop=chat.scrollHeight;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:AI_SYS,messages:aiHistory})});
-    const data=await r.json();
-    const reply=data.content?.[0]?.text||'Fehler.';
-    aiHistory.push({role:'assistant',content:reply});ad.textContent=reply;
-  }catch(e){ad.textContent='Verbindungsfehler.';}
-  chat.scrollTop=chat.scrollHeight;
-}
-function quickAI(msg){document.getElementById('ai-input').value=msg;sendAI();}
-calcPrice();
-updateAvailability();
-updateRabattFieldOnBooking();
 </script>
 </body>
 </html>
