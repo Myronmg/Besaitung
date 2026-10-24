@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Besaitung – Schläger bespannen lassen</title>
+<meta name="description" content="Tennisschläger bespannen lassen in Waldbronn & Eggenstein. Einfach online anfragen.">
+<meta name="theme-color" content="#0f3d2e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --green:#0f3d2e;--ball:#d9f23c;--clay:#c8562b;
+  --cream:#f6f3ea;--card:#ffffff;--ink:#13221b;--muted:#5f6d65;--line:#e4dece;
+  --ok:#1f8a4c;--bad:#c23b2b;--r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Barlow,system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+h1,h2{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+a{color:inherit}
+.hidden{display:none!important}
+
+/* HERO */
+.hero{background:var(--green);color:#fff;position:relative;overflow:hidden;padding:22px 0 56px}
+.hero::before{content:"";position:absolute;inset:0;opacity:.07;
+  background:repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 22px),repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 22px)}
+.nav{display:flex;justify-content:space-between;align-items:center;position:relative}
+.logo{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:24px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.logo i{width:14px;height:14px;border-radius:50%;background:var(--ball);display:inline-block}
+.pill{font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.3);padding:5px 11px;border-radius:99px}
+.hero-grid{display:grid;grid-template-columns:1fr;gap:10px;position:relative;margin-top:38px;align-items:center}
+.hero h1{font-size:clamp(52px,14vw,92px)}
+.hero h1 span{color:var(--ball)}
+.hero p{font-size:18px;color:rgba(255,255,255,.82);max-width:30ch;margin:16px 0 26px}
+.racket{width:100%;max-width:240px;justify-self:center;transform:rotate(-18deg);margin-top:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 17px Barlow,sans-serif;border:0;border-radius:99px;padding:15px 26px;cursor:pointer;text-decoration:none;transition:transform .15s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn-ball{background:var(--ball);color:var(--green)}
+.btn-dark{background:var(--green);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn[disabled]{opacity:.55;cursor:wait}
+@media(min-width:640px){.hero-grid{grid-template-columns:1.3fr 1fr}.racket{max-width:260px}}
+
+/* SECTIONS */
+section{padding:56px 0 8px}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:8px}
+h2{font-size:clamp(38px,9vw,54px);margin-bottom:22px}
+.steps{display:grid;gap:12px}
+.step{display:flex;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.step b{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:34px;line-height:1;color:var(--green);min-width:30px}
+.step h3{font-size:18px;margin-bottom:2px}
+.step p{color:var(--muted);font-size:15px}
+.prices{display:grid;gap:12px}
+@media(min-width:640px){.prices{grid-template-columns:repeat(3,1fr)}.steps{grid-template-columns:repeat(3,1fr)}.step{flex-direction:column}}
+.price{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;position:relative}
+.price.hot{background:var(--green);color:#fff;border-color:var(--green)}
+.price .tag{position:absolute;top:-10px;right:14px;background:var(--ball);color:var(--green);font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px}
+.price h3{font-size:16px;font-weight:600}
+.price .amt{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:46px;line-height:1.1}
+.price p{font-size:14px;opacity:.75}
+.paylogos{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.paylogos span{font-size:13px;font-weight:700;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+
+/* FORM */
+.form-card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
+.field{margin-bottom:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label,.lbl{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+label small,.lbl small{font-weight:400;color:var(--muted)}
+input,select,textarea{width:100%;font:500 16px Barlow,sans-serif;color:var(--ink);background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+textarea{min-height:90px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 15px Barlow,sans-serif;padding:9px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--cream);cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--green);border-color:var(--green);color:#fff}
+.payopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.payopt{font:600 14px Barlow,sans-serif;border:1.5px solid var(--line);background:var(--cream);border-radius:12px;padding:12px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink)}
+.payopt b{font-size:22px;line-height:1}
+.payopt.on{border-color:var(--green);background:#e8f0ea;box-shadow:inset 0 0 0 1px var(--green)}
+.hp{position:absolute;left:-9999px;opacity:0}
+.err{color:var(--bad);font-weight:600;font-size:15px;margin:4px 0 12px}
+.submit{width:100%;margin-top:6px}
+.note{font-size:13px;color:var(--muted);text-align:center;margin-top:12px}
+.done{text-align:center;padding:26px 6px}
+.ballbig{width:72px;height:72px;border-radius:50%;background:var(--ball);margin:0 auto 16px;display:grid;place-items:center;font-size:34px}
+.done h3,.st h3{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:38px;text-transform:uppercase;margin-bottom:6px;line-height:1}
+.done p{color:var(--muted)}
+footer{padding:48px 0 40px;color:var(--muted);font-size:14px;text-align:center}
+footer a{text-decoration:none;opacity:.5}
+
+/* STATUS (Kunde) */
+.st{padding-top:28px;padding-bottom:50px}
+.track{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:18px 0 22px}
+.track div{text-align:center;font-size:12px;font-weight:600;color:var(--muted)}
+.track div::before{content:"";display:block;height:6px;border-radius:9px;background:var(--line);margin-bottom:6px}
+.track div.on{color:var(--green)}
+.track div.on::before{background:var(--green)}
+.paybox{background:var(--green);color:#fff;border-radius:var(--r);padding:20px;margin-top:16px}
+.paybox .amt{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:52px;line-height:1}
+.paybox p{opacity:.8;font-size:15px;margin:4px 0 14px}
+.paybtns{display:grid;gap:10px}
+.btn-pp{background:#ffc439;color:#111}
+.btn-ap{background:#000;color:#fff}
+.btn-bar{background:rgba(255,255,255,.12);color:#fff}
+.paid{background:#dff3e6;color:var(--ok);border-radius:var(--r);padding:16px;font-weight:700;margin-top:16px;text-align:center}
+
+/* ADMIN */
+.admin-top{background:var(--green);color:#fff;padding:18px 0}
+.admin-top .wrap{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.admin-top button{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:99px;padding:8px 14px;font:600 14px Barlow,sans-serif;cursor:pointer}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:18px 0 6px;scrollbar-width:none}
+.tabs .chip{white-space:nowrap}
+.tabs .chip em{font-style:normal;opacity:.65;margin-left:4px}
+.list{display:grid;gap:12px;padding:10px 0 40px}
+.req{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.req-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.req-head h3{font-size:20px;line-height:1.2}
+.req-head time{font-size:13px;color:var(--muted)}
+.badges{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.b-offen{background:#fff4c2;color:#7a5b00}.b-angenommen{background:#dff3e6;color:var(--ok)}
+.b-abgelehnt{background:#f9e0dc;color:var(--bad)}.b-fertig{background:var(--ball);color:var(--green)}
+.b-abgeholt{background:#eceae3;color:var(--muted)}
+.b-paid{background:#dff3e6;color:var(--ok)}.b-unpaid{background:#f9e0dc;color:var(--bad)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:15px}
+.kv dt{color:var(--muted)}
+.kv dd{font-weight:600;word-break:break-word}
+.msg{background:var(--cream);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.acts .btn{padding:10px 16px;font-size:15px}
+.btn-ok{background:var(--ok);color:#fff}.btn-bad{background:#fff;color:var(--bad);border:1.5px solid #efc9c3}
+.btn-wa{background:#25d366;color:#fff}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+.login{max-width:400px;margin:60px auto}
+</style>
+</head>
+<body>
+
+<!-- ============ ÖFFENTLICHE SEITE ============ -->
+<div id="public">
+  <header class="hero">
+    <div class="wrap">
+      <nav class="nav">
+        <div class="logo"><i></i><span class="brandname">Besaitung</span></div>
+        <span class="pill" id="ort">Waldbronn · Eggenstein</span>
+      </nav>
+      <div class="hero-grid">
+        <div>
+          <h1>Frische Saiten.<br><span>Mehr Spin.</span></h1>
+          <p>Dein Schläger, sauber bespannt von einem aktiven Herren-1-Spieler. Online anfragen, ich melde mich per WhatsApp.</p>
+          <a href="#anfrage" class="btn btn-ball">Jetzt anfragen →</a>
+        </div>
+        <svg class="racket" viewBox="0 0 200 330" aria-hidden="true">
+          <defs><clipPath id="head"><ellipse cx="100" cy="100" rx="78" ry="92"/></clipPath></defs>
+          <g clip-path="url(#head)" stroke="rgba(255,255,255,.55)" stroke-width="1.6"><g id="v"></g><g id="h"></g></g>
+          <ellipse cx="100" cy="100" rx="78" ry="92" fill="none" stroke="#d9f23c" stroke-width="9"/>
+          <path d="M70 182 L92 236 M130 182 L108 236" stroke="#d9f23c" stroke-width="9" fill="none" stroke-linecap="round"/>
+          <rect x="88" y="232" width="24" height="92" rx="8" fill="#fff"/>
+          <rect x="88" y="250" width="24" height="5" fill="#0f3d2e" opacity=".25"/>
+          <rect x="88" y="270" width="24" height="5" fill="#0f3d2e" opacity=".25"/>
+          <rect x="88" y="290" width="24" height="5" fill="#0f3d2e" opacity=".25"/>
+          <circle cx="164" cy="44" r="20" fill="#d9f23c"/>
+          <path d="M150 30 q14 14 0 28 M178 30 q-14 14 0 28" stroke="#0f3d2e" stroke-width="2" fill="none" opacity=".5"/>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="kicker">So läuft's</div>
+      <h2>In 3 Schritten</h2>
+      <div class="steps">
+        <div class="step"><b>1</b><div><h3>Anfrage schicken</h3><p>Schläger, Saite, Spannung und Zahlungsart wählen. Dauert 1 Minute.</p></div></div>
+        <div class="step"><b>2</b><div><h3>Bestätigung</h3><p>Ich nehme an und schicke dir per WhatsApp deinen Status-Link.</p></div></div>
+        <div class="step"><b>3</b><div><h3>Zahlen & abholen</h3><p>Per PayPal, Apple Pay oder bar. Schläger frisch bespannt zurück.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="kicker">Preise</div>
+      <h2>Fair & transparent</h2>
+      <div class="prices" id="prices"></div>
+      <div class="paylogos"><span>PayPal</span><span>Apple Pay</span><span>💶 Bar</span></div>
+    </div>
+  </section>
+
+  <section id="anfrage">
+    <div class="wrap">
+      <div class="kicker">Anfrage</div>
+      <h2>Schläger bespannen lassen</h2>
+      <div class="form-card">
+        <form id="form" novalidate>
+          <div class="field"><label for="name">Name</label><input id="name" autocomplete="name" maxlength="80"></div>
+          <div class="field"><label for="kontakt">WhatsApp / Handynummer</label><input id="kontakt" type="tel" autocomplete="tel" maxlength="80" placeholder="0151 …"></div>
+          <div class="field"><label for="schlaeger">Schläger <small>(Marke & Modell)</small></label><input id="schlaeger" maxlength="120" placeholder="z. B. Babolat Pure Aero"></div>
+          <div class="field"><label for="saite">Saite</label><select id="saite"></select></div>
+          <div class="field"><span class="lbl">Spannung</span><div class="chips" id="spannung"></div></div>
+          <div class="row field">
+            <div><label for="abgabe">Abgabe <small>(ab)</small></label><input id="abgabe" type="date"></div>
+            <div><label for="fertig">Fertig bis</label><input id="fertig" type="date"></div>
+          </div>
+          <div class="field"><span class="lbl">Bezahlung</span>
+            <div class="payopts" id="zahlung">
+              <button type="button" class="payopt on" data-z="bar"><b>💶</b>Bar</button>
+              <button type="button" class="payopt" data-z="paypal"><b>🅿️</b>PayPal</button>
+              <button type="button" class="payopt" data-z="applepay"><b>📱</b>Apple Pay</button>
+            </div>
+          </div>
+          <div class="field"><label for="nachricht">Nachricht <small>(optional)</small></label><textarea id="nachricht" maxlength="500" placeholder="z. B. 2 Schläger, Griffband mit wechseln…"></textarea></div>
+          <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="err hidden" id="err"></div>
+          <button class="btn btn-dark submit" id="send">Anfrage senden</button>
+          <p class="note">Du zahlst erst, wenn ich die Anfrage angenommen habe.</p>
+        </form>
+        <div class="done hidden" id="done">
+          <div class="ballbig">🎾</div>
+          <h3>Anfrage ist raus!</h3>
+          <p>Ich melde mich in Kürze per WhatsApp. Über deinen Status-Link siehst du jederzeit, wie weit dein Schläger ist, und kannst dort bezahlen.</p>
+          <a class="btn btn-dark" style="margin-top:18px" id="myStatus" href="#">Mein Status & Bezahlung</a><br>
+          <button class="btn btn-ghost" style="margin-top:10px" id="again">Weitere Anfrage</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer><div class="wrap">© <span id="year"></span> <span class="brandname"></span> · <a href="#admin">Admin</a></div></footer>
+</div>
+
+<!-- ============ STATUS (Kunde) ============ -->
+<div id="status" class="hidden">
+  <div class="admin-top"><div class="wrap"><div class="logo"><i></i><span class="brandname"></span></div><button onclick="location.hash=''">Startseite</button></div></div>
+  <div class="wrap st" id="stBody"></div>
+</div>
+
+<!-- ============ ADMIN ============ -->
+<div id="admin" class="hidden">
+  <div class="admin-top"><div class="wrap">
+    <div class="logo"><i></i>Anfragen</div>
+    <div><button id="reload">↻</button> <button id="logout" class="hidden">Logout</button> <button onclick="location.hash=''">Seite</button></div>
+  </div></div>
+  <div class="wrap">
+    <div id="loginBox" class="login form-card">
+      <h2 style="font-size:36px">Admin Login</h2>
+      <form id="loginForm">
+        <div class="field"><label for="em">E-Mail</label><input id="em" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="pw">Passwort</label><input id="pw" type="password" autocomplete="current-password" required></div>
+        <div class="err hidden" id="lerr"></div>
+        <button class="btn btn-dark submit">Einloggen</button>
+      </form>
+    </div>
+    <div id="panel" class="hidden">
+      <div class="tabs" id="tabs"></div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== HIER ANPASSEN ===== */
+const CONFIG = {
+  brand: "Besaitung",
+  ort: "Waldbronn · Eggenstein",
+  paypalMe: "DEINNAME",   // nur der Name aus paypal.me/DEINNAME
+  stripeLink: "",          // Stripe-Zahlungslink für Apple Pay (leer = "Link folgt per WhatsApp")
+  preise: [
+    { titel: "Eigene Saite", preis: "12 €", text: "Du bringst die Saite mit, ich bespanne." },
+    { titel: "Inkl. Poly-Saite", preis: "ab 22 €", text: "Hyper-G, RPM Blast, ALU Power & Co.", hot: true, tag: "Beliebt" },
+    { titel: "Express", preis: "+5 €", text: "Fertig innerhalb von 24 Stunden." }
+  ],
+  saiten: [
+    "Weiß ich nicht – berate mich",
+    "Eigene Saite (bringe ich mit)",
+    "Solinco Hyper-G 1.25",
+    "Babolat RPM Blast 1.25",
+    "Luxilon ALU Power 1.25",
+    "Tecnifibre Razor Code 1.25",
+    "Tecnifibre X-One Biphase (armschonend)",
+    "Hybrid: Poly + Multifilament"
+  ],
+  spannungen: ["Weiß nicht", "Wie bisher", "21 kg", "22 kg", "23 kg", "24 kg", "25 kg", "Andere"],
+  supabaseUrl: "https://amqjsrhbomwenkhueehm.supabase.co",
+  supabaseKey: "sb_publishable_FxLMPFgWxoYqNzQdBtQ2hA_94RN51-4"
+};
+/* ========================= */
+
+const sb = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+const T = "bespannung_anfragen";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur = n => Number(n).toLocaleString("de-DE", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
+const ZAHL = { bar: "💶 Bar", paypal: "PayPal", applepay: "Apple Pay" };
+const statusUrl = id => location.origin + location.pathname + "#s=" + id;
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
+  "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+
+// Racket-Saiten
+(() => { let v = "", h = "";
+  for (let x = 30; x <= 170; x += 10) v += `<line x1="${x}" y1="0" x2="${x}" y2="200"/>`;
+  for (let y = 12; y <= 190; y += 10) h += `<line x1="0" y1="${y}" x2="200" y2="${y}"/>`;
+  $("v").innerHTML = v; $("h").innerHTML = h; })();
+
+// Inhalte
+document.querySelectorAll(".brandname").forEach(e => e.textContent = CONFIG.brand);
+$("ort").textContent = CONFIG.ort;
+$("year").textContent = new Date().getFullYear();
+$("prices").innerHTML = CONFIG.preise.map(p => `
+  <div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}
+    <h3>${esc(p.titel)}</h3><div class="amt">${esc(p.preis)}</div><p>${esc(p.text)}</p></div>`).join("");
+$("saite").innerHTML = `<option value="">Bitte wählen…</option>` + CONFIG.saiten.map(s => `<option>${esc(s)}</option>`).join("");
+let spannung = CONFIG.spannungen[0], zahlung = "bar";
+$("spannung").innerHTML = CONFIG.spannungen.map((s, i) => `<button type="button" class="chip ${i ? "" : "on"}">${esc(s)}</button>`).join("");
+$("spannung").addEventListener("click", e => {
+  if (!e.target.classList.contains("chip")) return;
+  [...$("spannung").children].forEach(c => c.classList.remove("on"));
+  e.target.classList.add("on"); spannung = e.target.textContent;
+});
+$("zahlung").addEventListener("click", e => {
+  const b = e.target.closest(".payopt"); if (!b) return;
+  [...$("zahlung").children].forEach(c => c.classList.remove("on"));
+  b.classList.add("on"); zahlung = b.dataset.z;
+});
+const today = new Date().toISOString().slice(0, 10);
+$("abgabe").min = today; $("fertig").min = today;
+
+// Anfrage senden
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = $("err"); err.classList.add("hidden");
+  if ($("website").value) return;
+  const row = {
+    id: uuid(), name: $("name").value.trim(), kontakt: $("kontakt").value.trim(), schlaeger: $("schlaeger").value.trim(),
+    saite: $("saite").value, spannung, zahlung, abgabe: $("abgabe").value || null, fertig_bis: $("fertig").value || null,
+    nachricht: $("nachricht").value.trim() || null
+  };
+  const fehlt = !row.name ? "deinen Namen" : row.kontakt.replace(/\D/g, "").length < 6 ? "eine gültige Handynummer" : !row.schlaeger ? "deinen Schläger" : !row.saite ? "eine Saite" : "";
+  if (fehlt) { err.textContent = `Bitte gib ${fehlt} an.`; err.classList.remove("hidden"); return; }
+  $("send").disabled = true; $("send").textContent = "Wird gesendet…";
+  const { error } = await sb.from(T).insert(row);
+  $("send").disabled = false; $("send").textContent = "Anfrage senden";
+  if (error) { err.textContent = "Ups, das hat nicht geklappt. Versuch's nochmal."; err.classList.remove("hidden"); return; }
+  store.set("letzteAnfrage", row.id);
+  $("myStatus").href = "#s=" + row.id;
+  $("form").reset(); spannung = CONFIG.spannungen[0]; zahlung = "bar";
+  [...$("spannung").children].forEach((c, i) => c.classList.toggle("on", !i));
+  [...$("zahlung").children].forEach((c, i) => c.classList.toggle("on", !i));
+  $("form").classList.add("hidden"); $("done").classList.remove("hidden");
+  $("anfrage").scrollIntoView();
+});
+$("again").onclick = () => { $("done").classList.add("hidden"); $("form").classList.remove("hidden"); };
+
+/* ===== ROUTING ===== */
+function route() {
+  const h = location.hash;
+  const view = h === "#admin" ? "admin" : h.startsWith("#s=") ? "status" : "public";
+  ["public", "status", "admin"].forEach(v => $(v).classList.toggle("hidden", v !== view));
+  if (view !== "public") scrollTo(0, 0);
+  if (view === "admin") checkSession();
+  if (view === "status") showStatus(h.slice(3));
+}
+addEventListener("hashchange", route);
+
+/* ===== STATUS-SEITE (Kunde) ===== */
+const STEPS = ["offen", "angenommen", "fertig", "abgeholt"];
+const STEP_LBL = { offen: "Eingegangen", angenommen: "Angenommen", fertig: "Fertig", abgeholt: "Abgeholt" };
+function payLinks(a) {
+  const pp = CONFIG.paypalMe && CONFIG.paypalMe !== "DEINNAME" ? `https://paypal.me/${encodeURIComponent(CONFIG.paypalMe)}/${Number(a.preis).toFixed(2)}EUR` : "";
+  return {
+    paypal: pp ? `<a class="btn btn-pp" href="${pp}" target="_blank" rel="noopener">Mit PayPal zahlen</a>` : `<span class="btn btn-bar">PayPal-Link folgt per WhatsApp</span>`,
+    applepay: CONFIG.stripeLink ? `<a class="btn btn-ap" href="${esc(CONFIG.stripeLink)}" target="_blank" rel="noopener">Apple Pay · ${eur(a.preis)}</a>` : `<span class="btn btn-bar">Apple-Pay-Link folgt per WhatsApp</span>`,
+    bar: `<span class="btn btn-bar">💶 Bar bei Abholung</span>`
+  };
+}
+async function showStatus(id) {
+  const box = $("stBody");
+  box.innerHTML = `<div class="empty">Lädt…</div>`;
+  const { data, error } = await sb.rpc("anfrage_status", { p_id: id });
+  const a = data && data[0];
+  if (error || !a) { box.innerHTML = `<div class="empty">Anfrage nicht gefunden.</div>`; return; }
+  if (a.status === "abgelehnt") {
+    box.innerHTML = `<h3>Leider abgelehnt</h3><p style="color:var(--muted)">Ich kann deine Anfrage gerade nicht annehmen. Du hast eine WhatsApp von mir bekommen.</p>`; return;
+  }
+  const idx = STEPS.indexOf(a.status);
+  const links = payLinks(a);
+  let pay = "";
+  if (a.bezahlt) pay = `<div class="paid">✓ Bezahlt${a.preis != null ? " · " + eur(a.preis) : ""}. Danke!</div>`;
+  else if (a.preis != null && a.status !== "offen") {
+    const others = Object.keys(links).filter(z => z !== a.zahlung);
+    pay = `<div class="paybox"><div>Zu zahlen</div><div class="amt">${eur(a.preis)}</div>
+      <p>Gewählt: ${ZAHL[a.zahlung]}. Du kannst auch anders zahlen.</p>
+      <div class="paybtns">${links[a.zahlung]}${others.map(z => links[z]).join("")}</div></div>`;
+  } else pay = `<p class="note" style="text-align:left;margin-top:16px">Sobald ich die Anfrage angenommen habe, siehst du hier den Preis und kannst direkt bezahlen.</p>`;
+  box.innerHTML = `
+    <div class="kicker">Dein Auftrag</div>
+    <h3>${esc(STEP_LBL[a.status])}</h3>
+    <div class="track">${STEPS.map((s, i) => `<div class="${i <= idx ? "on" : ""}">${STEP_LBL[s]}</div>`).join("")}</div>
+    <div class="req"><dl class="kv">
+      <dt>Schläger</dt><dd>${esc(a.schlaeger)}</dd><dt>Saite</dt><dd>${esc(a.saite)}</dd>
+      <dt>Spannung</dt><dd>${esc(a.spannung || "–")}</dd><dt>Zahlung</dt><dd>${ZAHL[a.zahlung]}</dd>
+    </dl></div>${pay}
+    <p class="note" style="margin-top:22px">Speicher dir diesen Link, um später nachzuschauen.</p>`;
+}
+
+/* ===== ADMIN ===== */
+const STATUS = { offen: "Offen", angenommen: "Angenommen", fertig: "Fertig", abgeholt: "Abgeholt", abgelehnt: "Abgelehnt" };
+let filter = "offen", rows = [];
+
+async function checkSession() {
+  const { data } = await sb.auth.getSession();
+  const inn = !!data.session;
+  $("loginBox").classList.toggle("hidden", inn);
+  $("panel").classList.toggle("hidden", !inn);
+  $("logout").classList.toggle("hidden", !inn);
+  if (inn) load();
+}
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({ email: $("em").value, password: $("pw").value });
+  if (error) { $("lerr").textContent = "Login fehlgeschlagen."; $("lerr").classList.remove("hidden"); return; }
+  $("lerr").classList.add("hidden"); checkSession();
+});
+$("logout").onclick = async () => { await sb.auth.signOut(); checkSession(); };
+$("reload").onclick = () => load();
+
+async function load() {
+  $("list").innerHTML = `<div class="empty">Lädt…</div>`;
+  const { data, error } = await sb.from(T).select("*").order("created_at", { ascending: false });
+  if (error) { $("list").innerHTML = `<div class="empty">Fehler: ${esc(error.message)}</div>`; return; }
+  rows = data; render();
+}
+
+function waLink(r, text) {
+  let n = r.kontakt.replace(/[^\d+]/g, "");
+  if (n.startsWith("+")) n = n.slice(1); else if (n.startsWith("00")) n = n.slice(2); else if (n.startsWith("0")) n = "49" + n.slice(1);
+  return `https://wa.me/${n}?text=${encodeURIComponent(text)}`;
+}
+function waText(r) {
+  const vn = r.name.split(" ")[0], link = statusUrl(r.id);
+  const p = r.preis != null ? eur(r.preis) : "";
+  const zahlHinweis = r.bezahlt ? "" : r.zahlung === "bar" ? ` Bitte ${p} bar mitbringen.` : ` Bezahlen kannst du hier: ${link}`;
+  return {
+    offen: `Hi ${vn}, kurze Frage zu deiner Bespannung (${r.schlaeger}): `,
+    angenommen: `Hi ${vn}, deine Bespannung für den ${r.schlaeger} ist angenommen 🎾${p ? " Preis: " + p + "." : ""} Wann kannst du ihn mir geben? Status & Bezahlung: ${link}`,
+    fertig: `Hi ${vn}, dein ${r.schlaeger} ist frisch bespannt und kann abgeholt werden 🎾${zahlHinweis}`,
+    abgeholt: `Hi ${vn}, danke dir! Viel Spaß mit den neuen Saiten 🎾`,
+    abgelehnt: `Hi ${vn}, sorry, deine Bespannungsanfrage kann ich gerade leider nicht annehmen.`
+  }[r.status];
+}
+const fmt = d => d ? new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "–";
+function askPreis(cur) {
+  const v = prompt("Preis in € (z. B. 22 oder 22,50):", cur != null ? String(cur).replace(".", ",") : "");
+  if (v === null) return undefined;
+  const n = parseFloat(v.replace(",", "."));
+  if (isNaN(n) || n < 0) { alert("Ungültiger Preis."); return undefined; }
+  return n;
+}
+
+function render() {
+  const count = s => rows.filter(r => s === "alle" || r.status === s).length;
+  $("tabs").innerHTML = [...Object.keys(STATUS), "alle"].map(s =>
+    `<button class="chip ${s === filter ? "on" : ""}" data-f="${s}">${s === "alle" ? "Alle" : STATUS[s]}<em>${count(s)}</em></button>`).join("");
+  const list = rows.filter(r => filter === "alle" || r.status === filter);
+  if (!list.length) { $("list").innerHTML = `<div class="empty">Keine Anfragen hier.</div>`; return; }
+  $("list").innerHTML = list.map(r => {
+    const t = new Date(r.created_at).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    const next = {
+      offen: `<button class="btn btn-ok" data-id="${r.id}" data-s="angenommen">✓ Annehmen</button><button class="btn btn-bad" data-id="${r.id}" data-s="abgelehnt">Ablehnen</button>`,
+      angenommen: `<button class="btn btn-dark" data-id="${r.id}" data-s="fertig">Fertig bespannt</button>`,
+      fertig: `<button class="btn btn-dark" data-id="${r.id}" data-s="abgeholt">Abgeholt</button>`,
+      abgeholt: "", abgelehnt: `<button class="btn btn-ghost" data-id="${r.id}" data-s="offen">Wieder öffnen</button>`
+    }[r.status];
+    const zahlBtns = r.status === "abgelehnt" ? "" :
+      `<button class="btn btn-ghost" data-preis="${r.id}">${r.preis != null ? "Preis ändern" : "Preis setzen"}</button>
+       <button class="btn btn-ghost" data-paid="${r.id}">${r.bezahlt ? "Als unbezahlt" : "💰 Bezahlt"}</button>`;
+    return `<article class="req">
+      <div class="req-head"><div><h3>${esc(r.name)}</h3><time>${t}</time></div>
+        <div class="badges"><span class="badge b-${r.status}">${STATUS[r.status]}</span>
+        ${r.status !== "abgelehnt" ? `<span class="badge ${r.bezahlt ? "b-paid" : "b-unpaid"}">${r.bezahlt ? "Bezahlt" : "Offen €"}</span>` : ""}</div></div>
+      <dl class="kv">
+        <dt>Schläger</dt><dd>${esc(r.schlaeger)}</dd>
+        <dt>Saite</dt><dd>${esc(r.saite)}</dd>
+        <dt>Spannung</dt><dd>${esc(r.spannung || "–")}</dd>
+        <dt>Abgabe</dt><dd>${fmt(r.abgabe)} · fertig bis ${fmt(r.fertig_bis)}</dd>
+        <dt>Zahlung</dt><dd>${ZAHL[r.zahlung] || "–"} · ${r.preis != null ? eur(r.preis) : "kein Preis"}</dd>
+        <dt>Kontakt</dt><dd>${esc(r.kontakt)}</dd>
+      </dl>
+      ${r.nachricht ? `<div class="msg">${esc(r.nachricht)}</div>` : ""}
+      <div class="acts">${next}
+        <a class="btn btn-wa" target="_blank" rel="noopener" href="${waLink(r, waText(r))}">WhatsApp</a>
+        ${zahlBtns}
+        ${["abgelehnt", "abgeholt"].includes(r.status) ? `<button class="btn btn-ghost" data-del="${r.id}">Löschen</button>` : ""}
+      </div></article>`;
+  }).join("");
+}
+async function save(id, patch) {
+  const { error } = await sb.from(T).update(patch).eq("id", id);
+  if (error) { alert("Fehler: " + error.message); return false; }
+  Object.assign(rows.find(x => x.id === id), patch); return true;
+}
+$("tabs").addEventListener("click", e => { const f = e.target.closest("[data-f]"); if (f) { filter = f.dataset.f; render(); } });
+$("list").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const d = b.dataset;
+  if (d.del) {
+    if (!confirm("Anfrage endgültig löschen?")) return;
+    const { error } = await sb.from(T).delete().eq("id", d.del);
+    if (error) return alert("Fehler: " + error.message);
+    rows = rows.filter(r => r.id !== d.del); return render();
+  }
+  if (d.preis) { const r = rows.find(x => x.id === d.preis); const n = askPreis(r.preis); if (n !== undefined && await save(r.id, { preis: n })) render(); return; }
+  if (d.paid) { const r = rows.find(x => x.id === d.paid); if (await save(r.id, { bezahlt: !r.bezahlt })) render(); return; }
+  if (!d.s) return;
+  const r = rows.find(x => x.id === d.id), patch = { status: d.s };
+  if (d.s === "angenommen" && r.preis == null) { const n = askPreis(null); if (n === undefined) return; patch.preis = n; }
+  b.disabled = true;
+  if (!(await save(r.id, patch))) { b.disabled = false; return; }
+  if (["angenommen", "fertig"].includes(d.s) && confirm("Direkt per WhatsApp Bescheid geben?")) open(waLink(r, waText(r)), "_blank");
+  render();
+});
+
+// Wiederkehrender Kunde: Link zur letzten Anfrage
+const last = store.get("letzteAnfrage");
+if (last) $("myStatus").href = "#s=" + last;
+
+route();
+</script>
+</body>
+</html>
