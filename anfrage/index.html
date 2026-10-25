@@ -23,6 +23,7 @@ body{font-family:Barlow,system-ui,sans-serif;background:var(--cream);color:var(-
 h1,h2{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
 a{color:inherit}
 .hidden{display:none!important}
+.disp{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;line-height:1}
 
 /* HERO */
 .hero{background:var(--green);color:#fff;position:relative;overflow:hidden;padding:22px 0 56px}
@@ -62,12 +63,12 @@ h2{font-size:clamp(38px,9vw,54px);margin-bottom:22px}
 .price h3{font-size:16px;font-weight:600}
 .price .amt{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:46px;line-height:1.1}
 .price p{font-size:14px;opacity:.75}
-.paylogos{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.paylogos span{font-size:13px;font-weight:700;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.paylogos{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;font-size:14px;color:var(--muted)}
+.paylogos span{font-size:13px;font-weight:700;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
 
 /* FORM */
 .form-card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
-.field{margin-bottom:16px}
+.field{margin-bottom:18px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 label,.lbl{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
 label small,.lbl small{font-weight:400;color:var(--muted)}
@@ -78,18 +79,54 @@ textarea{min-height:90px;resize:vertical}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font:600 15px Barlow,sans-serif;padding:9px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--cream);cursor:pointer;color:var(--ink)}
 .chip.on{background:var(--green);border-color:var(--green);color:#fff}
-.payopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.payopt{font:600 14px Barlow,sans-serif;border:1.5px solid var(--line);background:var(--cream);border-radius:12px;padding:12px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink)}
-.payopt b{font-size:22px;line-height:1}
-.payopt.on{border-color:var(--green);background:#e8f0ea;box-shadow:inset 0 0 0 1px var(--green)}
+.toggle{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);background:var(--cream);border-radius:12px;padding:12px 14px;cursor:pointer;margin:0}
+.toggle input{display:none}
+.toggle .sw{width:42px;height:24px;border-radius:99px;background:#d6d0bf;position:relative;flex-shrink:0;transition:background .15s}
+.toggle .sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.toggle input:checked + .sw{background:var(--green)}
+.toggle input:checked + .sw::after{transform:translateX(18px)}
+.toggle span:last-child{font-weight:600;font-size:15px}
+.toggle small{display:block;font-weight:400;color:var(--muted)}
+/* Zahlungsart */
+.paylist{display:grid;gap:10px}
+.payopt{display:flex;align-items:center;gap:14px;text-align:left;width:100%;font:inherit;color:var(--ink);border:1.5px solid var(--line);background:var(--cream);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,background .15s}
+.payopt .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;flex-shrink:0}
+.ico-bar{background:#e6efe2}.ico-pp{background:#ffc439;color:#003087;font-family:Arial,sans-serif;font-style:italic}.ico-ap{background:#000;color:#fff;font-size:13px!important}
+.payopt b{display:block;font-size:16px}
+.payopt small{display:block;color:var(--muted);font-size:14px;line-height:1.3}
+.payopt .chk{margin-left:auto;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center}
+.payopt.on{border-color:var(--green);background:#fff;box-shadow:0 0 0 1px var(--green)}
+.payopt.on .chk{border-color:var(--green);background:var(--green)}
+.payopt.on .chk::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+/* Preisübersicht */
+.sum{background:var(--green);color:#fff;border-radius:16px;padding:18px;margin:6px 0 16px}
+.sum .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.sum .lbl2{font-size:14px;opacity:.75}
+.sum .big{font-size:46px;color:var(--ball)}
+.sum ul{list-style:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15);font-size:15px}
+.sum li{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.sum li span:first-child{opacity:.8}
+.sum .fine{font-size:13px;opacity:.65;margin-top:8px}
 .hp{position:absolute;left:-9999px;opacity:0}
 .err{color:var(--bad);font-weight:600;font-size:15px;margin:4px 0 12px}
 .submit{width:100%;margin-top:6px}
 .note{font-size:13px;color:var(--muted);text-align:center;margin-top:12px}
-.done{text-align:center;padding:26px 6px}
-.ballbig{width:72px;height:72px;border-radius:50%;background:var(--ball);margin:0 auto 16px;display:grid;place-items:center;font-size:34px}
+/* Danke */
+.done{padding:10px 0}
+.done .head{text-align:center;margin-bottom:20px}
+.ballbig{width:72px;height:72px;border-radius:50%;background:var(--ball);margin:0 auto 14px;display:grid;place-items:center;font-size:34px}
 .done h3,.st h3{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:38px;text-transform:uppercase;margin-bottom:6px;line-height:1}
-.done p{color:var(--muted)}
+.next{list-style:none;display:grid;gap:12px;margin:18px 0}
+.next li{display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.next li b{width:28px;height:28px;border-radius:50%;background:var(--cream);border:1.5px solid var(--line);display:grid;place-items:center;flex-shrink:0;font-size:14px}
+.next li strong{display:block}
+.next li span{color:var(--muted)}
+.btnrow{display:grid;gap:10px}
+.savebox{background:#fff8d6;border:1.5px solid #f0dc7a;border-radius:16px;padding:16px;margin:0 0 14px;display:grid;gap:8px}
+.savebox strong{font-size:16px}
+.savebox span{font-size:14px;color:#5b4d12}
+.savebox code{font:600 13px ui-monospace,Menlo,monospace;background:#fff;border:1px solid #f0dc7a;border-radius:8px;padding:8px 10px;word-break:break-all;color:var(--ink)}
+.savebox .btn{width:100%;padding:12px 18px;font-size:16px}
 footer{padding:48px 0 40px;color:var(--muted);font-size:14px;text-align:center}
 footer a{text-decoration:none;opacity:.5}
 
@@ -100,14 +137,26 @@ footer a{text-decoration:none;opacity:.5}
 .track div::before{content:"";display:block;height:6px;border-radius:9px;background:var(--line);margin-bottom:6px}
 .track div.on{color:var(--green)}
 .track div.on::before{background:var(--green)}
-.paybox{background:var(--green);color:#fff;border-radius:var(--r);padding:20px;margin-top:16px}
-.paybox .amt{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:52px;line-height:1}
-.paybox p{opacity:.8;font-size:15px;margin:4px 0 14px}
-.paybtns{display:grid;gap:10px}
+.paybox{background:var(--card);border:1.5px solid var(--green);border-radius:20px;padding:20px;margin-top:16px}
+.paybox .lbl2{font-size:14px;color:var(--muted)}
+.paybox .big{font-size:56px;color:var(--green);margin:2px 0 12px}
+.paybox .how{font-size:14px;color:var(--muted);margin-top:12px}
+.btn-pay{width:100%;font-size:18px;padding:17px 20px}
 .btn-pp{background:#ffc439;color:#111}
 .btn-ap{background:#000;color:#fff}
-.btn-bar{background:rgba(255,255,255,.12);color:#fff}
-.paid{background:#dff3e6;color:var(--ok);border-radius:var(--r);padding:16px;font-weight:700;margin-top:16px;text-align:center}
+.btn-cash{background:#e6efe2;color:var(--green);cursor:default}
+.btn-wait{background:var(--cream);color:var(--muted);cursor:default;border:1.5px dashed var(--line)}
+details.alt{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+details.alt summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--green);list-style:none}
+details.alt summary::-webkit-details-marker{display:none}
+details.alt summary::after{content:" ▾"}
+details.alt[open] summary::after{content:" ▴"}
+details.alt .btnrow{margin-top:12px}
+details.alt .btn{font-size:16px;padding:13px 18px}
+.paid{background:#dff3e6;color:var(--ok);border-radius:20px;padding:22px;margin-top:16px;text-align:center}
+.paid .disp{font-size:34px;text-transform:uppercase}
+.waiting{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:16px}
+.waiting .big{font-size:40px;color:var(--green)}
 
 /* ADMIN */
 .admin-top{background:var(--green);color:#fff;padding:18px 0}
@@ -176,9 +225,9 @@ footer a{text-decoration:none;opacity:.5}
       <div class="kicker">So läuft's</div>
       <h2>In 3 Schritten</h2>
       <div class="steps">
-        <div class="step"><b>1</b><div><h3>Anfrage schicken</h3><p>Schläger, Saite, Spannung und Zahlungsart wählen. Dauert 1 Minute.</p></div></div>
+        <div class="step"><b>1</b><div><h3>Anfrage schicken</h3><p>Schläger und Saite wählen, du siehst sofort den Preis.</p></div></div>
         <div class="step"><b>2</b><div><h3>Bestätigung</h3><p>Ich nehme an und schicke dir per WhatsApp deinen Status-Link.</p></div></div>
-        <div class="step"><b>3</b><div><h3>Zahlen & abholen</h3><p>Per PayPal, Apple Pay oder bar. Schläger frisch bespannt zurück.</p></div></div>
+        <div class="step"><b>3</b><div><h3>Zahlen & abholen</h3><p>Mit einem Klick per PayPal oder Apple Pay, oder einfach bar.</p></div></div>
       </div>
     </div>
   </section>
@@ -188,7 +237,7 @@ footer a{text-decoration:none;opacity:.5}
       <div class="kicker">Preise</div>
       <h2>Fair & transparent</h2>
       <div class="prices" id="prices"></div>
-      <div class="paylogos"><span>PayPal</span><span>Apple Pay</span><span>💶 Bar</span></div>
+      <div class="paylogos">Bezahlen mit <span>PayPal</span><span>Apple Pay</span><span>Bar</span></div>
     </div>
   </section>
 
@@ -207,25 +256,44 @@ footer a{text-decoration:none;opacity:.5}
             <div><label for="abgabe">Abgabe <small>(ab)</small></label><input id="abgabe" type="date"></div>
             <div><label for="fertig">Fertig bis</label><input id="fertig" type="date"></div>
           </div>
-          <div class="field"><span class="lbl">Bezahlung</span>
-            <div class="payopts" id="zahlung">
-              <button type="button" class="payopt on" data-z="bar"><b>💶</b>Bar</button>
-              <button type="button" class="payopt" data-z="paypal"><b>🅿️</b>PayPal</button>
-              <button type="button" class="payopt" data-z="applepay"><b>📱</b>Apple Pay</button>
-            </div>
+          <div class="field">
+            <label class="toggle"><input type="checkbox" id="express"><span class="sw"></span><span>⚡ Express <small id="expressTxt">Fertig in 24 Stunden</small></span></label>
           </div>
           <div class="field"><label for="nachricht">Nachricht <small>(optional)</small></label><textarea id="nachricht" maxlength="500" placeholder="z. B. 2 Schläger, Griffband mit wechseln…"></textarea></div>
+
+          <div class="field"><span class="lbl">Wie möchtest du zahlen?</span>
+            <div class="paylist" id="zahlung">
+              <button type="button" class="payopt on" data-z="bar"><span class="ico ico-bar">💶</span><span><b>Bar bei Abholung</b><small>Einfach passend mitbringen</small></span><span class="chk"></span></button>
+              <button type="button" class="payopt" data-z="paypal"><span class="ico ico-pp">P</span><span><b>PayPal</b><small>Nach Bestätigung mit einem Klick zahlen</small></span><span class="chk"></span></button>
+              <button type="button" class="payopt" data-z="applepay"><span class="ico ico-ap">Pay</span><span><b>Apple Pay / Karte</b><small>Nach Bestätigung mit einem Klick zahlen</small></span><span class="chk"></span></button>
+            </div>
+          </div>
+
+          <div class="sum" id="sum"></div>
           <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="err hidden" id="err"></div>
-          <button class="btn btn-dark submit" id="send">Anfrage senden</button>
-          <p class="note">Du zahlst erst, wenn ich die Anfrage angenommen habe.</p>
+          <button class="btn btn-ball submit" id="send">Anfrage senden</button>
+          <p class="note">Du zahlst erst, wenn ich die Anfrage bestätigt habe.</p>
         </form>
+
         <div class="done hidden" id="done">
-          <div class="ballbig">🎾</div>
-          <h3>Anfrage ist raus!</h3>
-          <p>Ich melde mich in Kürze per WhatsApp. Über deinen Status-Link siehst du jederzeit, wie weit dein Schläger ist, und kannst dort bezahlen.</p>
-          <a class="btn btn-dark" style="margin-top:18px" id="myStatus" href="#">Mein Status & Bezahlung</a><br>
-          <button class="btn btn-ghost" style="margin-top:10px" id="again">Weitere Anfrage</button>
+          <div class="head">
+            <div class="ballbig">🎾</div>
+            <h3>Anfrage ist raus!</h3>
+          </div>
+          <div class="sum" id="doneSum"></div>
+          <div class="lbl">So geht's weiter</div>
+          <ol class="next" id="nextSteps"></ol>
+          <div class="savebox">
+            <strong>📌 Speicher dir deinen Status-Link!</strong>
+            <span>Darüber siehst du jederzeit, wie weit dein Schläger ist, und bezahlst dort. Am besten kopieren und in deine Notizen legen oder als Lesezeichen speichern. Ich schicke ihn dir zusätzlich per WhatsApp.</span>
+            <code id="linkText"></code>
+            <button class="btn btn-dark" id="copyLink" type="button">Link kopieren</button>
+          </div>
+          <div class="btnrow">
+            <a class="btn btn-ghost" id="myStatus" href="#">Status-Link öffnen</a>
+            <button class="btn btn-ghost" id="again">Weitere Anfrage</button>
+          </div>
         </div>
       </div>
     </div>
@@ -269,21 +337,18 @@ const CONFIG = {
   brand: "Besaitung",
   ort: "Waldbronn · Eggenstein",
   paypalMe: "DEINNAME",   // nur der Name aus paypal.me/DEINNAME
-  stripeLink: "",          // Stripe-Zahlungslink für Apple Pay (leer = "Link folgt per WhatsApp")
-  preise: [
-    { titel: "Eigene Saite", preis: "12 €", text: "Du bringst die Saite mit, ich bespanne." },
-    { titel: "Inkl. Poly-Saite", preis: "ab 22 €", text: "Hyper-G, RPM Blast, ALU Power & Co.", hot: true, tag: "Beliebt" },
-    { titel: "Express", preis: "+5 €", text: "Fertig innerhalb von 24 Stunden." }
-  ],
+  stripeLink: "",          // Stripe-Zahlungslink für Apple Pay (leer = "Link kommt per WhatsApp")
+  expressAufpreis: 5,
+  // preis = Gesamtpreis inkl. Bespannen. null = wird nach Beratung festgelegt
   saiten: [
-    "Weiß ich nicht – berate mich",
-    "Eigene Saite (bringe ich mit)",
-    "Solinco Hyper-G 1.25",
-    "Babolat RPM Blast 1.25",
-    "Luxilon ALU Power 1.25",
-    "Tecnifibre Razor Code 1.25",
-    "Tecnifibre X-One Biphase (armschonend)",
-    "Hybrid: Poly + Multifilament"
+    { name: "Weiß ich nicht – berate mich", preis: null },
+    { name: "Eigene Saite (bringe ich mit)", preis: 12 },
+    { name: "Solinco Hyper-G 1.25", preis: 24 },
+    { name: "Babolat RPM Blast 1.25", preis: 25 },
+    { name: "Luxilon ALU Power 1.25", preis: 27 },
+    { name: "Tecnifibre Razor Code 1.25", preis: 24 },
+    { name: "Tecnifibre X-One Biphase (armschonend)", preis: 28 },
+    { name: "Hybrid: Poly + Multifilament", preis: 26 }
   ],
   spannungen: ["Weiß nicht", "Wie bisher", "21 kg", "22 kg", "23 kg", "24 kg", "25 kg", "Andere"],
   supabaseUrl: "https://amqjsrhbomwenkhueehm.supabase.co",
@@ -296,11 +361,22 @@ const T = "bespannung_anfragen";
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const eur = n => Number(n).toLocaleString("de-DE", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
-const ZAHL = { bar: "💶 Bar", paypal: "PayPal", applepay: "Apple Pay" };
+const ZAHL = { bar: "Bar bei Abholung", paypal: "PayPal", applepay: "Apple Pay / Karte" };
 const statusUrl = id => location.origin + location.pathname + "#s=" + id;
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
   "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+
+// Preis-Logik
+const polyPreise = CONFIG.saiten.map(s => s.preis).filter(p => p != null && p > CONFIG.saiten[1].preis);
+const abPreis = Math.min(...polyPreise);
+function schaetzung(saiteName, express) {
+  const s = CONFIG.saiten.find(x => x.name === saiteName);
+  if (!s) return null;
+  const basis = s.preis ?? abPreis;
+  return { betrag: basis + (express ? CONFIG.expressAufpreis : 0), ab: s.preis == null, basis };
+}
+const preisTxt = e => e ? (e.ab ? "ab " : "") + eur(e.betrag) : "–";
 
 // Racket-Saiten
 (() => { let v = "", h = "";
@@ -312,10 +388,16 @@ const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
 document.querySelectorAll(".brandname").forEach(e => e.textContent = CONFIG.brand);
 $("ort").textContent = CONFIG.ort;
 $("year").textContent = new Date().getFullYear();
-$("prices").innerHTML = CONFIG.preise.map(p => `
-  <div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}
+$("prices").innerHTML = [
+  { titel: "Eigene Saite", preis: eur(CONFIG.saiten[1].preis), text: "Du bringst die Saite mit, ich bespanne." },
+  { titel: "Inkl. Saite", preis: "ab " + eur(abPreis), text: "Hyper-G, RPM Blast, ALU Power & Co.", hot: true, tag: "Beliebt" },
+  { titel: "Express", preis: "+" + eur(CONFIG.expressAufpreis), text: "Fertig innerhalb von 24 Stunden." }
+].map(p => `<div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${p.tag}</span>` : ""}
     <h3>${esc(p.titel)}</h3><div class="amt">${esc(p.preis)}</div><p>${esc(p.text)}</p></div>`).join("");
-$("saite").innerHTML = `<option value="">Bitte wählen…</option>` + CONFIG.saiten.map(s => `<option>${esc(s)}</option>`).join("");
+$("saite").innerHTML = `<option value="">Bitte wählen…</option>` + CONFIG.saiten.map(s =>
+  `<option value="${esc(s.name)}">${esc(s.name)}${s.preis != null ? " · " + eur(s.preis) : ""}</option>`).join("");
+$("expressTxt").textContent = `Fertig in 24 Stunden · +${eur(CONFIG.expressAufpreis)}`;
+
 let spannung = CONFIG.spannungen[0], zahlung = "bar";
 $("spannung").innerHTML = CONFIG.spannungen.map((s, i) => `<button type="button" class="chip ${i ? "" : "on"}">${esc(s)}</button>`).join("");
 $("spannung").addEventListener("click", e => {
@@ -323,13 +405,32 @@ $("spannung").addEventListener("click", e => {
   [...$("spannung").children].forEach(c => c.classList.remove("on"));
   e.target.classList.add("on"); spannung = e.target.textContent;
 });
-$("zahlung").addEventListener("click", e => {
-  const b = e.target.closest(".payopt"); if (!b) return;
-  [...$("zahlung").children].forEach(c => c.classList.remove("on"));
-  b.classList.add("on"); zahlung = b.dataset.z;
-});
+function setZahlung(z) {
+  zahlung = z;
+  [...$("zahlung").children].forEach(c => c.classList.toggle("on", c.dataset.z === z));
+  updateSum();
+}
+$("zahlung").addEventListener("click", e => { const b = e.target.closest(".payopt"); if (b) setZahlung(b.dataset.z); });
+$("saite").addEventListener("change", updateSum);
+$("express").addEventListener("change", updateSum);
 const today = new Date().toISOString().slice(0, 10);
 $("abgabe").min = today; $("fertig").min = today;
+
+function sumHtml(saite, express, z, titel) {
+  const e = schaetzung(saite, express);
+  if (!e) return `<div class="lbl2">Preis</div><div class="disp big" style="font-size:30px">Saite wählen</div><div class="fine">Der Preis erscheint, sobald du eine Saite gewählt hast.</div>`;
+  return `<div class="top"><div><div class="lbl2">${titel}</div><div class="disp big">${preisTxt(e)}</div></div>
+      <div style="text-align:right;font-size:14px;opacity:.85">${esc(ZAHL[z])}</div></div>
+    <ul><li><span>${esc(saite)}</span><span>${e.ab ? "ab " : ""}${eur(e.basis)}</span></li>
+    ${express ? `<li><span>⚡ Express</span><span>+${eur(CONFIG.expressAufpreis)}</span></li>` : ""}</ul>
+    <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : ""}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach der Bestätigung zahlst du über deinen Status-Link mit einem Klick."}</div>`;
+}
+function updateSum() {
+  $("sum").innerHTML = sumHtml($("saite").value, $("express").checked, zahlung, "Dein Preis");
+  const e = schaetzung($("saite").value, $("express").checked);
+  $("send").textContent = e ? `Anfrage senden · ${preisTxt(e)}` : "Anfrage senden";
+}
+updateSum();
 
 // Anfrage senden
 $("form").addEventListener("submit", async e => {
@@ -338,23 +439,46 @@ $("form").addEventListener("submit", async e => {
   if ($("website").value) return;
   const row = {
     id: uuid(), name: $("name").value.trim(), kontakt: $("kontakt").value.trim(), schlaeger: $("schlaeger").value.trim(),
-    saite: $("saite").value, spannung, zahlung, abgabe: $("abgabe").value || null, fertig_bis: $("fertig").value || null,
-    nachricht: $("nachricht").value.trim() || null
+    saite: $("saite").value, spannung, zahlung, express: $("express").checked,
+    abgabe: $("abgabe").value || null, fertig_bis: $("fertig").value || null, nachricht: $("nachricht").value.trim() || null
   };
   const fehlt = !row.name ? "deinen Namen" : row.kontakt.replace(/\D/g, "").length < 6 ? "eine gültige Handynummer" : !row.schlaeger ? "deinen Schläger" : !row.saite ? "eine Saite" : "";
   if (fehlt) { err.textContent = `Bitte gib ${fehlt} an.`; err.classList.remove("hidden"); return; }
+  const label = $("send").textContent;
   $("send").disabled = true; $("send").textContent = "Wird gesendet…";
   const { error } = await sb.from(T).insert(row);
-  $("send").disabled = false; $("send").textContent = "Anfrage senden";
+  $("send").disabled = false; $("send").textContent = label;
   if (error) { err.textContent = "Ups, das hat nicht geklappt. Versuch's nochmal."; err.classList.remove("hidden"); return; }
   store.set("letzteAnfrage", row.id);
+  showDone(row);
+});
+
+function showDone(row) {
+  const est = schaetzung(row.saite, row.express);
+  $("doneSum").innerHTML = sumHtml(row.saite, row.express, row.zahlung, "Voraussichtlich");
+  const zahlSchritt = row.zahlung === "bar"
+    ? `<strong>Bar bei Abholung</strong><span>Bring ${est.ab ? "den Betrag" : eur(est.betrag)} passend mit.</span>`
+    : `<strong>Mit einem Klick zahlen</strong><span>Im Status-Link erscheint dann der Button „Jetzt mit ${row.zahlung === "paypal" ? "PayPal" : "Apple Pay"} zahlen“.</span>`;
+  $("nextSteps").innerHTML = `
+    <li><b>1</b><div><strong>Ich prüfe deine Anfrage</strong><span>Meist innerhalb von 24 Stunden.</span></div></li>
+    <li><b>2</b><div><strong>WhatsApp mit Bestätigung</strong><span>Mit dem finalen Preis und deinem Status-Link.</span></div></li>
+    <li><b>3</b><div>${zahlSchritt}</div></li>`;
   $("myStatus").href = "#s=" + row.id;
-  $("form").reset(); spannung = CONFIG.spannungen[0]; zahlung = "bar";
+  $("copyLink").dataset.url = statusUrl(row.id);
+  $("linkText").textContent = statusUrl(row.id);
+  $("form").reset(); spannung = CONFIG.spannungen[0];
   [...$("spannung").children].forEach((c, i) => c.classList.toggle("on", !i));
-  [...$("zahlung").children].forEach((c, i) => c.classList.toggle("on", !i));
+  setZahlung("bar");
   $("form").classList.add("hidden"); $("done").classList.remove("hidden");
   $("anfrage").scrollIntoView();
-});
+}
+async function copyUrl(b) {
+  try { await navigator.clipboard.writeText(b.dataset.url); b.textContent = "✓ Kopiert – jetzt in Notizen einfügen"; }
+  catch { prompt("Link kopieren:", b.dataset.url); }
+  setTimeout(() => b.textContent = "Link kopieren", 2500);
+}
+$("copyLink").onclick = e => copyUrl(e.currentTarget);
+document.addEventListener("click", e => { const b = e.target.closest("[data-copy]"); if (b) copyUrl(b); });
 $("again").onclick = () => { $("done").classList.add("hidden"); $("form").classList.remove("hidden"); };
 
 /* ===== ROUTING ===== */
@@ -370,14 +494,24 @@ addEventListener("hashchange", route);
 
 /* ===== STATUS-SEITE (Kunde) ===== */
 const STEPS = ["offen", "angenommen", "fertig", "abgeholt"];
-const STEP_LBL = { offen: "Eingegangen", angenommen: "Angenommen", fertig: "Fertig", abgeholt: "Abgeholt" };
-function payLinks(a) {
-  const pp = CONFIG.paypalMe && CONFIG.paypalMe !== "DEINNAME" ? `https://paypal.me/${encodeURIComponent(CONFIG.paypalMe)}/${Number(a.preis).toFixed(2)}EUR` : "";
-  return {
-    paypal: pp ? `<a class="btn btn-pp" href="${pp}" target="_blank" rel="noopener">Mit PayPal zahlen</a>` : `<span class="btn btn-bar">PayPal-Link folgt per WhatsApp</span>`,
-    applepay: CONFIG.stripeLink ? `<a class="btn btn-ap" href="${esc(CONFIG.stripeLink)}" target="_blank" rel="noopener">Apple Pay · ${eur(a.preis)}</a>` : `<span class="btn btn-bar">Apple-Pay-Link folgt per WhatsApp</span>`,
-    bar: `<span class="btn btn-bar">💶 Bar bei Abholung</span>`
-  };
+const STEP_LBL = { offen: "Eingegangen", angenommen: "Bestätigt", fertig: "Fertig", abgeholt: "Abgeholt" };
+const STEP_TXT = {
+  offen: "Ich schaue mir deine Anfrage an und melde mich per WhatsApp.",
+  angenommen: "Deine Anfrage ist bestätigt. Gib mir deinen Schläger, wenn es passt.",
+  fertig: "Dein Schläger ist frisch bespannt und kann abgeholt werden.",
+  abgeholt: "Viel Spaß mit den neuen Saiten!"
+};
+function payButton(z, preis, primary) {
+  const cls = primary ? "btn btn-pay" : "btn";
+  if (z === "paypal") {
+    const ok = CONFIG.paypalMe && CONFIG.paypalMe !== "DEINNAME";
+    return ok ? `<a class="${cls} btn-pp" href="https://paypal.me/${encodeURIComponent(CONFIG.paypalMe)}/${Number(preis).toFixed(2)}EUR" target="_blank" rel="noopener">${primary ? `Jetzt ${eur(preis)} mit PayPal zahlen` : "Mit PayPal zahlen"}</a>`
+      : `<span class="${cls} btn-wait">PayPal-Link kommt per WhatsApp</span>`;
+  }
+  if (z === "applepay") return CONFIG.stripeLink
+    ? `<a class="${cls} btn-ap" href="${esc(CONFIG.stripeLink)}" target="_blank" rel="noopener">${primary ? `Jetzt ${eur(preis)} mit Apple Pay zahlen` : "Mit Apple Pay / Karte zahlen"}</a>`
+    : `<span class="${cls} btn-wait">Apple-Pay-Link kommt per WhatsApp</span>`;
+  return `<span class="${cls} btn-cash">💶 ${eur(preis)} bar bei Abholung</span>`;
 }
 async function showStatus(id) {
   const box = $("stBody");
@@ -389,24 +523,44 @@ async function showStatus(id) {
     box.innerHTML = `<h3>Leider abgelehnt</h3><p style="color:var(--muted)">Ich kann deine Anfrage gerade nicht annehmen. Du hast eine WhatsApp von mir bekommen.</p>`; return;
   }
   const idx = STEPS.indexOf(a.status);
-  const links = payLinks(a);
-  let pay = "";
-  if (a.bezahlt) pay = `<div class="paid">✓ Bezahlt${a.preis != null ? " · " + eur(a.preis) : ""}. Danke!</div>`;
-  else if (a.preis != null && a.status !== "offen") {
-    const others = Object.keys(links).filter(z => z !== a.zahlung);
-    pay = `<div class="paybox"><div>Zu zahlen</div><div class="amt">${eur(a.preis)}</div>
-      <p>Gewählt: ${ZAHL[a.zahlung]}. Du kannst auch anders zahlen.</p>
-      <div class="paybtns">${links[a.zahlung]}${others.map(z => links[z]).join("")}</div></div>`;
-  } else pay = `<p class="note" style="text-align:left;margin-top:16px">Sobald ich die Anfrage angenommen habe, siehst du hier den Preis und kannst direkt bezahlen.</p>`;
+  let pay;
+  if (a.bezahlt) {
+    pay = `<div class="paid"><div class="disp">✓ Bezahlt</div><div>${a.preis != null ? eur(a.preis) + " · " : ""}Danke dir!</div></div>`;
+  } else if (a.preis == null || a.status === "offen") {
+    const e = schaetzung(a.saite, a.express);
+    pay = `<div class="waiting"><div class="lbl2" style="font-size:14px;color:var(--muted)">Voraussichtlich</div>
+      <div class="disp big">${preisTxt(e)}</div>
+      <p style="font-size:14px;color:var(--muted);margin-top:6px">Sobald ich bestätigt habe, erscheint hier der Bezahl-Button${a.zahlung === "bar" ? " (oder du zahlst einfach bar bei Abholung)" : ""}.</p></div>`;
+  } else {
+    const others = ["paypal", "applepay", "bar"].filter(z => z !== a.zahlung);
+    const how = a.zahlung === "bar"
+      ? "Bring den Betrag einfach zur Abholung mit."
+      : "Button tippen, Zahlung bestätigen, fertig. Danach markiere ich die Zahlung und hier steht ✓ Bezahlt.";
+    pay = `<div class="paybox">
+      <div class="lbl2">Zu zahlen</div>
+      <div class="disp big">${eur(a.preis)}</div>
+      ${payButton(a.zahlung, a.preis, true)}
+      <div class="how">${how}</div>
+      <details class="alt"><summary>${a.zahlung === "bar" ? "Lieber online zahlen?" : "Lieber anders zahlen?"}</summary>
+        <div class="btnrow">${others.map(z => payButton(z, a.preis, false)).join("")}</div></details>
+    </div>`;
+  }
   box.innerHTML = `
     <div class="kicker">Dein Auftrag</div>
     <h3>${esc(STEP_LBL[a.status])}</h3>
+    <p style="color:var(--muted)">${STEP_TXT[a.status]}</p>
     <div class="track">${STEPS.map((s, i) => `<div class="${i <= idx ? "on" : ""}">${STEP_LBL[s]}</div>`).join("")}</div>
-    <div class="req"><dl class="kv">
+    ${pay}
+    <div class="req" style="margin-top:16px"><dl class="kv">
       <dt>Schläger</dt><dd>${esc(a.schlaeger)}</dd><dt>Saite</dt><dd>${esc(a.saite)}</dd>
-      <dt>Spannung</dt><dd>${esc(a.spannung || "–")}</dd><dt>Zahlung</dt><dd>${ZAHL[a.zahlung]}</dd>
-    </dl></div>${pay}
-    <p class="note" style="margin-top:22px">Speicher dir diesen Link, um später nachzuschauen.</p>`;
+      <dt>Spannung</dt><dd>${esc(a.spannung || "–")}</dd>${a.express ? `<dt>Express</dt><dd>⚡ 24 h</dd>` : ""}
+      <dt>Zahlung</dt><dd>${esc(ZAHL[a.zahlung])}</dd>
+    </dl></div>
+    ${a.status !== "abgeholt" ? `<div class="savebox" style="margin-top:16px">
+      <strong>📌 Diesen Link speichern</strong>
+      <span>So kannst du jederzeit nachschauen, wie weit dein Schläger ist. Am besten kopieren und in deine Notizen legen oder als Lesezeichen speichern.</span>
+      <button class="btn btn-dark" type="button" data-copy data-url="${esc(statusUrl(id))}">Link kopieren</button>
+    </div>` : ""}`;
 }
 
 /* ===== ADMIN ===== */
@@ -445,18 +599,19 @@ function waLink(r, text) {
 function waText(r) {
   const vn = r.name.split(" ")[0], link = statusUrl(r.id);
   const p = r.preis != null ? eur(r.preis) : "";
-  const zahlHinweis = r.bezahlt ? "" : r.zahlung === "bar" ? ` Bitte ${p} bar mitbringen.` : ` Bezahlen kannst du hier: ${link}`;
+  const zahl = r.bezahlt ? "" : r.zahlung === "bar" ? ` Bitte ${p} bar mitbringen.` : ` Hier kannst du mit einem Klick zahlen: ${link}`;
   return {
     offen: `Hi ${vn}, kurze Frage zu deiner Bespannung (${r.schlaeger}): `,
-    angenommen: `Hi ${vn}, deine Bespannung für den ${r.schlaeger} ist angenommen 🎾${p ? " Preis: " + p + "." : ""} Wann kannst du ihn mir geben? Status & Bezahlung: ${link}`,
-    fertig: `Hi ${vn}, dein ${r.schlaeger} ist frisch bespannt und kann abgeholt werden 🎾${zahlHinweis}`,
+    angenommen: `Hi ${vn}, deine Bespannung für den ${r.schlaeger} ist bestätigt 🎾${p ? " Preis: " + p + "." : ""} Wann kannst du ihn mir geben?${r.zahlung === "bar" ? ` Status: ${link}` : ` Bezahlen & Status: ${link}`} (Speicher dir den Link, da siehst du jederzeit den Stand.)`,
+    fertig: `Hi ${vn}, dein ${r.schlaeger} ist frisch bespannt und kann abgeholt werden 🎾${zahl}`,
     abgeholt: `Hi ${vn}, danke dir! Viel Spaß mit den neuen Saiten 🎾`,
     abgelehnt: `Hi ${vn}, sorry, deine Bespannungsanfrage kann ich gerade leider nicht annehmen.`
   }[r.status];
 }
 const fmt = d => d ? new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "–";
-function askPreis(cur) {
-  const v = prompt("Preis in € (z. B. 22 oder 22,50):", cur != null ? String(cur).replace(".", ",") : "");
+function askPreis(r) {
+  const vorschlag = r.preis ?? schaetzung(r.saite, r.express)?.betrag;
+  const v = prompt("Preis in € (z. B. 22 oder 22,50):", vorschlag != null ? String(vorschlag).replace(".", ",") : "");
   if (v === null) return undefined;
   const n = parseFloat(v.replace(",", "."));
   if (isNaN(n) || n < 0) { alert("Ungültiger Preis."); return undefined; }
@@ -480,6 +635,7 @@ function render() {
     const zahlBtns = r.status === "abgelehnt" ? "" :
       `<button class="btn btn-ghost" data-preis="${r.id}">${r.preis != null ? "Preis ändern" : "Preis setzen"}</button>
        <button class="btn btn-ghost" data-paid="${r.id}">${r.bezahlt ? "Als unbezahlt" : "💰 Bezahlt"}</button>`;
+    const est = schaetzung(r.saite, r.express);
     return `<article class="req">
       <div class="req-head"><div><h3>${esc(r.name)}</h3><time>${t}</time></div>
         <div class="badges"><span class="badge b-${r.status}">${STATUS[r.status]}</span>
@@ -487,9 +643,9 @@ function render() {
       <dl class="kv">
         <dt>Schläger</dt><dd>${esc(r.schlaeger)}</dd>
         <dt>Saite</dt><dd>${esc(r.saite)}</dd>
-        <dt>Spannung</dt><dd>${esc(r.spannung || "–")}</dd>
+        <dt>Spannung</dt><dd>${esc(r.spannung || "–")}${r.express ? " · ⚡ Express" : ""}</dd>
         <dt>Abgabe</dt><dd>${fmt(r.abgabe)} · fertig bis ${fmt(r.fertig_bis)}</dd>
-        <dt>Zahlung</dt><dd>${ZAHL[r.zahlung] || "–"} · ${r.preis != null ? eur(r.preis) : "kein Preis"}</dd>
+        <dt>Zahlung</dt><dd>${esc(ZAHL[r.zahlung] || "–")} · ${r.preis != null ? eur(r.preis) : "ca. " + preisTxt(est)}</dd>
         <dt>Kontakt</dt><dd>${esc(r.kontakt)}</dd>
       </dl>
       ${r.nachricht ? `<div class="msg">${esc(r.nachricht)}</div>` : ""}
@@ -515,20 +671,16 @@ $("list").addEventListener("click", async e => {
     if (error) return alert("Fehler: " + error.message);
     rows = rows.filter(r => r.id !== d.del); return render();
   }
-  if (d.preis) { const r = rows.find(x => x.id === d.preis); const n = askPreis(r.preis); if (n !== undefined && await save(r.id, { preis: n })) render(); return; }
+  if (d.preis) { const r = rows.find(x => x.id === d.preis); const n = askPreis(r); if (n !== undefined && await save(r.id, { preis: n })) render(); return; }
   if (d.paid) { const r = rows.find(x => x.id === d.paid); if (await save(r.id, { bezahlt: !r.bezahlt })) render(); return; }
   if (!d.s) return;
   const r = rows.find(x => x.id === d.id), patch = { status: d.s };
-  if (d.s === "angenommen" && r.preis == null) { const n = askPreis(null); if (n === undefined) return; patch.preis = n; }
+  if (d.s === "angenommen" && r.preis == null) { const n = askPreis(r); if (n === undefined) return; patch.preis = n; }
   b.disabled = true;
   if (!(await save(r.id, patch))) { b.disabled = false; return; }
   if (["angenommen", "fertig"].includes(d.s) && confirm("Direkt per WhatsApp Bescheid geben?")) open(waLink(r, waText(r)), "_blank");
   render();
 });
-
-// Wiederkehrender Kunde: Link zur letzten Anfrage
-const last = store.get("letzteAnfrage");
-if (last) $("myStatus").href = "#s=" + last;
 
 route();
 </script>
