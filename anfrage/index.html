@@ -185,6 +185,15 @@ details.alt .btn{font-size:16px;padding:13px 18px}
 .btn-ok{background:var(--ok);color:#fff}.btn-bad{background:#fff;color:var(--bad);border:1.5px solid #efc9c3}
 .btn-wa{background:#25d366;color:#fff}
 .empty{text-align:center;color:var(--muted);padding:40px 0}
+.remind{font-size:13px;color:var(--muted);margin-top:8px}
+.b-late{background:var(--bad);color:#fff}
+.duebox{background:#fdecea;color:var(--bad);border-radius:12px;padding:10px 12px;font-weight:700;font-size:15px;margin-bottom:12px}
+.pt{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:18px 0}
+.pt h3{font-size:20px;margin-bottom:4px}
+.pt p{font-size:14px;color:var(--muted);margin-bottom:12px}
+.prow{display:grid;grid-template-columns:1fr 92px 40px;gap:8px;align-items:center;margin-bottom:8px}
+.prow input{padding:10px 12px;font-size:15px}
+.prow button{border:0;background:var(--cream);border-radius:10px;height:40px;cursor:pointer;font-size:16px}
 .login{max-width:400px;margin:60px auto}
 </style>
 </head>
@@ -312,7 +321,7 @@ details.alt .btn{font-size:16px;padding:13px 18px}
 <div id="admin" class="hidden">
   <div class="admin-top"><div class="wrap">
     <div class="logo"><i></i>Anfragen</div>
-    <div><button id="reload">↻</button> <button id="logout" class="hidden">Logout</button> <button onclick="location.hash=''">Seite</button></div>
+    <div><button id="reload">↻</button> <button id="preiseBtn" class="hidden">€ Preise</button> <button id="logout" class="hidden">Logout</button> <button onclick="location.hash=''">Seite</button></div>
   </div></div>
   <div class="wrap">
     <div id="loginBox" class="login form-card">
@@ -324,6 +333,7 @@ details.alt .btn{font-size:16px;padding:13px 18px}
         <button class="btn btn-dark submit">Einloggen</button>
       </form>
     </div>
+    <div id="preisPanel" class="hidden"></div>
     <div id="panel" class="hidden">
       <div class="tabs" id="tabs"></div>
       <div class="list" id="list"></div>
@@ -338,22 +348,12 @@ const CONFIG = {
   ort: "Waldbronn · Eggenstein",
   paypalMe: "DEINNAME",   // nur der Name aus paypal.me/DEINNAME
   stripeLink: "",          // Stripe-Zahlungslink für Apple Pay (leer = "Link kommt per WhatsApp")
-  expressAufpreis: 5,
-  // preis = Gesamtpreis inkl. Bespannen. null = wird nach Beratung festgelegt
-  saiten: [
-    { name: "Weiß ich nicht – berate mich", preis: null },
-    { name: "Eigene Saite (bringe ich mit)", preis: 12 },
-    { name: "Solinco Hyper-G 1.25", preis: 24 },
-    { name: "Babolat RPM Blast 1.25", preis: 25 },
-    { name: "Luxilon ALU Power 1.25", preis: 27 },
-    { name: "Tecnifibre Razor Code 1.25", preis: 24 },
-    { name: "Tecnifibre X-One Biphase (armschonend)", preis: 28 },
-    { name: "Hybrid: Poly + Multifilament", preis: 26 }
-  ],
+  erinnernNachTagen: 2,    // ab so vielen Tagen nach "Fertig" gilt eine offene Zahlung als überfällig
   spannungen: ["Weiß nicht", "Wie bisher", "21 kg", "22 kg", "23 kg", "24 kg", "25 kg", "Andere"],
   supabaseUrl: "https://amqjsrhbomwenkhueehm.supabase.co",
   supabaseKey: "sb_publishable_FxLMPFgWxoYqNzQdBtQ2hA_94RN51-4"
 };
+/* Preise änderst du direkt im Admin unter "€ Preise". */
 /* ========================= */
 
 const sb = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
@@ -366,17 +366,44 @@ const statusUrl = id => location.origin + location.pathname + "#s=" + id;
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
   "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+const tageSeit = d => Math.floor((Date.now() - new Date(d)) / 864e5);
+const vorTagen = d => { const t = tageSeit(d); return t <= 0 ? "heute" : t === 1 ? "gestern" : `vor ${t} Tagen`; };
 
-// Preis-Logik
-const polyPreise = CONFIG.saiten.map(s => s.preis).filter(p => p != null && p > CONFIG.saiten[1].preis);
-const abPreis = Math.min(...polyPreise);
+/* ===== PREISE (aus der Datenbank) ===== */
+let SAITEN = [], EXPRESS = 0, abPreis = 0;
+async function ladePreise() {
+  const { data, error } = await sb.from("bespannung_preise").select("*").order("sort");
+  if (error || !data) return false;
+  SAITEN = data.filter(p => p.art === "saite").map(p => ({ name: p.name, preis: p.preis == null ? null : Number(p.preis) }));
+  EXPRESS = Number(data.find(p => p.name === "Express")?.preis ?? 0);
+  const eigene = SAITEN.find(s => /eigene/i.test(s.name));
+  const mitSaite = SAITEN.filter(s => s.preis != null && s !== eigene).map(s => s.preis);
+  abPreis = mitSaite.length ? Math.min(...mitSaite) : 0;
+  return true;
+}
 function schaetzung(saiteName, express) {
-  const s = CONFIG.saiten.find(x => x.name === saiteName);
+  const s = SAITEN.find(x => x.name === saiteName);
   if (!s) return null;
   const basis = s.preis ?? abPreis;
-  return { betrag: basis + (express ? CONFIG.expressAufpreis : 0), ab: s.preis == null, basis };
+  return { betrag: basis + (express ? EXPRESS : 0), ab: s.preis == null, basis };
 }
 const preisTxt = e => e ? (e.ab ? "ab " : "") + eur(e.betrag) : "–";
+
+function renderPublicPreise() {
+  const eigene = SAITEN.find(s => /eigene/i.test(s.name));
+  $("prices").innerHTML = [
+    eigene ? { titel: "Eigene Saite", preis: eur(eigene.preis), text: "Du bringst die Saite mit, ich bespanne." } : null,
+    { titel: "Inkl. Saite", preis: "ab " + eur(abPreis), text: "Hyper-G, RPM Blast, ALU Power & Co.", hot: true, tag: "Beliebt" },
+    EXPRESS ? { titel: "Express", preis: "+" + eur(EXPRESS), text: "Fertig innerhalb von 24 Stunden." } : null
+  ].filter(Boolean).map(p => `<div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${p.tag}</span>` : ""}
+      <h3>${esc(p.titel)}</h3><div class="amt">${esc(p.preis)}</div><p>${esc(p.text)}</p></div>`).join("");
+  const cur = $("saite").value;
+  $("saite").innerHTML = `<option value="">Bitte wählen…</option>` + SAITEN.map(s =>
+    `<option value="${esc(s.name)}">${esc(s.name)}${s.preis != null ? " · " + eur(s.preis) : ""}</option>`).join("");
+  $("saite").value = cur;
+  $("expressTxt").textContent = `Fertig in 24 Stunden · +${eur(EXPRESS)}`;
+  updateSum();
+}
 
 // Racket-Saiten
 (() => { let v = "", h = "";
@@ -384,19 +411,9 @@ const preisTxt = e => e ? (e.ab ? "ab " : "") + eur(e.betrag) : "–";
   for (let y = 12; y <= 190; y += 10) h += `<line x1="0" y1="${y}" x2="200" y2="${y}"/>`;
   $("v").innerHTML = v; $("h").innerHTML = h; })();
 
-// Inhalte
 document.querySelectorAll(".brandname").forEach(e => e.textContent = CONFIG.brand);
 $("ort").textContent = CONFIG.ort;
 $("year").textContent = new Date().getFullYear();
-$("prices").innerHTML = [
-  { titel: "Eigene Saite", preis: eur(CONFIG.saiten[1].preis), text: "Du bringst die Saite mit, ich bespanne." },
-  { titel: "Inkl. Saite", preis: "ab " + eur(abPreis), text: "Hyper-G, RPM Blast, ALU Power & Co.", hot: true, tag: "Beliebt" },
-  { titel: "Express", preis: "+" + eur(CONFIG.expressAufpreis), text: "Fertig innerhalb von 24 Stunden." }
-].map(p => `<div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${p.tag}</span>` : ""}
-    <h3>${esc(p.titel)}</h3><div class="amt">${esc(p.preis)}</div><p>${esc(p.text)}</p></div>`).join("");
-$("saite").innerHTML = `<option value="">Bitte wählen…</option>` + CONFIG.saiten.map(s =>
-  `<option value="${esc(s.name)}">${esc(s.name)}${s.preis != null ? " · " + eur(s.preis) : ""}</option>`).join("");
-$("expressTxt").textContent = `Fertig in 24 Stunden · +${eur(CONFIG.expressAufpreis)}`;
 
 let spannung = CONFIG.spannungen[0], zahlung = "bar";
 $("spannung").innerHTML = CONFIG.spannungen.map((s, i) => `<button type="button" class="chip ${i ? "" : "on"}">${esc(s)}</button>`).join("");
@@ -422,17 +439,16 @@ function sumHtml(saite, express, z, titel) {
   return `<div class="top"><div><div class="lbl2">${titel}</div><div class="disp big">${preisTxt(e)}</div></div>
       <div style="text-align:right;font-size:14px;opacity:.85">${esc(ZAHL[z])}</div></div>
     <ul><li><span>${esc(saite)}</span><span>${e.ab ? "ab " : ""}${eur(e.basis)}</span></li>
-    ${express ? `<li><span>⚡ Express</span><span>+${eur(CONFIG.expressAufpreis)}</span></li>` : ""}</ul>
-    <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : ""}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach der Bestätigung zahlst du über deinen Status-Link mit einem Klick."}</div>`;
+    ${express ? `<li><span>⚡ Express</span><span>+${eur(EXPRESS)}</span></li>` : ""}</ul>
+    <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : "Festpreis, keine versteckten Kosten. "}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach meiner Bestätigung zahlst du über deinen Status-Link mit einem Klick."}</div>`;
 }
 function updateSum() {
   $("sum").innerHTML = sumHtml($("saite").value, $("express").checked, zahlung, "Dein Preis");
   const e = schaetzung($("saite").value, $("express").checked);
   $("send").textContent = e ? `Anfrage senden · ${preisTxt(e)}` : "Anfrage senden";
 }
-updateSum();
 
-// Anfrage senden
+// Anfrage senden (Preis berechnet die Datenbank selbst)
 $("form").addEventListener("submit", async e => {
   e.preventDefault();
   const err = $("err"); err.classList.add("hidden");
@@ -455,13 +471,13 @@ $("form").addEventListener("submit", async e => {
 
 function showDone(row) {
   const est = schaetzung(row.saite, row.express);
-  $("doneSum").innerHTML = sumHtml(row.saite, row.express, row.zahlung, "Voraussichtlich");
+  $("doneSum").innerHTML = sumHtml(row.saite, row.express, row.zahlung, est && !est.ab ? "Dein Preis" : "Voraussichtlich");
   const zahlSchritt = row.zahlung === "bar"
-    ? `<strong>Bar bei Abholung</strong><span>Bring ${est.ab ? "den Betrag" : eur(est.betrag)} passend mit.</span>`
+    ? `<strong>Bar bei Abholung</strong><span>Bring ${est && !est.ab ? eur(est.betrag) : "den Betrag"} passend mit.</span>`
     : `<strong>Mit einem Klick zahlen</strong><span>Im Status-Link erscheint dann der Button „Jetzt mit ${row.zahlung === "paypal" ? "PayPal" : "Apple Pay"} zahlen“.</span>`;
   $("nextSteps").innerHTML = `
     <li><b>1</b><div><strong>Ich prüfe deine Anfrage</strong><span>Meist innerhalb von 24 Stunden.</span></div></li>
-    <li><b>2</b><div><strong>WhatsApp mit Bestätigung</strong><span>Mit dem finalen Preis und deinem Status-Link.</span></div></li>
+    <li><b>2</b><div><strong>WhatsApp mit Bestätigung</strong><span>Mit deinem Status-Link.</span></div></li>
     <li><b>3</b><div>${zahlSchritt}</div></li>`;
   $("myStatus").href = "#s=" + row.id;
   $("copyLink").dataset.url = statusUrl(row.id);
@@ -526,23 +542,24 @@ async function showStatus(id) {
   let pay;
   if (a.bezahlt) {
     pay = `<div class="paid"><div class="disp">✓ Bezahlt</div><div>${a.preis != null ? eur(a.preis) + " · " : ""}Danke dir!</div></div>`;
-  } else if (a.preis == null || a.status === "offen") {
-    const e = schaetzung(a.saite, a.express);
-    pay = `<div class="waiting"><div class="lbl2" style="font-size:14px;color:var(--muted)">Voraussichtlich</div>
-      <div class="disp big">${preisTxt(e)}</div>
-      <p style="font-size:14px;color:var(--muted);margin-top:6px">Sobald ich bestätigt habe, erscheint hier der Bezahl-Button${a.zahlung === "bar" ? " (oder du zahlst einfach bar bei Abholung)" : ""}.</p></div>`;
+  } else if (a.status === "offen" || a.preis == null) {
+    pay = `<div class="waiting"><div style="font-size:14px;color:var(--muted)">${a.preis != null ? "Dein Preis" : "Preis"}</div>
+      <div class="disp big">${a.preis != null ? eur(a.preis) : "nach Beratung"}</div>
+      <p style="font-size:14px;color:var(--muted);margin-top:6px">${a.status === "offen" ? "Sobald ich bestätigt habe, erscheint hier der Bezahl-Button" : "Ich lege den Preis gleich fest, dann erscheint hier der Bezahl-Button"}${a.zahlung === "bar" ? " (oder du zahlst einfach bar bei Abholung)" : ""}.</p></div>`;
   } else {
-    const others = ["paypal", "applepay", "bar"].filter(z => z !== a.zahlung);
+    const faellig = ["fertig", "abgeholt"].includes(a.status);
+    const others = ["paypal", "applepay", "bar"].filter(z => z !== a.zahlung && !(z === "bar" && a.status === "abgeholt"));
     const how = a.zahlung === "bar"
       ? "Bring den Betrag einfach zur Abholung mit."
       : "Button tippen, Zahlung bestätigen, fertig. Danach markiere ich die Zahlung und hier steht ✓ Bezahlt.";
     pay = `<div class="paybox">
+      ${faellig ? `<div class="duebox">⏰ Zahlung noch offen. Bitte jetzt begleichen, danke!</div>` : ""}
       <div class="lbl2">Zu zahlen</div>
       <div class="disp big">${eur(a.preis)}</div>
-      ${payButton(a.zahlung, a.preis, true)}
+      ${payButton(a.status === "abgeholt" && a.zahlung === "bar" ? "paypal" : a.zahlung, a.preis, true)}
       <div class="how">${how}</div>
-      <details class="alt"><summary>${a.zahlung === "bar" ? "Lieber online zahlen?" : "Lieber anders zahlen?"}</summary>
-        <div class="btnrow">${others.map(z => payButton(z, a.preis, false)).join("")}</div></details>
+      ${others.length ? `<details class="alt"><summary>${a.zahlung === "bar" ? "Lieber online zahlen?" : "Lieber anders zahlen?"}</summary>
+        <div class="btnrow">${others.map(z => payButton(z, a.preis, false)).join("")}</div></details>` : ""}
     </div>`;
   }
   box.innerHTML = `
@@ -556,7 +573,7 @@ async function showStatus(id) {
       <dt>Spannung</dt><dd>${esc(a.spannung || "–")}</dd>${a.express ? `<dt>Express</dt><dd>⚡ 24 h</dd>` : ""}
       <dt>Zahlung</dt><dd>${esc(ZAHL[a.zahlung])}</dd>
     </dl></div>
-    ${a.status !== "abgeholt" ? `<div class="savebox" style="margin-top:16px">
+    ${a.status !== "abgeholt" || !a.bezahlt ? `<div class="savebox" style="margin-top:16px">
       <strong>📌 Diesen Link speichern</strong>
       <span>So kannst du jederzeit nachschauen, wie weit dein Schläger ist. Am besten kopieren und in deine Notizen legen oder als Lesezeichen speichern.</span>
       <button class="btn btn-dark" type="button" data-copy data-url="${esc(statusUrl(id))}">Link kopieren</button>
@@ -566,6 +583,8 @@ async function showStatus(id) {
 /* ===== ADMIN ===== */
 const STATUS = { offen: "Offen", angenommen: "Angenommen", fertig: "Fertig", abgeholt: "Abgeholt", abgelehnt: "Abgelehnt" };
 let filter = "offen", rows = [];
+const unbezahlt = r => ["angenommen", "fertig", "abgeholt"].includes(r.status) && !r.bezahlt;
+const ueberfaellig = r => unbezahlt(r) && ["fertig", "abgeholt"].includes(r.status) && tageSeit(r.status_seit) >= CONFIG.erinnernNachTagen;
 
 async function checkSession() {
   const { data } = await sb.auth.getSession();
@@ -573,6 +592,8 @@ async function checkSession() {
   $("loginBox").classList.toggle("hidden", inn);
   $("panel").classList.toggle("hidden", !inn);
   $("logout").classList.toggle("hidden", !inn);
+  $("preiseBtn").classList.toggle("hidden", !inn);
+  if (!inn) $("preisPanel").classList.add("hidden");
   if (inn) load();
 }
 $("loginForm").addEventListener("submit", async e => {
@@ -588,7 +609,9 @@ async function load() {
   $("list").innerHTML = `<div class="empty">Lädt…</div>`;
   const { data, error } = await sb.from(T).select("*").order("created_at", { ascending: false });
   if (error) { $("list").innerHTML = `<div class="empty">Fehler: ${esc(error.message)}</div>`; return; }
-  rows = data; render();
+  rows = data;
+  if (filter === "offen" && !rows.some(r => r.status === "offen") && rows.some(ueberfaellig)) filter = "unbezahlt";
+  render();
 }
 
 function waLink(r, text) {
@@ -599,7 +622,7 @@ function waLink(r, text) {
 function waText(r) {
   const vn = r.name.split(" ")[0], link = statusUrl(r.id);
   const p = r.preis != null ? eur(r.preis) : "";
-  const zahl = r.bezahlt ? "" : r.zahlung === "bar" ? ` Bitte ${p} bar mitbringen.` : ` Hier kannst du mit einem Klick zahlen: ${link}`;
+  const zahl = r.bezahlt ? "" : r.zahlung === "bar" ? ` Bitte ${p} bar mitbringen.` : ` Hier kannst du mit einem Klick ${p} zahlen: ${link}`;
   return {
     offen: `Hi ${vn}, kurze Frage zu deiner Bespannung (${r.schlaeger}): `,
     angenommen: `Hi ${vn}, deine Bespannung für den ${r.schlaeger} ist bestätigt 🎾${p ? " Preis: " + p + "." : ""} Wann kannst du ihn mir geben?${r.zahlung === "bar" ? ` Status: ${link}` : ` Bezahlen & Status: ${link}`} (Speicher dir den Link, da siehst du jederzeit den Stand.)`,
@@ -608,10 +631,19 @@ function waText(r) {
     abgelehnt: `Hi ${vn}, sorry, deine Bespannungsanfrage kann ich gerade leider nicht annehmen.`
   }[r.status];
 }
+function erinnerungText(r) {
+  const vn = r.name.split(" ")[0], p = eur(r.preis), link = statusUrl(r.id);
+  const zweite = !!r.erinnert_am;
+  const anrede = zweite ? `Hi ${vn}, nochmal kurz wegen der Bespannung (${r.schlaeger}):` : `Hi ${vn}, kleine Erinnerung 🎾 Für deine Bespannung (${r.schlaeger}) sind noch`;
+  if (zweite) return `${anrede} die ${p} sind leider noch offen. Mit einem Klick per PayPal/Apple Pay: ${link} Danke dir!`;
+  return r.zahlung === "bar" && r.status !== "abgeholt"
+    ? `${anrede} ${p} offen. Bring sie einfach bar zur Abholung mit, oder zahl hier online: ${link} Danke!`
+    : `${anrede} ${p} offen. Hier geht's mit einem Klick: ${link} Danke dir!`;
+}
 const fmt = d => d ? new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "–";
-function askPreis(r) {
+function askPreis(r, msg) {
   const vorschlag = r.preis ?? schaetzung(r.saite, r.express)?.betrag;
-  const v = prompt("Preis in € (z. B. 22 oder 22,50):", vorschlag != null ? String(vorschlag).replace(".", ",") : "");
+  const v = prompt(msg || "Preis in € (z. B. 22 oder 22,50):", vorschlag != null ? String(vorschlag).replace(".", ",") : "");
   if (v === null) return undefined;
   const n = parseFloat(v.replace(",", "."));
   if (isNaN(n) || n < 0) { alert("Ungültiger Preis."); return undefined; }
@@ -619,47 +651,56 @@ function askPreis(r) {
 }
 
 function render() {
-  const count = s => rows.filter(r => s === "alle" || r.status === s).length;
-  $("tabs").innerHTML = [...Object.keys(STATUS), "alle"].map(s =>
-    `<button class="chip ${s === filter ? "on" : ""}" data-f="${s}">${s === "alle" ? "Alle" : STATUS[s]}<em>${count(s)}</em></button>`).join("");
-  const list = rows.filter(r => filter === "alle" || r.status === filter);
+  const count = s => rows.filter(r => s === "alle" ? true : s === "unbezahlt" ? unbezahlt(r) : r.status === s).length;
+  const tabs = ["offen", "unbezahlt", "angenommen", "fertig", "abgeholt", "abgelehnt", "alle"];
+  const tabLbl = { ...STATUS, unbezahlt: "💰 Unbezahlt", alle: "Alle" };
+  $("tabs").innerHTML = tabs.map(s => `<button class="chip ${s === filter ? "on" : ""}" data-f="${s}">${tabLbl[s]}<em>${count(s)}</em></button>`).join("");
+  let list = rows.filter(r => filter === "alle" ? true : filter === "unbezahlt" ? unbezahlt(r) : r.status === filter);
+  if (filter === "unbezahlt") list.sort((a, b) => ueberfaellig(b) - ueberfaellig(a) || new Date(a.status_seit) - new Date(b.status_seit));
   if (!list.length) { $("list").innerHTML = `<div class="empty">Keine Anfragen hier.</div>`; return; }
   $("list").innerHTML = list.map(r => {
     const t = new Date(r.created_at).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
     const next = {
-      offen: `<button class="btn btn-ok" data-id="${r.id}" data-s="angenommen">✓ Annehmen</button><button class="btn btn-bad" data-id="${r.id}" data-s="abgelehnt">Ablehnen</button>`,
+      offen: `<button class="btn btn-ok" data-id="${r.id}" data-s="angenommen">✓ Annehmen${r.preis != null ? " · " + eur(r.preis) : ""}</button><button class="btn btn-bad" data-id="${r.id}" data-s="abgelehnt">Ablehnen</button>`,
       angenommen: `<button class="btn btn-dark" data-id="${r.id}" data-s="fertig">Fertig bespannt</button>`,
       fertig: `<button class="btn btn-dark" data-id="${r.id}" data-s="abgeholt">Abgeholt</button>`,
       abgeholt: "", abgelehnt: `<button class="btn btn-ghost" data-id="${r.id}" data-s="offen">Wieder öffnen</button>`
     }[r.status];
+    const late = ueberfaellig(r);
+    const erinnern = unbezahlt(r) && r.preis != null ? `<button class="btn ${late ? "btn-bad" : "btn-ghost"}" data-remind="${r.id}">🔔 ${r.erinnert_am ? "Nochmal erinnern" : "Zahlung erinnern"}</button>` : "";
     const zahlBtns = r.status === "abgelehnt" ? "" :
       `<button class="btn btn-ghost" data-preis="${r.id}">${r.preis != null ? "Preis ändern" : "Preis setzen"}</button>
        <button class="btn btn-ghost" data-paid="${r.id}">${r.bezahlt ? "Als unbezahlt" : "💰 Bezahlt"}</button>`;
-    const est = schaetzung(r.saite, r.express);
+    const zahlBadge = r.status === "abgelehnt" ? "" : r.bezahlt ? `<span class="badge b-paid">Bezahlt</span>`
+      : late ? `<span class="badge b-late">Überfällig</span>` : `<span class="badge b-unpaid">Offen €</span>`;
+    const offenSeit = unbezahlt(r) && ["fertig", "abgeholt"].includes(r.status) ? ` · offen seit ${vorTagen(r.status_seit).replace("vor ", "")}` : "";
     return `<article class="req">
       <div class="req-head"><div><h3>${esc(r.name)}</h3><time>${t}</time></div>
-        <div class="badges"><span class="badge b-${r.status}">${STATUS[r.status]}</span>
-        ${r.status !== "abgelehnt" ? `<span class="badge ${r.bezahlt ? "b-paid" : "b-unpaid"}">${r.bezahlt ? "Bezahlt" : "Offen €"}</span>` : ""}</div></div>
+        <div class="badges"><span class="badge b-${r.status}">${STATUS[r.status]}</span>${zahlBadge}</div></div>
       <dl class="kv">
         <dt>Schläger</dt><dd>${esc(r.schlaeger)}</dd>
         <dt>Saite</dt><dd>${esc(r.saite)}</dd>
         <dt>Spannung</dt><dd>${esc(r.spannung || "–")}${r.express ? " · ⚡ Express" : ""}</dd>
         <dt>Abgabe</dt><dd>${fmt(r.abgabe)} · fertig bis ${fmt(r.fertig_bis)}</dd>
-        <dt>Zahlung</dt><dd>${esc(ZAHL[r.zahlung] || "–")} · ${r.preis != null ? eur(r.preis) : "ca. " + preisTxt(est)}</dd>
+        <dt>Preis</dt><dd>${r.preis != null ? eur(r.preis) : "⚠️ noch festlegen"} · ${esc(ZAHL[r.zahlung] || "–")}${offenSeit}</dd>
         <dt>Kontakt</dt><dd>${esc(r.kontakt)}</dd>
       </dl>
       ${r.nachricht ? `<div class="msg">${esc(r.nachricht)}</div>` : ""}
+      ${r.erinnert_am && !r.bezahlt ? `<div class="remind">🔔 Zuletzt erinnert: ${vorTagen(r.erinnert_am)}</div>` : ""}
       <div class="acts">${next}
+        ${erinnern}
         <a class="btn btn-wa" target="_blank" rel="noopener" href="${waLink(r, waText(r))}">WhatsApp</a>
         ${zahlBtns}
-        ${["abgelehnt", "abgeholt"].includes(r.status) ? `<button class="btn btn-ghost" data-del="${r.id}">Löschen</button>` : ""}
+        ${["abgelehnt", "abgeholt"].includes(r.status) && (r.bezahlt || r.status === "abgelehnt") ? `<button class="btn btn-ghost" data-del="${r.id}">Löschen</button>` : ""}
       </div></article>`;
   }).join("");
 }
 async function save(id, patch) {
   const { error } = await sb.from(T).update(patch).eq("id", id);
   if (error) { alert("Fehler: " + error.message); return false; }
-  Object.assign(rows.find(x => x.id === id), patch); return true;
+  const r = rows.find(x => x.id === id);
+  if (patch.status && patch.status !== r.status) patch.status_seit = new Date().toISOString();
+  Object.assign(r, patch); return true;
 }
 $("tabs").addEventListener("click", e => { const f = e.target.closest("[data-f]"); if (f) { filter = f.dataset.f; render(); } });
 $("list").addEventListener("click", async e => {
@@ -671,17 +712,77 @@ $("list").addEventListener("click", async e => {
     if (error) return alert("Fehler: " + error.message);
     rows = rows.filter(r => r.id !== d.del); return render();
   }
+  if (d.remind) {
+    const r = rows.find(x => x.id === d.remind);
+    open(waLink(r, erinnerungText(r)), "_blank");
+    if (await save(r.id, { erinnert_am: new Date().toISOString() })) render();
+    return;
+  }
   if (d.preis) { const r = rows.find(x => x.id === d.preis); const n = askPreis(r); if (n !== undefined && await save(r.id, { preis: n })) render(); return; }
   if (d.paid) { const r = rows.find(x => x.id === d.paid); if (await save(r.id, { bezahlt: !r.bezahlt })) render(); return; }
   if (!d.s) return;
   const r = rows.find(x => x.id === d.id), patch = { status: d.s };
-  if (d.s === "angenommen" && r.preis == null) { const n = askPreis(r); if (n === undefined) return; patch.preis = n; }
+  if (d.s === "angenommen" && r.preis == null) {
+    const n = askPreis(r, "Diese Anfrage braucht Beratung. Welchen Preis in € legst du fest?");
+    if (n === undefined) return; patch.preis = n;
+  }
+  if (d.s === "abgeholt" && !r.bezahlt) {
+    if (r.zahlung === "bar") { if (confirm(`Hat ${r.name.split(" ")[0]} die ${eur(r.preis)} bar bezahlt?`)) patch.bezahlt = true; }
+    else if (!confirm(`Achtung: ${eur(r.preis)} sind noch nicht bezahlt. Trotzdem als abgeholt markieren?`)) return;
+  }
   b.disabled = true;
   if (!(await save(r.id, patch))) { b.disabled = false; return; }
   if (["angenommen", "fertig"].includes(d.s) && confirm("Direkt per WhatsApp Bescheid geben?")) open(waLink(r, waText(r)), "_blank");
   render();
 });
 
+/* ===== PREISE BEARBEITEN (Admin) ===== */
+let preisRows = [];
+$("preiseBtn").onclick = async () => {
+  const p = $("preisPanel");
+  if (!p.classList.contains("hidden")) { p.classList.add("hidden"); return; }
+  const { data, error } = await sb.from("bespannung_preise").select("*").order("sort");
+  if (error) return alert("Fehler: " + error.message);
+  preisRows = data; renderPreisPanel(); p.classList.remove("hidden");
+};
+function renderPreisPanel() {
+  const ex = preisRows.find(r => r.name === "Express");
+  $("preisPanel").innerHTML = `<div class="pt"><h3>€ Preise</h3>
+    <p>Gesamtpreis inkl. Bespannen. Leer lassen = Preis nach Beratung. Neue Anfragen werden automatisch damit berechnet.</p>
+    ${preisRows.filter(r => r.art === "saite").map(r => `<div class="prow" data-n="${esc(r.name)}">
+      <input value="${esc(r.name)}" data-k="name" maxlength="120"><input value="${r.preis ?? ""}" data-k="preis" inputmode="decimal" placeholder="Beratung">
+      <button type="button" data-delp title="Entfernen">✕</button></div>`).join("")}
+    <div class="prow" data-n="Express"><input value="⚡ Express-Aufpreis" disabled><input value="${ex?.preis ?? 0}" data-k="preis" inputmode="decimal"><span></span></div>
+    <div class="acts"><button class="btn btn-ghost" type="button" id="addSaite">+ Saite</button><button class="btn btn-dark" type="button" id="savePreise">Speichern</button></div></div>`;
+}
+$("preisPanel").addEventListener("click", async e => {
+  if (e.target.closest("[data-delp]")) { e.target.closest(".prow").remove(); return; }
+  if (e.target.id === "addSaite") {
+    const row = document.createElement("div"); row.className = "prow"; row.dataset.n = "";
+    row.innerHTML = `<input data-k="name" maxlength="120" placeholder="Name der Saite"><input data-k="preis" inputmode="decimal" placeholder="€"><button type="button" data-delp>✕</button>`;
+    e.target.closest(".acts").before(row); row.querySelector("input").focus(); return;
+  }
+  if (e.target.id === "savePreise") {
+    const neu = [...$("preisPanel").querySelectorAll(".prow")].map((row, i) => {
+      const isEx = row.dataset.n === "Express";
+      const name = isEx ? "Express" : row.querySelector('[data-k=name]').value.trim();
+      const raw = row.querySelector('[data-k=preis]').value.trim().replace(",", ".");
+      return { name, art: isEx ? "extra" : "saite", preis: raw === "" ? (isEx ? 0 : null) : Number(raw), sort: isEx ? 0 : i + 1 };
+    }).filter(r => r.name);
+    if (neu.some(r => r.preis != null && (isNaN(r.preis) || r.preis < 0))) return alert("Bitte nur gültige Preise eintragen.");
+    if (new Set(neu.map(r => r.name)).size !== neu.length) return alert("Jede Saite nur einmal eintragen.");
+    const weg = preisRows.map(r => r.name).filter(n => !neu.some(x => x.name === n));
+    if (weg.length) { const { error } = await sb.from("bespannung_preise").delete().in("name", weg); if (error) return alert("Fehler: " + error.message); }
+    const { error } = await sb.from("bespannung_preise").upsert(neu);
+    if (error) return alert("Fehler: " + error.message);
+    preisRows = neu; await ladePreise(); renderPublicPreise();
+    e.target.textContent = "✓ Gespeichert"; setTimeout(() => e.target.textContent = "Speichern", 2000);
+  }
+});
+
+/* ===== START ===== */
+updateSum();
+ladePreise().then(ok => { if (ok) renderPublicPreise(); else $("prices").innerHTML = `<p style="color:var(--muted)">Preise konnten nicht geladen werden.</p>`; });
 route();
 </script>
 </body>
