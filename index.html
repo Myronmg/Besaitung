@@ -290,7 +290,7 @@ details.alt .btn{font-size:16px;padding:13px 18px}
           <div class="field"><span class="lbl">Wie möchtest du zahlen?</span>
             <div class="paylist" id="zahlung">
               <button type="button" class="payopt on" data-z="bar"><span class="ico ico-bar">💶</span><span><b>Bar bei Abholung</b><small>Einfach passend mitbringen</small></span><span class="chk"></span></button>
-              <button type="button" class="payopt" data-z="paypal"><span class="ico ico-pp">P</span><span><b>PayPal</b><small>Nach Bestätigung per Klick zahlen, auch mit Karte</small></span><span class="chk"></span></button>
+              <button type="button" class="payopt" data-z="paypal"><span class="ico ico-pp">P</span><span><b>PayPal</b><small>Direkt beim Absenden zahlen, auch mit Karte</small></span><span class="chk"></span></button>
             </div>
           </div>
 
@@ -298,7 +298,7 @@ details.alt .btn{font-size:16px;padding:13px 18px}
           <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="err hidden" id="err"></div>
           <button class="btn btn-ball submit" id="send">Anfrage senden</button>
-          <p class="note">Du zahlst erst, wenn ich die Anfrage bestätigt habe.</p>
+          <p class="note" id="sendNote">Du zahlst bar bei Abholung.</p>
         </form>
 
         <div class="done hidden" id="done">
@@ -474,7 +474,7 @@ function sumHtml(saite, express, z, titel, n = 1) {
       <div style="text-align:right;font-size:14px;opacity:.85">${esc(ZAHL[z])}</div></div>
     <ul><li><span>${n > 1 ? n + " × " : ""}${esc(saite)}</span><span>${e.ab ? "ab " : ""}${eur(e.basis * n)}</span></li>
     ${express ? `<li><span>⚡ Express (24 h)</span><span>+${eur(EXPRESS)}</span></li>` : ""}</ul>
-    <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : "Festpreis, keine versteckten Kosten. "}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach meiner Bestätigung zahlst du über deinen Status-Link mit einem Klick."}</div>`;
+    <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : "Festpreis, keine versteckten Kosten. "}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach dem Absenden geht's direkt zu PayPal."}</div>`;
 }
 function updateSum() {
   const ex = expressJetzt();
@@ -483,7 +483,10 @@ function updateSum() {
   info.innerHTML = ex ? `<b>⚡ Express erkannt</b><span>Fertig innerhalb von 24 Stunden · +${eur(EXPRESS)}. Günstiger geht's mit einem späteren „Fertig bis“-Tag.</span>` : "";
   $("sum").innerHTML = sumHtml($("saite").value, ex, zahlung, "Dein Preis", anzahl);
   const e = schaetzung($("saite").value, ex, anzahl);
-  $("send").textContent = e ? `Anfrage senden · ${preisTxt(e)}` : "Anfrage senden";
+  const pp = zahlung === "paypal" && e && !e.ab;
+  $("send").innerHTML = e ? (pp ? `<span>Senden & zahlen mit <span class="ppl">Pay<b>Pal</b></span> · ${preisTxt(e)}</span>` : `Anfrage senden · ${preisTxt(e)}`) : "Anfrage senden";
+  $("send").classList.toggle("btn-pp", pp); $("send").classList.toggle("btn-ball", !pp);
+  $("sendNote").textContent = pp ? "Du wirst zu PayPal weitergeleitet. Ohne Konto geht's auch mit Karte." : zahlung === "paypal" ? "Den PayPal-Link bekommst du nach der Beratung." : "Du zahlst bar bei Abholung.";
 }
 
 // Anfrage senden (Preis berechnet die Datenbank selbst)
@@ -499,12 +502,18 @@ $("form").addEventListener("submit", async e => {
   if (row.abgabe && row.fertig_bis && row.fertig_bis < row.abgabe) { err.textContent = "„Fertig bis“ darf nicht vor der Abgabe liegen."; err.classList.remove("hidden"); return; }
   const fehlt = !row.name ? "deinen Namen" : row.kontakt.replace(/\D/g, "").length < 6 ? "eine gültige Handynummer" : !row.schlaeger ? "deinen Schläger" : !row.saite ? "eine Saite" : "";
   if (fehlt) { err.textContent = `Bitte gib ${fehlt} an.`; err.classList.remove("hidden"); return; }
-  const label = $("send").textContent;
+  const label = $("send").innerHTML;
   $("send").disabled = true; $("send").textContent = "Wird gesendet…";
   const { error } = await sb.from(T).insert(row);
-  $("send").disabled = false; $("send").textContent = label;
+  $("send").disabled = false; $("send").innerHTML = label;
   if (error) { err.textContent = "Ups, das hat nicht geklappt. Versuch's nochmal."; err.classList.remove("hidden"); return; }
   store.set("letzteAnfrage", row.id);
+  const est = schaetzung(row.saite, row.express, row.anzahl);
+  if (row.zahlung === "paypal" && est && !est.ab && CONFIG.paypalEmail) {
+    $("send").textContent = "Weiter zu PayPal…"; $("send").disabled = true;
+    location.href = paypalUrl(est.betrag, row, row.id);
+    return;
+  }
   showDone(row);
 });
 
@@ -570,7 +579,7 @@ function payButton(z, preis, primary, a, id) {
   const cls = primary ? "btn btn-pay" : "btn";
   if (z === "paypal" || z === "applepay") {
     if (!CONFIG.paypalEmail) return `<span class="${cls} btn-wait">PayPal-Link kommt per WhatsApp</span>`;
-    return `<a class="${cls} btn-pp" href="${esc(paypalUrl(preis, a, id))}">${primary ? `Jetzt ${eur(preis)} zahlen mit <span class="ppl">Pay<b>Pal</b></span>` : `Mit <span class="ppl">Pay<b>Pal</b></span> zahlen`}</a>`;
+    return `<a class="${cls} btn-pp" href="${esc(paypalUrl(preis, a, id))}"><span>${primary ? `Jetzt ${eur(preis)} zahlen mit <span class="ppl">Pay<b>Pal</b></span>` : `Mit <span class="ppl">Pay<b>Pal</b></span> zahlen`}</span></a>`;
   }
   return `<span class="${cls} btn-cash">💶 ${eur(preis)} bar bei Abholung</span>`;
 }
@@ -588,12 +597,12 @@ async function showStatus(id) {
   let pay;
   if (!a.bezahlt && gemeldet && a.preis != null) {
     pay = `<div class="paid"><div class="disp">✓ Danke für deine Zahlung!</div>
-      <div>${eur(a.preis)} per PayPal. Ich bestätige den Eingang in Kürze, dann steht hier „Bezahlt“.</div></div>
+      <div>${eur(a.preis)} per PayPal. Ich melde mich per WhatsApp, sobald ich deine Anfrage bestätigt habe.</div></div>
       <details class="alt" style="border:0"><summary>Zahlung hat nicht geklappt?</summary>
       <div class="btnrow">${payButton("paypal", a.preis, false, a, id)}</div></details>`;
   } else if (a.bezahlt) {
     pay = `<div class="paid"><div class="disp">✓ Bezahlt</div><div>${a.preis != null ? eur(a.preis) + " · " : ""}Danke dir!</div></div>`;
-  } else if (a.status === "offen" || a.preis == null) {
+  } else if (a.preis == null || (a.status === "offen" && a.zahlung === "bar")) {
     pay = `<div class="waiting"><div style="font-size:14px;color:var(--muted)">${a.preis != null ? "Dein Preis" : "Preis"}</div>
       <div class="disp big">${a.preis != null ? eur(a.preis) : "nach Beratung"}</div>
       <p style="font-size:14px;color:var(--muted);margin-top:6px">${a.status === "offen" ? "Sobald ich bestätigt habe, erscheint hier der Bezahl-Button" : "Ich lege den Preis gleich fest, dann erscheint hier der Bezahl-Button"}${a.zahlung === "bar" ? " (oder du zahlst einfach bar bei Abholung)" : ""}.</p></div>`;
@@ -603,7 +612,7 @@ async function showStatus(id) {
     const online = !(a.zahlung === "bar" && a.status !== "abgeholt");
     const how = !online
       ? `<div class="how">Bring den Betrag einfach zur Abholung mit.</div>`
-      : `<ol class="ppsteps"><li><b>1</b>Gelben Button tippen</li><li><b>2</b>Bei PayPal einloggen oder mit Karte zahlen</li><li><b>3</b>„Jetzt bezahlen“, fertig ✓</li></ol>`;
+      : `<div class="how">Ein Klick, dann bei PayPal bestätigen. Ohne Konto geht's auch mit Karte.</div>`;
     pay = `<div class="paybox">
       ${faellig ? `<div class="duebox">⏰ Zahlung noch offen. Bitte jetzt begleichen, danke!</div>` : ""}
       <div class="lbl2">Zu zahlen</div>
