@@ -70,6 +70,8 @@ h2{font-size:clamp(38px,9vw,54px);margin-bottom:22px}
 .form-card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
 .field{margin-bottom:18px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row>div{min-width:0}
+input[type=date]{min-width:0;max-width:100%;display:block}
 label,.lbl{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
 label small,.lbl small{font-weight:400;color:var(--muted)}
 input,select,textarea{width:100%;font:500 16px Barlow,sans-serif;color:var(--ink);background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
@@ -89,6 +91,13 @@ textarea{min-height:90px;resize:vertical}
 .toggle small{display:block;font-weight:400;color:var(--muted)}
 /* Zahlungsart */
 .paylist{display:grid;gap:10px}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line);background:var(--cream);font:700 24px Barlow,sans-serif;color:var(--green);cursor:pointer;line-height:1}
+.stepper button:disabled{opacity:.35;cursor:default}
+.stepper output{font-family:"Barlow Condensed",sans-serif;font-style:italic;font-weight:800;font-size:34px;min-width:28px;text-align:center}
+.stepper span{color:var(--muted);font-weight:600}
+.exinfo{background:var(--ball);color:var(--green);border-radius:12px;padding:12px 14px;margin:-4px 0 18px;display:grid;gap:2px}
+.exinfo span{font-size:14px}
 .payopt{display:flex;align-items:center;gap:14px;text-align:left;width:100%;font:inherit;color:var(--ink);border:1.5px solid var(--line);background:var(--cream);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,background .15s}
 .payopt .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;flex-shrink:0}
 .ico-bar{background:#e6efe2}.ico-pp{background:#ffc439;color:#003087;font-family:Arial,sans-serif;font-style:italic}.ico-ap{background:#000;color:#fff;font-size:13px!important}
@@ -142,7 +151,14 @@ footer a{text-decoration:none;opacity:.5}
 .paybox .big{font-size:56px;color:var(--green);margin:2px 0 12px}
 .paybox .how{font-size:14px;color:var(--muted);margin-top:12px}
 .btn-pay{width:100%;font-size:18px;padding:17px 20px}
-.btn-pp{background:#ffc439;color:#111}
+.btn-pp{background:#ffc439;color:#111;box-shadow:0 4px 0 #e0a800}
+.btn-pp:active{box-shadow:none;transform:translateY(3px)}
+.ppl{font-family:Verdana,Arial,sans-serif;font-style:italic;font-weight:800;color:#003087;letter-spacing:-.02em}
+.ppl b{color:#009cde}
+.ppsteps{list-style:none;display:grid;gap:8px;margin-top:16px;font-size:15px}
+.ppsteps li{display:flex;align-items:center;gap:10px}
+.ppsteps li b{width:24px;height:24px;border-radius:50%;background:var(--cream);border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.ppsteps small{color:var(--muted)}
 .btn-ap{background:#000;color:#fff}
 .btn-cash{background:#e6efe2;color:var(--green);cursor:default}
 .btn-wait{background:var(--cream);color:var(--muted);cursor:default;border:1.5px dashed var(--line)}
@@ -259,21 +275,22 @@ details.alt .btn{font-size:16px;padding:13px 18px}
           <div class="field"><label for="name">Name</label><input id="name" autocomplete="name" maxlength="80"></div>
           <div class="field"><label for="kontakt">WhatsApp / Handynummer</label><input id="kontakt" type="tel" autocomplete="tel" maxlength="80" placeholder="0151 …"></div>
           <div class="field"><label for="schlaeger">Schläger <small>(Marke & Modell)</small></label><input id="schlaeger" maxlength="120" placeholder="z. B. Babolat Pure Aero"></div>
+          <div class="field"><span class="lbl">Wie viele Schläger?</span>
+            <div class="stepper"><button type="button" id="minus" aria-label="weniger">−</button><output id="anzahl">1</output><button type="button" id="plus" aria-label="mehr">+</button><span>Schläger</span></div>
+          </div>
           <div class="field"><label for="saite">Saite</label><select id="saite"></select></div>
           <div class="field"><span class="lbl">Spannung</span><div class="chips" id="spannung"></div></div>
           <div class="row field">
             <div><label for="abgabe">Abgabe <small>(ab)</small></label><input id="abgabe" type="date"></div>
             <div><label for="fertig">Fertig bis</label><input id="fertig" type="date"></div>
           </div>
-          <div class="field">
-            <label class="toggle"><input type="checkbox" id="express"><span class="sw"></span><span>⚡ Express <small id="expressTxt">Fertig in 24 Stunden</small></span></label>
-          </div>
-          <div class="field"><label for="nachricht">Nachricht <small>(optional)</small></label><textarea id="nachricht" maxlength="500" placeholder="z. B. 2 Schläger, Griffband mit wechseln…"></textarea></div>
+          <div class="exinfo hidden" id="exinfo"></div>
+          <div class="field"><label for="nachricht">Nachricht <small>(optional)</small></label><textarea id="nachricht" maxlength="500" placeholder="z. B. Spannung längs/quer unterschiedlich, Fragen…"></textarea></div>
 
           <div class="field"><span class="lbl">Wie möchtest du zahlen?</span>
             <div class="paylist" id="zahlung">
               <button type="button" class="payopt on" data-z="bar"><span class="ico ico-bar">💶</span><span><b>Bar bei Abholung</b><small>Einfach passend mitbringen</small></span><span class="chk"></span></button>
-              <button type="button" class="payopt" data-z="paypal"><span class="ico ico-pp">P</span><span><b>PayPal</b><small>Nach Bestätigung mit einem Klick zahlen</small></span><span class="chk"></span></button>
+              <button type="button" class="payopt" data-z="paypal"><span class="ico ico-pp">P</span><span><b>PayPal</b><small>Nach Bestätigung per Klick zahlen, auch mit Karte</small></span><span class="chk"></span></button>
             </div>
           </div>
 
@@ -345,7 +362,7 @@ details.alt .btn{font-size:16px;padding:13px 18px}
 const CONFIG = {
   brand: "Besaitung",
   ort: "Waldbronn · Eggenstein",
-  paypalMe: "DEINNAME",   // nur der Name aus paypal.me/DEINNAME
+  paypalEmail: "myron.henschen@gmail.com",   // PayPal-Konto, an das gezahlt wird
   erinnernNachTagen: 2,    // ab so vielen Tagen nach "Fertig" gilt eine offene Zahlung als überfällig
   spannungen: ["Weiß nicht", "Wie bisher", "21 kg", "22 kg", "23 kg", "24 kg", "25 kg", "Andere"],
   supabaseUrl: "https://amqjsrhbomwenkhueehm.supabase.co",
@@ -379,11 +396,17 @@ async function ladePreise() {
   abPreis = mitSaite.length ? Math.min(...mitSaite) : 0;
   return true;
 }
-function schaetzung(saiteName, express) {
+function schaetzung(saiteName, express, anzahl = 1) {
   const s = SAITEN.find(x => x.name === saiteName);
   if (!s) return null;
   const basis = s.preis ?? abPreis;
-  return { betrag: basis + (express ? EXPRESS : 0), ab: s.preis == null, basis };
+  return { betrag: basis * anzahl + (express ? EXPRESS : 0), ab: s.preis == null, basis, anzahl };
+}
+// Express automatisch: "Fertig bis" höchstens 1 Tag nach Abgabe (oder heute)
+function istExpress(abgabe, fertig) {
+  if (!fertig) return false;
+  const start = new Date((abgabe || new Date().toISOString().slice(0, 10)) + "T00:00");
+  return (new Date(fertig + "T00:00") - start) / 864e5 <= 1;
 }
 const preisTxt = e => e ? (e.ab ? "ab " : "") + eur(e.betrag) : "–";
 
@@ -391,15 +414,17 @@ function renderPublicPreise() {
   const eigene = SAITEN.find(s => /eigene/i.test(s.name));
   $("prices").innerHTML = [
     eigene ? { titel: "Eigene Saite", preis: eur(eigene.preis), text: "Du bringst die Saite mit, ich bespanne." } : null,
-    { titel: "Inkl. Saite", preis: "ab " + eur(abPreis), text: "Hyper-G, RPM Blast, ALU Power & Co.", hot: true, tag: "Beliebt" },
+    (() => { const mit = SAITEN.filter(x => x.preis != null && x !== eigene);
+      return mit.length === 1
+        ? { titel: "Inkl. " + mit[0].name, preis: eur(mit[0].preis), text: "Bespannen inkl. Saite. Alles drin.", hot: true, tag: "Beliebt" }
+        : { titel: "Inkl. Saite", preis: "ab " + eur(abPreis), text: mit.map(x => x.name).slice(0, 3).join(", "), hot: true, tag: "Beliebt" }; })(),
     EXPRESS ? { titel: "Express", preis: "+" + eur(EXPRESS), text: "Fertig innerhalb von 24 Stunden." } : null
   ].filter(Boolean).map(p => `<div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${p.tag}</span>` : ""}
       <h3>${esc(p.titel)}</h3><div class="amt">${esc(p.preis)}</div><p>${esc(p.text)}</p></div>`).join("");
   const cur = $("saite").value;
   $("saite").innerHTML = `<option value="">Bitte wählen…</option>` + SAITEN.map(s =>
     `<option value="${esc(s.name)}">${esc(s.name)}${s.preis != null ? " · " + eur(s.preis) : ""}</option>`).join("");
-  $("saite").value = cur;
-  $("expressTxt").textContent = `Fertig in 24 Stunden · +${eur(EXPRESS)}`;
+  $("saite").value = cur || (SAITEN.find(x => x.preis != null && !/eigene/i.test(x.name))?.name ?? "");
   updateSum();
 }
 
@@ -427,22 +452,37 @@ function setZahlung(z) {
 }
 $("zahlung").addEventListener("click", e => { const b = e.target.closest(".payopt"); if (b) setZahlung(b.dataset.z); });
 $("saite").addEventListener("change", updateSum);
-$("express").addEventListener("change", updateSum);
+let anzahl = 1;
+function setAnzahl(n) {
+  anzahl = Math.max(1, Math.min(10, n));
+  $("anzahl").textContent = anzahl;
+  $("minus").disabled = anzahl === 1; $("plus").disabled = anzahl === 10;
+  updateSum();
+}
+$("minus").onclick = () => setAnzahl(anzahl - 1);
+$("plus").onclick = () => setAnzahl(anzahl + 1);
 const today = new Date().toISOString().slice(0, 10);
 $("abgabe").min = today; $("fertig").min = today;
+$("abgabe").addEventListener("change", () => { $("fertig").min = $("abgabe").value || today; updateSum(); });
+$("fertig").addEventListener("change", updateSum);
+const expressJetzt = () => istExpress($("abgabe").value, $("fertig").value);
 
-function sumHtml(saite, express, z, titel) {
-  const e = schaetzung(saite, express);
+function sumHtml(saite, express, z, titel, n = 1) {
+  const e = schaetzung(saite, express, n);
   if (!e) return `<div class="lbl2">Preis</div><div class="disp big" style="font-size:30px">Saite wählen</div><div class="fine">Der Preis erscheint, sobald du eine Saite gewählt hast.</div>`;
   return `<div class="top"><div><div class="lbl2">${titel}</div><div class="disp big">${preisTxt(e)}</div></div>
       <div style="text-align:right;font-size:14px;opacity:.85">${esc(ZAHL[z])}</div></div>
-    <ul><li><span>${esc(saite)}</span><span>${e.ab ? "ab " : ""}${eur(e.basis)}</span></li>
-    ${express ? `<li><span>⚡ Express</span><span>+${eur(EXPRESS)}</span></li>` : ""}</ul>
+    <ul><li><span>${n > 1 ? n + " × " : ""}${esc(saite)}</span><span>${e.ab ? "ab " : ""}${eur(e.basis * n)}</span></li>
+    ${express ? `<li><span>⚡ Express (24 h)</span><span>+${eur(EXPRESS)}</span></li>` : ""}</ul>
     <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : "Festpreis, keine versteckten Kosten. "}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach meiner Bestätigung zahlst du über deinen Status-Link mit einem Klick."}</div>`;
 }
 function updateSum() {
-  $("sum").innerHTML = sumHtml($("saite").value, $("express").checked, zahlung, "Dein Preis");
-  const e = schaetzung($("saite").value, $("express").checked);
+  const ex = expressJetzt();
+  const info = $("exinfo");
+  info.classList.toggle("hidden", !ex);
+  info.innerHTML = ex ? `<b>⚡ Express erkannt</b><span>Fertig innerhalb von 24 Stunden · +${eur(EXPRESS)}. Günstiger geht's mit einem späteren „Fertig bis“-Tag.</span>` : "";
+  $("sum").innerHTML = sumHtml($("saite").value, ex, zahlung, "Dein Preis", anzahl);
+  const e = schaetzung($("saite").value, ex, anzahl);
   $("send").textContent = e ? `Anfrage senden · ${preisTxt(e)}` : "Anfrage senden";
 }
 
@@ -453,9 +493,10 @@ $("form").addEventListener("submit", async e => {
   if ($("website").value) return;
   const row = {
     id: uuid(), name: $("name").value.trim(), kontakt: $("kontakt").value.trim(), schlaeger: $("schlaeger").value.trim(),
-    saite: $("saite").value, spannung, zahlung, express: $("express").checked,
+    saite: $("saite").value, spannung, zahlung, anzahl, express: expressJetzt(),
     abgabe: $("abgabe").value || null, fertig_bis: $("fertig").value || null, nachricht: $("nachricht").value.trim() || null
   };
+  if (row.abgabe && row.fertig_bis && row.fertig_bis < row.abgabe) { err.textContent = "„Fertig bis“ darf nicht vor der Abgabe liegen."; err.classList.remove("hidden"); return; }
   const fehlt = !row.name ? "deinen Namen" : row.kontakt.replace(/\D/g, "").length < 6 ? "eine gültige Handynummer" : !row.schlaeger ? "deinen Schläger" : !row.saite ? "eine Saite" : "";
   if (fehlt) { err.textContent = `Bitte gib ${fehlt} an.`; err.classList.remove("hidden"); return; }
   const label = $("send").textContent;
@@ -468,8 +509,8 @@ $("form").addEventListener("submit", async e => {
 });
 
 function showDone(row) {
-  const est = schaetzung(row.saite, row.express);
-  $("doneSum").innerHTML = sumHtml(row.saite, row.express, row.zahlung, est && !est.ab ? "Dein Preis" : "Voraussichtlich");
+  const est = schaetzung(row.saite, row.express, row.anzahl);
+  $("doneSum").innerHTML = sumHtml(row.saite, row.express, row.zahlung, est && !est.ab ? "Dein Preis" : "Voraussichtlich", row.anzahl);
   const zahlSchritt = row.zahlung === "bar"
     ? `<strong>Bar bei Abholung</strong><span>Bring ${est && !est.ab ? eur(est.betrag) : "den Betrag"} passend mit.</span>`
     : `<strong>Mit einem Klick zahlen</strong><span>Im Status-Link erscheint dann der Button „Jetzt mit PayPal zahlen“.</span>`;
@@ -482,7 +523,7 @@ function showDone(row) {
   $("linkText").textContent = statusUrl(row.id);
   $("form").reset(); spannung = CONFIG.spannungen[0];
   [...$("spannung").children].forEach((c, i) => c.classList.toggle("on", !i));
-  setZahlung("bar");
+  setZahlung("bar"); setAnzahl(1);
   $("form").classList.add("hidden"); $("done").classList.remove("hidden");
   $("anfrage").scrollIntoView();
 }
@@ -515,12 +556,21 @@ const STEP_TXT = {
   fertig: "Dein Schläger ist frisch bespannt und kann abgeholt werden.",
   abgeholt: "Viel Spaß mit den neuen Saiten!"
 };
-function payButton(z, preis, primary) {
+function paypalUrl(preis, a, id) {
+  const back = location.origin + location.pathname;
+  const q = new URLSearchParams({
+    cmd: "_xclick", business: CONFIG.paypalEmail, currency_code: "EUR", amount: Number(preis).toFixed(2),
+    item_name: `Bespannung ${(a.anzahl || 1) > 1 ? a.anzahl + "x " : ""}${a.schlaeger}`.slice(0, 120),
+    custom: id, no_shipping: "1", lc: "de_DE", charset: "utf-8",
+    return: `${back}?danke=${id}#s=${id}`, cancel_return: `${back}#s=${id}`
+  });
+  return "https://www.paypal.com/cgi-bin/webscr?" + q;
+}
+function payButton(z, preis, primary, a, id) {
   const cls = primary ? "btn btn-pay" : "btn";
   if (z === "paypal" || z === "applepay") {
-    const ok = CONFIG.paypalMe && CONFIG.paypalMe !== "DEINNAME";
-    return ok ? `<a class="${cls} btn-pp" href="https://paypal.me/${encodeURIComponent(CONFIG.paypalMe)}/${Number(preis).toFixed(2)}EUR" target="_blank" rel="noopener">${primary ? `Jetzt ${eur(preis)} mit PayPal zahlen` : "Mit PayPal zahlen"}</a>`
-      : `<span class="${cls} btn-wait">PayPal-Link kommt per WhatsApp</span>`;
+    if (!CONFIG.paypalEmail) return `<span class="${cls} btn-wait">PayPal-Link kommt per WhatsApp</span>`;
+    return `<a class="${cls} btn-pp" href="${esc(paypalUrl(preis, a, id))}">${primary ? `Jetzt ${eur(preis)} zahlen mit <span class="ppl">Pay<b>Pal</b></span>` : `Mit <span class="ppl">Pay<b>Pal</b></span> zahlen`}</a>`;
   }
   return `<span class="${cls} btn-cash">💶 ${eur(preis)} bar bei Abholung</span>`;
 }
@@ -534,8 +584,14 @@ async function showStatus(id) {
     box.innerHTML = `<h3>Leider abgelehnt</h3><p style="color:var(--muted)">Ich kann deine Anfrage gerade nicht annehmen. Du hast eine WhatsApp von mir bekommen.</p>`; return;
   }
   const idx = STEPS.indexOf(a.status);
+  const gemeldet = store.get("gezahlt_" + id);
   let pay;
-  if (a.bezahlt) {
+  if (!a.bezahlt && gemeldet && a.preis != null) {
+    pay = `<div class="paid"><div class="disp">✓ Danke für deine Zahlung!</div>
+      <div>${eur(a.preis)} per PayPal. Ich bestätige den Eingang in Kürze, dann steht hier „Bezahlt“.</div></div>
+      <details class="alt" style="border:0"><summary>Zahlung hat nicht geklappt?</summary>
+      <div class="btnrow">${payButton("paypal", a.preis, false, a, id)}</div></details>`;
+  } else if (a.bezahlt) {
     pay = `<div class="paid"><div class="disp">✓ Bezahlt</div><div>${a.preis != null ? eur(a.preis) + " · " : ""}Danke dir!</div></div>`;
   } else if (a.status === "offen" || a.preis == null) {
     pay = `<div class="waiting"><div style="font-size:14px;color:var(--muted)">${a.preis != null ? "Dein Preis" : "Preis"}</div>
@@ -544,17 +600,18 @@ async function showStatus(id) {
   } else {
     const faellig = ["fertig", "abgeholt"].includes(a.status);
     const others = ["paypal", "bar"].filter(z => z !== a.zahlung && !(z === "bar" && a.status === "abgeholt"));
-    const how = a.zahlung === "bar"
-      ? "Bring den Betrag einfach zur Abholung mit."
-      : "Button tippen, Zahlung bestätigen, fertig. Danach markiere ich die Zahlung und hier steht ✓ Bezahlt.";
+    const online = !(a.zahlung === "bar" && a.status !== "abgeholt");
+    const how = !online
+      ? `<div class="how">Bring den Betrag einfach zur Abholung mit.</div>`
+      : `<ol class="ppsteps"><li><b>1</b>Gelben Button tippen</li><li><b>2</b>Bei PayPal einloggen oder mit Karte zahlen</li><li><b>3</b>„Jetzt bezahlen“, fertig ✓</li></ol>`;
     pay = `<div class="paybox">
       ${faellig ? `<div class="duebox">⏰ Zahlung noch offen. Bitte jetzt begleichen, danke!</div>` : ""}
       <div class="lbl2">Zu zahlen</div>
       <div class="disp big">${eur(a.preis)}</div>
-      ${payButton(a.status === "abgeholt" && a.zahlung === "bar" ? "paypal" : a.zahlung, a.preis, true)}
-      <div class="how">${how}</div>
-      ${others.length ? `<details class="alt"><summary>${a.zahlung === "bar" ? "Lieber online zahlen?" : "Lieber anders zahlen?"}</summary>
-        <div class="btnrow">${others.map(z => payButton(z, a.preis, false)).join("")}</div></details>` : ""}
+      ${payButton(online ? "paypal" : "bar", a.preis, true, a, id)}
+      ${how}
+      ${others.length ? `<details class="alt"><summary>${online ? "Lieber bar zahlen?" : "Lieber online mit PayPal zahlen?"}</summary>
+        <div class="btnrow">${others.map(z => payButton(z, a.preis, false, a, id)).join("")}</div></details>` : ""}
     </div>`;
   }
   box.innerHTML = `
@@ -564,7 +621,7 @@ async function showStatus(id) {
     <div class="track">${STEPS.map((s, i) => `<div class="${i <= idx ? "on" : ""}">${STEP_LBL[s]}</div>`).join("")}</div>
     ${pay}
     <div class="req" style="margin-top:16px"><dl class="kv">
-      <dt>Schläger</dt><dd>${esc(a.schlaeger)}</dd><dt>Saite</dt><dd>${esc(a.saite)}</dd>
+      <dt>Schläger</dt><dd>${esc(a.schlaeger)}</dd><dt>Saite</dt><dd>${(a.anzahl || 1) > 1 ? a.anzahl + " × " : ""}${esc(a.saite)}</dd>
       <dt>Spannung</dt><dd>${esc(a.spannung || "–")}</dd>${a.express ? `<dt>Express</dt><dd>⚡ 24 h</dd>` : ""}
       <dt>Zahlung</dt><dd>${esc(ZAHL[a.zahlung])}</dd>
     </dl></div>
@@ -637,7 +694,7 @@ function erinnerungText(r) {
 }
 const fmt = d => d ? new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "–";
 function askPreis(r, msg) {
-  const vorschlag = r.preis ?? schaetzung(r.saite, r.express)?.betrag;
+  const vorschlag = r.preis ?? schaetzung(r.saite, r.express, r.anzahl || 1)?.betrag;
   const v = prompt(msg || "Preis in € (z. B. 22 oder 22,50):", vorschlag != null ? String(vorschlag).replace(".", ",") : "");
   if (v === null) return undefined;
   const n = parseFloat(v.replace(",", "."));
@@ -674,7 +731,7 @@ function render() {
         <div class="badges"><span class="badge b-${r.status}">${STATUS[r.status]}</span>${zahlBadge}</div></div>
       <dl class="kv">
         <dt>Schläger</dt><dd>${esc(r.schlaeger)}</dd>
-        <dt>Saite</dt><dd>${esc(r.saite)}</dd>
+        <dt>Saite</dt><dd>${(r.anzahl || 1) > 1 ? `<b style="color:var(--clay)">${r.anzahl} ×</b> ` : ""}${esc(r.saite)}</dd>
         <dt>Spannung</dt><dd>${esc(r.spannung || "–")}${r.express ? " · ⚡ Express" : ""}</dd>
         <dt>Abgabe</dt><dd>${fmt(r.abgabe)} · fertig bis ${fmt(r.fertig_bis)}</dd>
         <dt>Preis</dt><dd>${r.preis != null ? eur(r.preis) : "⚠️ noch festlegen"} · ${esc(ZAHL[r.zahlung] || "–")}${offenSeit}</dd>
@@ -776,6 +833,8 @@ $("preisPanel").addEventListener("click", async e => {
 });
 
 /* ===== START ===== */
+(() => { const d = new URLSearchParams(location.search).get("danke");
+  if (d) { store.set("gezahlt_" + d, "1"); history.replaceState(null, "", location.pathname + location.hash); } })();
 updateSum();
 ladePreise().then(ok => { if (ok) renderPublicPreise(); else $("prices").innerHTML = `<p style="color:var(--muted)">Preise konnten nicht geladen werden.</p>`; });
 route();
