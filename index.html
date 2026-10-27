@@ -400,7 +400,7 @@ function schaetzung(saiteName, express, anzahl = 1) {
   const s = SAITEN.find(x => x.name === saiteName);
   if (!s) return null;
   const basis = s.preis ?? abPreis;
-  return { betrag: basis * anzahl + (express ? EXPRESS : 0), ab: s.preis == null, basis, anzahl };
+  return { betrag: (basis + (express ? EXPRESS : 0)) * anzahl, ab: s.preis == null, basis, anzahl };
 }
 // Express automatisch: "Fertig bis" höchstens 1 Tag nach Abgabe (oder heute)
 function istExpress(abgabe, fertig) {
@@ -418,7 +418,7 @@ function renderPublicPreise() {
       return mit.length === 1
         ? { titel: "Inkl. " + mit[0].name, preis: eur(mit[0].preis), text: "Bespannen inkl. Saite. Alles drin.", hot: true, tag: "Beliebt" }
         : { titel: "Inkl. Saite", preis: "ab " + eur(abPreis), text: mit.map(x => x.name).slice(0, 3).join(", "), hot: true, tag: "Beliebt" }; })(),
-    EXPRESS ? { titel: "Express", preis: "+" + eur(EXPRESS), text: "Fertig innerhalb von 24 Stunden." } : null
+    EXPRESS ? { titel: "Express", preis: "+" + eur(EXPRESS), text: "Pro Schläger. Fertig innerhalb von 24 Stunden." } : null
   ].filter(Boolean).map(p => `<div class="price ${p.hot ? "hot" : ""}">${p.tag ? `<span class="tag">${p.tag}</span>` : ""}
       <h3>${esc(p.titel)}</h3><div class="amt">${esc(p.preis)}</div><p>${esc(p.text)}</p></div>`).join("");
   const cur = $("saite").value;
@@ -473,14 +473,14 @@ function sumHtml(saite, express, z, titel, n = 1) {
   return `<div class="top"><div><div class="lbl2">${titel}</div><div class="disp big">${preisTxt(e)}</div></div>
       <div style="text-align:right;font-size:14px;opacity:.85">${esc(ZAHL[z])}</div></div>
     <ul><li><span>${n > 1 ? n + " × " : ""}${esc(saite)}</span><span>${e.ab ? "ab " : ""}${eur(e.basis * n)}</span></li>
-    ${express ? `<li><span>⚡ Express (24 h)</span><span>+${eur(EXPRESS)}</span></li>` : ""}</ul>
+    ${express ? `<li><span>⚡ Express (24 h)${n > 1 ? " · " + n + " × " + eur(EXPRESS) : ""}</span><span>+${eur(EXPRESS * n)}</span></li>` : ""}</ul>
     <div class="fine">${e.ab ? "Den genauen Preis bekommst du nach der Beratung. " : "Festpreis, keine versteckten Kosten. "}${z === "bar" ? "Du zahlst bar bei Abholung." : "Nach dem Absenden geht's direkt zu PayPal."}</div>`;
 }
 function updateSum() {
   const ex = expressJetzt();
   const info = $("exinfo");
   info.classList.toggle("hidden", !ex);
-  info.innerHTML = ex ? `<b>⚡ Express erkannt</b><span>Fertig innerhalb von 24 Stunden · +${eur(EXPRESS)}. Günstiger geht's mit einem späteren „Fertig bis“-Tag.</span>` : "";
+  info.innerHTML = ex ? `<b>⚡ Express erkannt</b><span>Fertig innerhalb von 24 Stunden · +${eur(EXPRESS)} pro Schläger. Günstiger geht's mit einem späteren „Fertig bis“-Tag.</span>` : "";
   $("sum").innerHTML = sumHtml($("saite").value, ex, zahlung, "Dein Preis", anzahl);
   const e = schaetzung($("saite").value, ex, anzahl);
   const pp = zahlung === "paypal" && e && !e.ab;
